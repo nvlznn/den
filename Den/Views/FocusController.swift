@@ -19,6 +19,7 @@ final class FocusController {
     private(set) var celebrations = 0
     private(set) var starts = 0
     private(set) var stops = 0
+    private(set) var pauseToggles = 0
 
     init(timer: FocusTimer) {
         self.timer = timer
@@ -36,6 +37,29 @@ final class FocusController {
         if case .countdown(let planned) = mode, let end = active.plannedEnd {
             Task {
                 await CountdownNotifier.shared.schedule(at: end, planned: planned)
+            }
+        }
+    }
+
+    /// 暫停或繼續。暫停時取消倒數的通知（時間凍結了），繼續時依剩餘時間重新排。
+    func togglePause() {
+        guard let active = timer.active else { return }
+        pauseToggles += 1
+
+        if active.isPaused {
+            timer.resume()
+            guard let resumed = timer.active else { return }
+            LiveActivityController.update(for: resumed)
+            if case .countdown(let planned) = resumed.mode, let end = resumed.plannedEnd, end > .now {
+                Task {
+                    await CountdownNotifier.shared.schedule(at: end, planned: planned)
+                }
+            }
+        } else {
+            timer.pause()
+            CountdownNotifier.shared.cancel()
+            if let paused = timer.active {
+                LiveActivityController.update(for: paused)
             }
         }
     }

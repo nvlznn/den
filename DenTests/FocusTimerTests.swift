@@ -125,6 +125,79 @@ struct FocusTimerTests {
         #expect(finished.duration == 4000)
     }
 
+    // MARK: 暫停
+
+    @Test func pauseFreezesElapsedAndResumeContinues() throws {
+        let timer = FocusTimer(defaults: defaults)
+        timer.start(.stopwatch, at: start)
+
+        timer.pause(at: start.addingTimeInterval(600))
+        var active = try #require(timer.active)
+        #expect(active.isPaused)
+        #expect(active.elapsed(at: start.addingTimeInterval(600)) == 600)
+        #expect(active.elapsed(at: start.addingTimeInterval(5000)) == 600) // 暫停中不再增加
+
+        timer.resume(at: start.addingTimeInterval(1800)) // 暫停了 1200 秒
+        active = try #require(timer.active)
+        #expect(!active.isPaused)
+        #expect(active.elapsed(at: start.addingTimeInterval(1800)) == 600)
+        #expect(active.elapsed(at: start.addingTimeInterval(2000)) == 800)
+        #expect(active.pausedSeconds(at: start.addingTimeInterval(2000)) == 1200)
+    }
+
+    @Test func countdownEndShiftsByPausedTime() throws {
+        let timer = FocusTimer(defaults: defaults)
+        timer.start(.countdown(planned: 1500), at: start)
+        timer.pause(at: start.addingTimeInterval(300))
+        timer.resume(at: start.addingTimeInterval(900)) // 暫停 600 秒
+
+        let active = try #require(timer.active)
+        #expect(active.plannedEnd == start.addingTimeInterval(2100))
+        #expect(active.displayedSeconds(at: start.addingTimeInterval(900)) == 1200)
+        #expect(active.overtimeSeconds(at: start.addingTimeInterval(2100)) == 0)
+        #expect(active.overtimeSeconds(at: start.addingTimeInterval(2160)) == 60)
+        #expect(active.effectiveStart == start.addingTimeInterval(600))
+    }
+
+    @Test func pausedTimeIsNotSavedInRecord() throws {
+        let timer = FocusTimer(defaults: defaults)
+        timer.start(.stopwatch, at: start)
+        timer.pause(at: start.addingTimeInterval(600))
+        timer.resume(at: start.addingTimeInterval(1800))
+        let finished = try #require(timer.end(at: start.addingTimeInterval(2400)))
+        #expect(finished.duration == 1200) // 600 + 600，不含暫停的 1200
+    }
+
+    @Test func endingWhilePausedCountsUpToThePause() throws {
+        let timer = FocusTimer(defaults: defaults)
+        timer.start(.stopwatch, at: start)
+        timer.pause(at: start.addingTimeInterval(900))
+        let finished = try #require(timer.end(at: start.addingTimeInterval(9000)))
+        #expect(finished.duration == 900)
+    }
+
+    @Test func pauseStateSurvivesRelaunch() throws {
+        let first = FocusTimer(defaults: defaults)
+        first.start(.countdown(planned: 1500), at: start)
+        first.pause(at: start.addingTimeInterval(300))
+
+        let relaunched = FocusTimer(defaults: defaults)
+        let active = try #require(relaunched.active)
+        #expect(active.isPaused)
+        #expect(active.elapsed(at: start.addingTimeInterval(99_999)) == 300)
+    }
+
+    @Test func pauseAndResumeAreIdempotent() throws {
+        let timer = FocusTimer(defaults: defaults)
+        timer.start(.stopwatch, at: start)
+        timer.resume(at: start.addingTimeInterval(10)) // 沒在暫停，什麼都不做
+        #expect(timer.active?.pausedTotal == nil)
+
+        timer.pause(at: start.addingTimeInterval(100))
+        timer.pause(at: start.addingTimeInterval(500)) // 已經在暫停，不重設起點
+        #expect(timer.active?.pausedAt == start.addingTimeInterval(100))
+    }
+
     // MARK: 最短紀錄
 
     @Test func underFifteenSecondsIsDropped() {

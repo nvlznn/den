@@ -131,18 +131,35 @@ struct HomeView: View {
     @ViewBuilder
     private var primaryButton: some View {
         if timer.isRunning {
-            // 結束不是破壞性操作，用次要樣式，不用紅色。
-            Button {
-                controller.endTapped(context: modelContext)
-            } label: {
-                Text("End")
-                    .fontWeight(.bold)
-                    .padding(.horizontal, 48)
+            let isPaused = timer.active?.isPaused ?? false
+            HStack(spacing: 12) {
+                // 暫停 ⏸ / 繼續 ▶。暫停時大數字變灰。
+                Button {
+                    controller.togglePause()
+                } label: {
+                    Image(systemName: isPaused ? "play.fill" : "pause.fill")
+                        .font(.title3.weight(.semibold))
+                        .frame(width: 24, height: 24)
+                }
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.circle)
+                .controlSize(.extraLarge)
+                .background(Color(.systemBackground), in: Circle())
+                .accessibilityLabel(isPaused ? "Resume" : "Pause")
+
+                // 結束不是破壞性操作，用次要樣式，不用紅色。
+                Button {
+                    controller.endTapped(context: modelContext)
+                } label: {
+                    Text("End")
+                        .fontWeight(.bold)
+                        .padding(.horizontal, 48)
+                }
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
+                .controlSize(.extraLarge)
+                .background(Color(.systemBackground), in: Capsule())
             }
-            .buttonStyle(.bordered)
-            .buttonBorderShape(.capsule)
-            .controlSize(.extraLarge)
-            .background(Color(.systemBackground), in: Capsule())
         } else {
             Button {
                 controller.start(focusMinutes: focusMinutes, tag: selectedTag, character: character)
@@ -234,11 +251,13 @@ private struct RunningTime: View {
                 let seconds = session.displayedSeconds(at: context.date)
                 let overtime = session.overtimeSeconds(at: context.date)
                 // 倒數到了之後只剩一個大數字：從 +0:00 開始往上數超時的部分。
+                // 暫停時數字變灰，讓人知道計時停著。
                 Text(overtime > 0 ? "+\(DurationText.clock(overtime))" : DurationText.clock(seconds))
                     .font(.system(size: fontSize, weight: .semibold))
                     .monospacedDigit()
                     .lineLimit(1)
                     .minimumScaleFactor(0.4)
+                    .foregroundStyle(session.isPaused ? Color.secondary : Color.primary)
                     .accessibilityLabel(accessibilityText(seconds, overtime: overtime))
             }
             if let tagName {
@@ -253,6 +272,7 @@ private struct RunningTime: View {
     }
 
     private func accessibilityText(_ seconds: Int, overtime: Int) -> String {
+        if session.isPaused { return "Paused, " + DurationText.hoursAndMinutes(TimeInterval(session.plannedEnd == nil ? seconds : max(seconds, overtime))) }
         let text = DurationText.hoursAndMinutes(TimeInterval(seconds))
         if session.plannedEnd == nil { return "Focused for \(text)" }
         if overtime > 0 { return "Time is up, \(DurationText.hoursAndMinutes(TimeInterval(overtime))) over" }

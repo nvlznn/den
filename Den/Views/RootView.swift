@@ -53,6 +53,7 @@ struct RootView: View {
         .sensoryFeedback(.success, trigger: controller.celebrations)
         .sensoryFeedback(.start, trigger: controller.starts)
         .sensoryFeedback(.stop, trigger: controller.stops)
+        .sensoryFeedback(.impact(weight: .medium), trigger: controller.pauseToggles)
     }
 
     /// 同名標籤合併後，如果目前選的是被合併掉的那個，改選留下來的。

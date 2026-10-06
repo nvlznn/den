@@ -6,7 +6,7 @@ import WidgetKit
 struct FocusLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: FocusActivityAttributes.self) { context in
-            LockScreenView(attributes: context.attributes, isStale: context.isStale)
+            LockScreenView(attributes: context.attributes, state: context.state, isStale: context.isStale)
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
@@ -15,13 +15,13 @@ struct FocusLiveActivity: Widget {
                         .padding(.leading, 4)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    TimerText(attributes: context.attributes, isStale: context.isStale)
+                    TimerText(state: context.state, isStale: context.isStale)
                         .font(.title2.weight(.medium))
                         .frame(maxWidth: 140, alignment: .trailing)
                         .padding(.trailing, 4)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text(context.attributes.tagName ?? (context.attributes.endsAt == nil ? "Stopwatch" : "Countdown"))
+                    Text(context.state.pausedAt != nil ? "Paused" : (context.attributes.tagName ?? (context.state.endsAt == nil ? "Stopwatch" : "Countdown")))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -29,7 +29,7 @@ struct FocusLiveActivity: Widget {
                 PetIcon(characterID: context.attributes.characterID, color: LCDPalette.background)
                     .frame(width: 20, height: 20)
             } compactTrailing: {
-                TimerText(attributes: context.attributes, isStale: context.isStale)
+                TimerText(state: context.state, isStale: context.isStale)
                     .frame(maxWidth: 64, alignment: .trailing)
             } minimal: {
                 PetIcon(characterID: context.attributes.characterID, color: LCDPalette.background)
@@ -41,6 +41,7 @@ struct FocusLiveActivity: Widget {
 
 private struct LockScreenView: View {
     let attributes: FocusActivityAttributes
+    let state: FocusActivityAttributes.ContentState
     let isStale: Bool
 
     var body: some View {
@@ -50,14 +51,14 @@ private struct LockScreenView: View {
                 .frame(width: 52, height: 52)
                 .background(LCDPalette.background, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
-            // 只留標籤名字，靠左、放大；沒有標籤時寫 Focus。
-            Text(attributes.tagName ?? "Focus")
+            // 只留標籤名字，靠左、放大；沒有標籤時寫 Focus；暫停時改寫 Paused。
+            Text(state.pausedAt != nil ? "Paused" : (attributes.tagName ?? "Focus"))
                 .font(.title2.weight(.semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            TimerText(attributes: attributes, isStale: isStale)
+            TimerText(state: state, isStale: isStale)
                 .font(.system(size: 44, weight: .semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
@@ -71,12 +72,15 @@ private struct TimerText: View {
     /// 正計時的上限只是給 `Text(timerInterval:)` 一個範圍；Live Activity 本身撐不到這麼久。
     private static let stopwatchSpan: TimeInterval = 24 * 3600
 
-    let attributes: FocusActivityAttributes
+    let state: FocusActivityAttributes.ContentState
     let isStale: Bool
 
     var body: some View {
         Group {
-            if let endsAt = attributes.endsAt {
+            if let pausedText = state.pausedText {
+                // 暫停中：直接顯示 app 算好的固定文字，數字一定不動。
+                Text(pausedText)
+            } else if let endsAt = state.endsAt {
                 if isStale || endsAt <= .now {
                     // 時間到之後計時不會停：從 0 開始往上數超時的部分。
                     HStack(spacing: 2) {
@@ -84,11 +88,11 @@ private struct TimerText: View {
                         Text(timerInterval: endsAt...endsAt.addingTimeInterval(Self.stopwatchSpan), countsDown: false)
                     }
                 } else {
-                    Text(timerInterval: attributes.startedAt...endsAt, countsDown: true)
+                    Text(timerInterval: state.startedAt...endsAt, countsDown: true)
                 }
             } else {
                 Text(
-                    timerInterval: attributes.startedAt...attributes.startedAt.addingTimeInterval(Self.stopwatchSpan),
+                    timerInterval: state.startedAt...state.startedAt.addingTimeInterval(Self.stopwatchSpan),
                     countsDown: false
                 )
             }
@@ -111,8 +115,9 @@ private struct PetIcon: View {
     }
 }
 
-#Preview("Countdown", as: .content, using: FocusActivityAttributes(startedAt: .now, endsAt: .now.addingTimeInterval(25 * 60), tagName: "Study", characterID: "fangfang")) {
+#Preview("Countdown", as: .content, using: FocusActivityAttributes(tagName: "Study", characterID: "fangfang")) {
     FocusLiveActivity()
 } contentStates: {
-    FocusActivityAttributes.ContentState()
+    FocusActivityAttributes.ContentState(startedAt: .now, endsAt: .now.addingTimeInterval(25 * 60), pausedAt: nil, pausedText: nil)
+    FocusActivityAttributes.ContentState(startedAt: .now, endsAt: .now.addingTimeInterval(25 * 60), pausedAt: .now, pausedText: "20:00")
 }

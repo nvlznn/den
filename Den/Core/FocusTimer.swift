@@ -10,16 +10,48 @@ struct ActiveSession: Codable, Hashable, Sendable {
     var tagID: UUID?
     /// 開始時陪著的角色。
     var characterID: String?
+    /// 暫停開始的時間；沒有暫停就是 nil。
+    var pausedAt: Date?
+    /// 之前已經暫停掉的總秒數（不含目前這一次）。舊版存下的計時沒有這個欄位，所以是 optional。
+    var pausedTotal: TimeInterval?
 
-    /// 倒數的預定結束時間；正計時沒有。
-    var plannedEnd: Date? {
-        guard case .countdown(let planned) = mode else { return nil }
-        return startedAt.addingTimeInterval(planned)
+    var isPaused: Bool { pausedAt != nil }
+
+    /// 到目前為止所有暫停的總秒數，目前這一次也算到 `now`。
+    func pausedSeconds(at now: Date) -> TimeInterval {
+        (pausedTotal ?? 0) + (pausedAt.map { max(0, now.timeIntervalSince($0)) } ?? 0)
     }
 
-    /// 已經過的時間。倒數時間到了之後仍然繼續計，直到使用者按結束。
+    /// 倒數的預定結束時間（把之前暫停掉的時間順延）；正計時沒有。
+    /// 目前暫停中的這一次還沒結束，所以不算進去，繼續之後才會順延。
+    var plannedEnd: Date? {
+        guard case .countdown(let planned) = mode else { return nil }
+        return startedAt.addingTimeInterval(planned + (pausedTotal ?? 0))
+    }
+
+    /// 扣掉暫停時間之後的「虛擬開始時間」。Live Activity 的計時用它，暫停過的計時才會對。
+    var effectiveStart: Date {
+        startedAt.addingTimeInterval(pausedTotal ?? 0)
+    }
+
+    /// 已經過的時間，不含暫停的時間。倒數時間到了之後仍然繼續計，直到使用者按結束。
     func elapsed(at now: Date) -> TimeInterval {
-        max(0, now.timeIntervalSince(startedAt))
+        max(0, (pausedAt ?? now).timeIntervalSince(startedAt) - (pausedTotal ?? 0))
+    }
+
+    func pausing(at now: Date) -> ActiveSession {
+        guard !isPaused else { return self }
+        var copy = self
+        copy.pausedAt = now
+        return copy
+    }
+
+    func resuming(at now: Date) -> ActiveSession {
+        guard let pausedAt else { return self }
+        var copy = self
+        copy.pausedTotal = (pausedTotal ?? 0) + max(0, now.timeIntervalSince(pausedAt))
+        copy.pausedAt = nil
+        return copy
     }
 
     /// 畫面上顯示的整數秒：正計時是經過時間，倒數是剩餘時間（到 0 為止）。
@@ -99,12 +131,27 @@ final class FocusTimer {
     }
 
     func start(_ mode: TimerMode, tagID: UUID? = nil, characterID: String? = nil, at now: Date = .now) {
-        let session = ActiveSession(startedAt: now, mode: mode, tagID: tagID, characterID: characterID)
+        save(ActiveSession(startedAt: now, mode: mode, tagID: tagID, characterID: characterID))
+    }
+
+    /// 暫停。已經在暫停就不動。
+    func pause(at now: Date = .now) {
+        guard let active, !active.isPaused else { return }
+        save(active.pausing(at: now))
+    }
+
+    /// 繼續。不在暫停就不動。
+    func resume(at now: Date = .now) {
+        guard let active, active.isPaused else { return }
+        save(active.resuming(at: now))
+    }
+
+    private func save(_ session: ActiveSession) {
         active = session
         defaults.set(try? JSONEncoder().encode(session), forKey: Self.storageKey)
     }
 
-    /// 使用者按下結束。已經過的時間（含倒數之後的超時）照樣算數。
+    /// 使用者按下結束。已經過的時間（含倒數之後的超時，不含暫停）照樣算數。
     func end(at now: Date = .now) -> FinishedSession? {
         guard let active else { return nil }
         clear()
