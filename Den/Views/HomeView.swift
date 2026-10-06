@@ -1,256 +1,180 @@
 import SwiftData
 import SwiftUI
 
-/// 唯一的主畫面：上半部是 LCD，下半部是計時。
+/// 「專注」分頁：上面是 LCD，下面是今天的累積與專注設定。
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(\.scenePhase) private var scenePhase
-    @Environment(FocusTimer.self) private var timer
+    @Environment(FocusController.self) private var controller
     @Query private var sessions: [FocusSession]
+    @Query(sort: \FocusTag.order) private var tags: [FocusTag]
 
-    @AppStorage("timerMode") private var modeKind = TimerMode.Kind.stopwatch
-    @AppStorage("countdownMinutes") private var countdownMinutes = 25
+    @AppStorage("focusMinutes") private var focusMinutes = 25
+    @AppStorage("selectedTagID") private var selectedTagID = ""
 
-    @State private var happySince: Date?
-    @State private var levelFlashSince: Date?
-    @State private var sessionToConfirm: FinishedSession?
+    @State private var isChoosingTag = false
+    @State private var isChoosingDuration = false
 
-    // Haptic 觸發器
-    @State private var petTaps = 0
-    @State private var celebrations = 0
-    @State private var starts = 0
-    @State private var stops = 0
-
-    private var totalSeconds: TimeInterval {
-        sessions.reduce(0) { $0 + $1.duration }
-    }
+    private var timer: FocusTimer { controller.timer }
 
     private var level: Level {
-        Level(totalSeconds: totalSeconds)
+        Level(totalSeconds: sessions.reduce(0) { $0 + $1.duration })
+    }
+
+    private var selectedTag: FocusTag? {
+        tags.first { $0.id.uuidString == selectedTagID }
+    }
+
+    private var today: (count: Int, duration: TimeInterval) {
+        let calendar = Calendar.current
+        let todays = sessions.filter { calendar.isDateInToday($0.startedAt) }
+        return (todays.count, todays.reduce(0) { $0 + $1.duration })
     }
 
     var body: some View {
-        GeometryReader { proxy in
-            let screenHeight = max(240, proxy.size.height * 0.6)
-            let spacing: CGFloat = 24
-
-            ScrollView {
-                VStack(spacing: spacing) {
-                    LCDScreenView(
-                        level: level.number,
-                        pet: PetState(isTiming: timer.isRunning, happySince: happySince),
-                        levelFlashSince: levelFlashSince,
-                        onPetTap: petTapped
-                    )
-                    .frame(height: screenHeight)
-
-                    Group {
-                        if let active = timer.active {
-                            RunningTime(session: active)
-                        } else {
-                            idleControls
-                        }
-                    }
-                    .frame(maxWidth: .infinity, minHeight: max(0, proxy.size.height - screenHeight - spacing - 8))
+        List {
+            Section {
+                LCDScreenView(
+                    level: level.number,
+                    pet: PetState(isTiming: timer.isRunning, happySince: controller.happySince),
+                    levelFlashSince: controller.levelFlashSince,
+                    onPetTap: controller.petTapped
+                )
+                .aspectRatio(1, contentMode: .fit)
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+            } footer: {
+                if !timer.isRunning {
+                    levelProgress
                 }
-                .padding(.horizontal)
-                .padding(.top, 8)
             }
-            .scrollBounceBehavior(.basedOnSize)
+
+            if let active = timer.active {
+                Section {
+                    RunningTime(session: active, tagName: tagName(for: active))
+                        .frame(maxWidth: .infinity)
+                        .listRowBackground(Color.clear)
+                }
+            } else {
+                Section("今天") {
+                    LabeledContent("專注次數", value: "\(today.count)")
+                    LabeledContent("專注時長", value: DurationText.hoursAndMinutes(today.duration))
+                }
+
+                Section("專注設定") {
+                    SettingRow(title: "專注標籤", value: selectedTag?.name ?? "無") {
+                        isChoosingTag = true
+                    }
+                    SettingRow(title: "專注時長", value: DurationSheet.rowLabel(focusMinutes)) {
+                        isChoosingDuration = true
+                    }
+                }
+            }
         }
         .safeAreaInset(edge: .bottom) {
             primaryButton
-                .padding(.horizontal)
                 .padding(.bottom, 8)
-                .background(Color(.systemBackground))
         }
         .animation(.default, value: timer.isRunning)
-        .animation(.default, value: modeKind)
-        .sheet(item: $sessionToConfirm) { session in
-            EndSessionSheet(session: session, onSave: saveConfirmed, onDiscard: discardStopwatch)
+        .sheet(isPresented: $isChoosingTag) {
+            TagSheet(selectedTagID: $selectedTagID)
         }
-        .task(id: timer.active) {
-            await waitForCountdownEnd()
+        .sheet(isPresented: $isChoosingDuration) {
+            DurationSheet(minutes: $focusMinutes)
         }
-        .onChange(of: scenePhase, initial: true) { _, phase in
-            guard phase == .active else { return }
-            timer.restore()
-            if timer.isRunning {
-                finishExpiredCountdown()
-            } else {
-                LiveActivityController.end()
-            }
-        }
-        .sensoryFeedback(.impact(weight: .light), trigger: petTaps)
-        .sensoryFeedback(.success, trigger: celebrations)
-        .sensoryFeedback(.start, trigger: starts)
-        .sensoryFeedback(.stop, trigger: stops)
     }
 
-    // MARK: 下半部
-
-    private var idleControls: some View {
-        VStack(spacing: 20) {
-            VStack(alignment: .leading, spacing: 8) {
-                ProgressView(value: level.progressToNext)
-                    .accessibilityLabel("距離 Lv \(level.number + 1) 的進度")
-                Text("累積 \(DurationText.hoursAndMinutes(totalSeconds))")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-
-            Picker("模式", selection: $modeKind) {
-                Text("正計時").tag(TimerMode.Kind.stopwatch)
-                Text("倒數").tag(TimerMode.Kind.countdown)
-            }
-            .pickerStyle(.segmented)
-
-            if modeKind == .countdown {
-                DurationPicker(minutes: $countdownMinutes)
-            }
+    private var levelProgress: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ProgressView(value: level.progressToNext)
+                .accessibilityLabel("距離 Lv \(level.number + 1) 的進度")
+            Text("累積 \(DurationText.hoursAndMinutes(level.totalSeconds))")
         }
+        .padding(.top, 12)
     }
 
     @ViewBuilder
     private var primaryButton: some View {
         if timer.isRunning {
             // 結束不是破壞性操作，用次要樣式，不用紅色。
-            Button(action: endTapped) {
+            Button {
+                controller.endTapped(context: modelContext)
+            } label: {
                 Text("結束")
-                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 48)
             }
             .buttonStyle(.bordered)
-            .controlSize(.large)
+            .buttonBorderShape(.capsule)
+            .controlSize(.extraLarge)
+            .background(Color(.systemBackground), in: Capsule())
         } else {
-            Button(action: start) {
+            Button {
+                controller.start(focusMinutes: focusMinutes, tag: selectedTag)
+            } label: {
                 Text("開始專注")
-                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 48)
             }
             .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .buttonBorderShape(.capsule)
+            .controlSize(.extraLarge)
         }
     }
 
-    // MARK: 動作
-
-    private func start() {
-        let mode: TimerMode = switch modeKind {
-        case .stopwatch: .stopwatch
-        case .countdown: .countdown(planned: TimeInterval(countdownMinutes * 60))
-        }
-        timer.start(mode)
-        starts += 1
-
-        guard let active = timer.active else { return }
-        LiveActivityController.start(for: active)
-        if case .countdown(let planned) = mode, let end = active.plannedEnd {
-            Task {
-                await CountdownNotifier.shared.schedule(at: end, planned: planned)
-            }
-        }
-    }
-
-    private func endTapped() {
-        guard let active = timer.active else { return }
-        stops += 1
-
-        switch active.mode {
-        case .stopwatch:
-            let finished = active.finished(at: .now)
-            if finished.isWorthKeeping {
-                sessionToConfirm = finished
-            } else {
-                discardStopwatch()
-            }
-
-        case .countdown:
-            // 提早結束：已經過的時間照樣存，不確認、不評論。寵物直接回到待機。
-            CountdownNotifier.shared.cancel()
-            LiveActivityController.end()
-            if let finished = timer.end() {
-                record(finished)
-            }
-        }
-    }
-
-    private func saveConfirmed(_ session: FinishedSession) {
-        sessionToConfirm = nil
-        timer.clear()
-        LiveActivityController.end()
-        record(session)
-    }
-
-    private func discardStopwatch() {
-        sessionToConfirm = nil
-        timer.clear()
-        LiveActivityController.end()
-    }
-
-    private func waitForCountdownEnd() async {
-        guard let end = timer.active?.plannedEnd else { return }
-        let delay = end.timeIntervalSinceNow
-        if delay > 0 {
-            do {
-                try await Task.sleep(for: .seconds(delay + 0.05))
-            } catch {
-                return
-            }
-        }
-        finishExpiredCountdown()
-    }
-
-    /// 倒數時間到：以「開始 + 預定時長」存檔，不跳確認視窗。
-    /// 使用者在時間到之後才打開 app 也一樣。
-    private func finishExpiredCountdown() {
-        guard let finished = timer.completeIfExpired() else { return }
-        CountdownNotifier.shared.cancel()
-        LiveActivityController.end()
-        record(finished)
-        happySince = .now
-        celebrations += 1
-    }
-
-    private func petTapped() {
-        happySince = .now
-        petTaps += 1
-    }
-
-    /// 不到 1 分鐘的直接丟掉，不顯示任何訊息。
-    private func record(_ finished: FinishedSession) {
-        guard finished.isWorthKeeping else { return }
-        let before = level
-        modelContext.insert(FocusSession(startedAt: finished.startedAt, endedAt: finished.endedAt))
-        try? modelContext.save()
-
-        let after = Level(totalSeconds: before.totalSeconds + finished.duration)
-        if after.number > before.number {
-            // 升級：寵物開心、Lv 閃兩下。不彈窗、不撒彩帶。
-            happySince = .now
-            levelFlashSince = .now
-            celebrations += 1
-        }
+    private func tagName(for session: ActiveSession) -> String? {
+        guard let id = session.tagID else { return nil }
+        return tags.first { $0.id == id }?.name
     }
 }
 
-extension FinishedSession: Identifiable {
-    var id: Date { startedAt }
+/// 「名稱　值 ›」的設定列，點了開 sheet。
+private struct SettingRow: View {
+    let title: String
+    let value: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                // 用具體的 Color；`.primary` 這類樣式在 List 的按鈕裡會被換成 tint 色。
+                Text(title)
+                    .foregroundStyle(Color.primary)
+                Spacer()
+                Text(value)
+                    .foregroundStyle(Color.secondary)
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Color(.tertiaryLabel))
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
+        .accessibilityValue(value)
+        .accessibilityAddTraits(.isButton)
+    }
 }
 
 /// 專注中的大數字。正計時顯示經過時間，倒數顯示剩餘時間。
 private struct RunningTime: View {
     let session: ActiveSession
+    let tagName: String?
 
     @ScaledMetric(relativeTo: .largeTitle) private var fontSize: CGFloat = 76
 
     var body: some View {
-        TimelineView(.periodic(from: session.startedAt, by: 1)) { context in
-            let seconds = session.displayedSeconds(at: context.date)
-            Text(DurationText.clock(seconds))
-                .font(.system(size: fontSize, weight: .light))
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.4)
-                .accessibilityLabel(accessibilityText(seconds))
+        VStack(spacing: 4) {
+            TimelineView(.periodic(from: session.startedAt, by: 1)) { context in
+                let seconds = session.displayedSeconds(at: context.date)
+                Text(DurationText.clock(seconds))
+                    .font(.system(size: fontSize, weight: .light))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.4)
+                    .accessibilityLabel(accessibilityText(seconds))
+            }
+            if let tagName {
+                Label(tagName, systemImage: "tag.fill")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 
@@ -262,6 +186,6 @@ private struct RunningTime: View {
 
 #Preview {
     HomeView()
-        .environment(FocusTimer(defaults: UserDefaults(suiteName: "preview")!))
-        .modelContainer(for: FocusSession.self, inMemory: true)
+        .environment(FocusController(timer: FocusTimer(defaults: UserDefaults(suiteName: "preview")!)))
+        .modelContainer(for: [FocusSession.self, FocusTag.self], inMemory: true)
 }

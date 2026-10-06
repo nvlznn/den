@@ -3,7 +3,7 @@ import SwiftUI
 
 @main
 struct DenApp: App {
-    @State private var timer = FocusTimer()
+    @State private var controller = FocusController(timer: FocusTimer())
 
     init() {
         CountdownNotifier.shared.becomeDelegate()
@@ -11,9 +11,9 @@ struct DenApp: App {
 
     var body: some Scene {
         WindowGroup {
-            HomeView()
-                .environment(timer)
+            RootView()
+                .environment(controller)
         }
-        .modelContainer(for: FocusSession.self)
+        .modelContainer(for: [FocusSession.self, FocusTag.self])
     }
 }

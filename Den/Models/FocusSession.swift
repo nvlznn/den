@@ -6,11 +6,17 @@ import SwiftData
 final class FocusSession {
     var startedAt: Date
     var endedAt: Date
+    /// 標籤被刪掉時變成 nil，紀錄本身保留。
+    var tag: FocusTag?
 
     var duration: TimeInterval { endedAt.timeIntervalSince(startedAt) }
 
-    init(startedAt: Date, endedAt: Date) {
+    init(startedAt: Date, endedAt: Date, tag: FocusTag? = nil) {
         self.startedAt = startedAt
         self.endedAt = endedAt
+        self.tag = tag
     }
+
+    /// 沒有標籤時顯示的名稱。
+    static let untaggedName = "專注"
 }

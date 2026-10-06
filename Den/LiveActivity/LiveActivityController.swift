@@ -4,11 +4,15 @@ import Foundation
 /// 計時開始時啟動 Live Activity；結束、不儲存、倒數時間到時關掉。
 @MainActor
 enum LiveActivityController {
-    static func start(for session: ActiveSession) {
+    static func start(for session: ActiveSession, tagName: String?) {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
         end()
 
-        let attributes = FocusActivityAttributes(startedAt: session.startedAt, endsAt: session.plannedEnd)
+        let attributes = FocusActivityAttributes(
+            startedAt: session.startedAt,
+            endsAt: session.plannedEnd,
+            tagName: tagName
+        )
         let content = ActivityContent(state: FocusActivityAttributes.ContentState(), staleDate: session.plannedEnd)
         _ = try? Activity.request(attributes: attributes, content: content, pushType: nil)
     }

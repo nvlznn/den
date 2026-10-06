@@ -9,4 +9,6 @@ struct FocusActivityAttributes: ActivityAttributes {
     var startedAt: Date
     /// 倒數的預定結束時間；正計時為 nil。
     var endsAt: Date?
+    /// 開始時選的標籤。
+    var tagName: String?
 }

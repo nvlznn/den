@@ -147,6 +147,26 @@ struct FocusTimerTests {
         #expect(FocusTimer(defaults: defaults).active == nil)
     }
 
+    @Test func tagSurvivesRelaunchAndEndsUpInRecord() throws {
+        let tagID = UUID()
+        FocusTimer(defaults: defaults).start(.countdown(planned: 1500), tagID: tagID, at: start)
+
+        let relaunched = FocusTimer(defaults: defaults)
+        #expect(relaunched.active?.tagID == tagID)
+        let finished = try #require(relaunched.completeIfExpired(at: start.addingTimeInterval(9999)))
+        #expect(finished.tagID == tagID)
+        #expect(finished.shortened(to: 60).tagID == tagID)
+    }
+
+    /// 舊版存下、沒有 tagID 的計時也要讀得回來。
+    @Test func decodesSessionSavedBeforeTags() throws {
+        let json = #"{"startedAt": 800000000, "mode": {"stopwatch": {}}}"#
+        defaults.set(Data(json.utf8), forKey: FocusTimer.storageKey)
+        let active = try #require(FocusTimer(defaults: defaults).active)
+        #expect(active.mode == .stopwatch)
+        #expect(active.tagID == nil)
+    }
+
     @Test func restorePicksUpChangesFromStorage() {
         let timer = FocusTimer(defaults: defaults)
         #expect(timer.active == nil)

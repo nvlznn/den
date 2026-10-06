@@ -21,7 +21,7 @@ struct FocusLiveActivity: Widget {
                         .padding(.trailing, 4)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text(context.attributes.endsAt == nil ? "正計時" : "倒數")
+                    Text(context.attributes.tagName ?? (context.attributes.endsAt == nil ? "正計時" : "倒數"))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -51,7 +51,7 @@ private struct LockScreenView: View {
                 .background(LCDPalette.background, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(attributes.endsAt == nil ? "專注中" : "倒數中")
+                Text([attributes.endsAt == nil ? "專注中" : "倒數中", attributes.tagName].compactMap { $0 }.joined(separator: " · "))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 TimerText(attributes: attributes, isStale: isStale)
@@ -131,7 +131,7 @@ private struct PixelSprite: Shape {
     }
 }
 
-#Preview("倒數", as: .content, using: FocusActivityAttributes(startedAt: .now, endsAt: .now.addingTimeInterval(25 * 60))) {
+#Preview("倒數", as: .content, using: FocusActivityAttributes(startedAt: .now, endsAt: .now.addingTimeInterval(25 * 60), tagName: "讀書")) {
     FocusLiveActivity()
 } contentStates: {
     FocusActivityAttributes.ContentState()

@@ -10,18 +10,18 @@ enum TimerMode: Codable, Hashable, Sendable {
     /// 倒數，`planned` 是預定時長（秒）。
     case countdown(planned: TimeInterval)
 
-    var kind: Kind {
-        switch self {
-        case .stopwatch: .stopwatch
-        case .countdown: .countdown
+    /// 「專注時長」設定裡的分鐘數；`unlimitedMinutes`（∞）代表正計時。
+    init(focusMinutes: Int) {
+        if focusMinutes == Self.unlimitedMinutes {
+            self = .stopwatch
+        } else {
+            self = .countdown(planned: TimeInterval(focusMinutes * 60))
         }
     }
 
-    /// 不帶時長的模式種類，給模式選擇與記住上次選擇用。
-    enum Kind: String, CaseIterable, Identifiable, Sendable {
-        case stopwatch
-        case countdown
+    /// 專注時長設定中代表 ∞（正計時）的值。
+    static let unlimitedMinutes = 0
 
-        var id: Self { self }
-    }
+    /// 時長滾輪的選項：∞，然後 5 分鐘到 3 小時，每 5 分鐘一格。
+    static let focusMinuteChoices = [unlimitedMinutes] + Array(stride(from: 5, through: 180, by: 5))
 }
