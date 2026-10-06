@@ -84,6 +84,7 @@ struct RecordsView: View {
                 week = week.shifted(by: -1)
             } label: {
                 Image(systemName: "chevron.left")
+                    .foregroundStyle(Color.primary)
             }
             .accessibilityLabel("Previous Week")
 
@@ -99,6 +100,7 @@ struct RecordsView: View {
                 week = week.shifted(by: 1)
             } label: {
                 Image(systemName: "chevron.right")
+                    .foregroundStyle(Color.primary)
             }
             .accessibilityLabel("Next Week")
             .disabled(week.interval.end > .now)
@@ -114,12 +116,10 @@ private struct DayHeader: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
+            // 不指定字級，跟 Focus 頁的「Today」、「Focus Settings」一樣用系統預設的區段標題樣式。
             Text(RecordFormat.day(day.day))
-                .font(.title3.weight(.semibold))
-                .foregroundStyle(Color.primary)
+                .fontWeight(.semibold)
             Text("\(DurationText.hoursAndMinutes(day.totalDuration)), \(RecordFormat.sessions(day.count))")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
         }
         .textCase(nil)
         .accessibilityElement(children: .combine)
@@ -130,20 +130,19 @@ private struct RecordRow: View {
     let session: FocusSession
 
     var body: some View {
-        HStack(spacing: 10) {
+        // 字級跟 Focus 頁的列一樣（系統預設的 body），不自己指定大小。
+        HStack(spacing: 12) {
             // 手動補的用鉛筆，和計時的沙漏區分。
             Image(systemName: session.isManual ? "pencil" : "hourglass")
-                .font(.subheadline)
                 .foregroundStyle(.tint)
-                .frame(width: 18)
+                .frame(width: 24)
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 0) {
                 Text(session.displayTagName)
-                    .font(.subheadline)
                     .foregroundStyle(Color.primary)
                 Text(session.isManual ? "\(RecordFormat.time(session.startedAt)) · Added manually" : RecordFormat.time(session.startedAt))
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundStyle(Color.secondary)
                     .monospacedDigit()
             }
@@ -151,7 +150,6 @@ private struct RecordRow: View {
             Spacer()
 
             Text(DurationText.clock(Int(session.duration)))
-                .font(.callout)
                 .monospacedDigit()
                 .foregroundStyle(.tint)
                 .accessibilityLabel(DurationText.hoursAndMinutes(session.duration))
