@@ -15,9 +15,13 @@
 
 假設網站部署在 `https://den.example.com`：
 
-- 隱私權政策網址（Privacy Policy URL）：`https://den.example.com/privacy.html`
-- 支援網址（Support URL）：`https://den.example.com/privacy.html#support`
+- 隱私權政策網址（Privacy Policy URL）：`https://den.example.com/privacy`
+- 支援網址（Support URL）：`https://den.example.com/privacy#support`
 - 行銷網址（Marketing URL，選填）：`https://den.example.com/`
+
+## 本機預覽
+
+連結不帶 `.html`（例如 `privacy`），直接雙擊 `index.html` 用 `file://` 開的話，點連結會找不到頁面。本機預覽請在 `website/` 裡跑 `npx vercel dev`，或 `npx serve`。
 
 ## 部署方式（擇一）
 
@@ -28,7 +32,8 @@
 ## 檔案
 
 - `index.html`：首頁
-- `privacy.html`：隱私權政策 + 支援
+- `privacy.html`：隱私權政策 + 支援（網址是 `/privacy`，`vercel.json` 的 `cleanUrls` 會拿掉 `.html`）
+- `vercel.json`：開啟 `cleanUrls`；舊的 `/privacy.html` 會自動轉址到 `/privacy`
 - `assets/config.js`：App Store 網址、支援信箱
 - `assets/sprites.js`：六隻角色的像素圖，由 `Den/Pet/PetSprites.swift` 產生；改了角色之後要重新產生
 - `assets/site.js`：LCD 繪製、寵物動畫、套用設定
