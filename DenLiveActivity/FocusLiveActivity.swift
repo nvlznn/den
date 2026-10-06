@@ -50,14 +50,18 @@ private struct LockScreenView: View {
                 .frame(width: 52, height: 52)
                 .background(LCDPalette.background, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text([attributes.endsAt == nil ? "Focusing" : "Countdown", attributes.tagName].compactMap { $0 }.joined(separator: " · "))
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                TimerText(attributes: attributes, isStale: isStale)
-                    .font(.title.weight(.medium))
-            }
-            Spacer(minLength: 0)
+            // 只留標籤名字，靠左、放大；沒有標籤時寫 Focus。
+            Text(attributes.tagName ?? "Focus")
+                .font(.title2.weight(.semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            TimerText(attributes: attributes, isStale: isStale)
+                .font(.system(size: 44, weight: .semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+                .frame(maxWidth: 170, alignment: .trailing)
         }
         .padding()
     }

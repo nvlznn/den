@@ -1,9 +1,11 @@
 import SwiftData
 import SwiftUI
 
-/// 選擇專注標籤。點一下選取並關閉；可以新增、重新命名、刪除、排序。
+/// 選擇專注標籤。點一下選取並關閉；可以新增、重新命名、刪除。
+///
+/// 至少要留一個標籤：只剩一個時不能刪。刪掉標籤時，它的紀錄保留原本的標籤名稱。
 struct TagSheet: View {
-    /// 目前選的標籤 `FocusTag.id`，空字串代表沒有。
+    /// 目前選的標籤 `FocusTag.id`；空字串或找不到時，視為選第一個標籤。
     @Binding var selectedTagID: String
 
     @Environment(\.dismiss) private var dismiss
@@ -14,6 +16,11 @@ struct TagSheet: View {
     @State private var renaming: FocusTag?
     @State private var nameDraft = ""
 
+    /// 實際生效的選擇。
+    private var effectiveSelectedID: UUID? {
+        tags.first { $0.id.uuidString == selectedTagID }?.id ?? tags.first?.id
+    }
+
     var body: some View {
         NavigationStack {
             List {
@@ -22,10 +29,6 @@ struct TagSheet: View {
                         ForEach(tags) { tag in
                             row(for: tag)
                         }
-                        .onDelete { offsets in
-                            offsets.map { tags[$0] }.forEach(delete)
-                        }
-                        .onMove(perform: move)
                     }
                 }
 
@@ -44,9 +47,6 @@ struct TagSheet: View {
                 ToolbarItem(placement: .cancellationAction) {
                     SheetCloseButton { dismiss() }
                 }
-                ToolbarItem(placement: .primaryAction) {
-                    EditButton()
-                }
             }
             .alert("Add Tag", isPresented: $isAdding) {
                 TextField("Name", text: $nameDraft)
@@ -58,6 +58,7 @@ struct TagSheet: View {
                 Button("Cancel", role: .cancel) {}
                 Button("Save") { rename(tag) }
             }
+
         }
     }
 
@@ -76,19 +77,22 @@ struct TagSheet: View {
                         .foregroundStyle(.tint)
                 }
                 Spacer()
-                if tag.id.uuidString == selectedTagID {
+                if tag.id == effectiveSelectedID {
                     Image(systemName: "checkmark")
                         .fontWeight(.semibold)
                         .foregroundStyle(.tint)
                 }
             }
         }
-        .accessibilityAddTraits(tag.id.uuidString == selectedTagID ? .isSelected : [])
+        .accessibilityAddTraits(tag.id == effectiveSelectedID ? .isSelected : [])
         .swipeActions {
-            Button(role: .destructive) {
-                delete(tag)
-            } label: {
-                Label("Delete", systemImage: "trash")
+            // 至少要留一個標籤，只剩一個時不出現刪除。
+            if tags.count > 1 {
+                Button(role: .destructive) {
+                    delete(tag)
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
             }
             Button {
                 nameDraft = tag.name
@@ -116,29 +120,25 @@ struct TagSheet: View {
         let order = (tags.map(\.order).max() ?? -1) + 1
         modelContext.insert(FocusTag(name: trimmedDraft, order: order))
         try? modelContext.save()
+        // 如果有標籤被刪掉的紀錄原本就叫這個名字，它們歸到新標籤底下。
+        TagMaintenance.adoptOrphans(context: modelContext)
     }
 
     private func rename(_ tag: FocusTag) {
         guard !trimmedDraft.isEmpty else { return }
         tag.name = trimmedDraft
+        for session in tag.sessions ?? [] {
+            session.tagName = trimmedDraft
+        }
         try? modelContext.save()
+        TagMaintenance.adoptOrphans(context: modelContext)
     }
 
-    /// 刪掉標籤時，用過它的紀錄保留，只是變成沒有標籤。
     private func delete(_ tag: FocusTag) {
-        if tag.id.uuidString == selectedTagID {
-            selectedTagID = ""
+        let wasSelected = effectiveSelectedID == tag.id
+        guard let target = TagMaintenance.delete(tag, context: modelContext) else { return }
+        if wasSelected || selectedTagID == tag.id.uuidString {
+            selectedTagID = target.id.uuidString
         }
-        modelContext.delete(tag)
-        try? modelContext.save()
-    }
-
-    private func move(from source: IndexSet, to destination: Int) {
-        var reordered = tags
-        reordered.move(fromOffsets: source, toOffset: destination)
-        for (index, tag) in reordered.enumerated() {
-            tag.order = index
-        }
-        try? modelContext.save()
     }
 }

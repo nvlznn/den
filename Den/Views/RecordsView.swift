@@ -139,7 +139,7 @@ private struct RecordRow: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 0) {
-                Text(session.tag?.name ?? FocusSession.untaggedName)
+                Text(session.displayTagName)
                     .font(.subheadline)
                     .foregroundStyle(Color.primary)
                 Text(session.isManual ? "\(RecordFormat.time(session.startedAt)) · Added manually" : RecordFormat.time(session.startedAt))

@@ -58,6 +58,7 @@ struct RootView: View {
     /// 同名標籤合併後，如果目前選的是被合併掉的那個，改選留下來的。
     private func mergeDuplicateTags() {
         let replaced = TagMaintenance.mergeDuplicates(context: modelContext)
+        TagMaintenance.adoptOrphans(context: modelContext)
         if let current = UUID(uuidString: selectedTagID), let keeper = replaced[current] {
             selectedTagID = keeper.uuidString
         }

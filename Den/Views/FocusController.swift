@@ -88,7 +88,8 @@ final class FocusController {
         context.insert(FocusSession(
             startedAt: finished.startedAt,
             endedAt: finished.endedAt,
-            tag: tag(withID: finished.tagID, context: context),
+            // 標籤被刪掉了或找不到時，補第一個，每筆紀錄一定要有標籤。
+            tag: tag(withID: finished.tagID, context: context) ?? TagMaintenance.fallbackTag(context: context),
             characterID: characterID
         ))
         try? context.save()

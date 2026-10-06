@@ -36,8 +36,9 @@ struct HomeView: View {
         return Level(totalSeconds: saved + (timer.active?.elapsed(at: date) ?? 0))
     }
 
+    /// 一定有一個標籤：沒選或選的已經被刪掉時，用第一個。
     private var selectedTag: FocusTag? {
-        tags.first { $0.id.uuidString == selectedTagID }
+        tags.first { $0.id.uuidString == selectedTagID } ?? tags.first
     }
 
     private var today: (count: Int, duration: TimeInterval) {
@@ -86,7 +87,7 @@ struct HomeView: View {
                     SettingRow(title: "Character", value: character.name) {
                         isChoosingCharacter = true
                     }
-                    SettingRow(title: "Focus Tag", value: selectedTag?.name ?? "None") {
+                    SettingRow(title: "Focus Tag", value: selectedTag?.name ?? "–") {
                         isChoosingTag = true
                     }
                     SettingRow(title: "Focus Duration", value: DurationSheet.rowLabel(focusMinutes)) {
@@ -241,9 +242,11 @@ private struct RunningTime: View {
                     .accessibilityLabel(accessibilityText(seconds, overtime: overtime))
             }
             if let tagName {
-                Label(tagName, systemImage: "tag.fill")
+                Text(tagName)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
             }
         }
         .padding(.top, 32)

@@ -36,8 +36,12 @@ struct RecordSheet: View {
     var body: some View {
         NavigationStack {
             Form {
+                // 每筆紀錄一定要有標籤，所以沒有「None」。
                 Picker("Tag", selection: $tagID) {
-                    Text("None").tag(UUID?.none)
+                    // 標籤已經被刪掉的紀錄：保留原本的名稱當作一個選項，沒改的話就維持原樣。
+                    if let orphanName {
+                        Text(orphanName).tag(UUID?.none)
+                    }
                     ForEach(tags) { tag in
                         Text(tag.name).tag(Optional(tag.id))
                     }
@@ -66,22 +70,34 @@ struct RecordSheet: View {
                 }
             }
             .onAppear {
-                if editing == nil {
-                    tagID = UUID(uuidString: selectedTagID)
-                }
+                // 新增：預設用目前選的標籤。編輯：用紀錄原本的標籤；它的標籤已被刪掉就維持原名，不改成別的。
+                guard orphanName == nil else { return }
+                let preferred = editing == nil ? UUID(uuidString: selectedTagID) : tagID
+                tagID = tags.first { $0.id == preferred }?.id ?? tags.first?.id
             }
         }
     }
 
+    /// 編輯的紀錄如果標籤已被刪掉，它顯示的原本名稱；否則 nil。
+    private var orphanName: String? {
+        guard let editing, editing.tag == nil else { return nil }
+        return editing.displayTagName
+    }
+
     private func save() {
-        let tag = tags.first { $0.id == tagID }
+        // 孤兒紀錄且沒換標籤：維持原本的標籤名稱，不指定新的標籤。
+        let keepsDeletedTag = orphanName != nil && tagID == nil
+        let tag = tags.first { $0.id == tagID } ?? TagMaintenance.fallbackTag(context: modelContext)
 
         if let editing {
             let originalMinutes = Int((editing.duration / 60).rounded())
             let duration = minutes == min(max(originalMinutes, Self.minuteRange.lowerBound), Self.minuteRange.upperBound)
                 ? editing.duration
                 : TimeInterval(minutes * 60)
-            editing.tag = tag
+            if !keepsDeletedTag {
+                editing.tag = tag
+                editing.tagName = tag.name
+            }
             editing.startedAt = startedAt
             editing.endedAt = startedAt.addingTimeInterval(duration)
         } else {

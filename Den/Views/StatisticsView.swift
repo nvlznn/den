@@ -13,7 +13,7 @@ struct StatisticsView: View {
             FocusStats.Item(
                 startedAt: $0.startedAt,
                 duration: $0.duration,
-                tagName: $0.tag?.name ?? FocusSession.untaggedName
+                tagName: $0.displayTagName
             )
         }
         return FocusStats(items: items, range: range)
