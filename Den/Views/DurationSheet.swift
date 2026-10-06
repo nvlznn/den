@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 選擇專注時長。最上面的 ∞ 是正計時，其他是倒數。
+/// 選擇專注時長。最上面的 No limit 是正計時，其他是倒數。
 struct DurationSheet: View {
     @Binding var minutes: Int
 
@@ -18,10 +18,9 @@ struct DurationSheet: View {
 
     var body: some View {
         NavigationStack {
-            Picker("專注時長", selection: $draft) {
+            Picker("Focus Duration", selection: $draft) {
                 ForEach(TimerMode.focusMinuteChoices, id: \.self) { choice in
                     Text(Self.wheelLabel(choice))
-                        .accessibilityLabel(Self.rowLabel(choice))
                         .tag(choice)
                 }
             }
@@ -29,7 +28,7 @@ struct DurationSheet: View {
             .labelsHidden()
             .padding(.horizontal)
             .frame(maxHeight: .infinity, alignment: .top)
-            .navigationTitle("選擇時長")
+            .navigationTitle("Select Duration")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -47,11 +46,11 @@ struct DurationSheet: View {
     }
 
     static func wheelLabel(_ minutes: Int) -> String {
-        minutes == TimerMode.unlimitedMinutes ? "∞" : "\(minutes) 分鐘"
+        minutes == TimerMode.unlimitedMinutes ? "No limit" : "\(minutes) minutes"
     }
 
     /// 設定列上顯示的文字。
     static func rowLabel(_ minutes: Int) -> String {
-        minutes == TimerMode.unlimitedMinutes ? "∞ 正計時" : "\(minutes) 分鐘"
+        wheelLabel(minutes)
     }
 }

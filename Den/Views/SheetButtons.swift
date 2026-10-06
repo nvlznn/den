@@ -11,7 +11,7 @@ struct SheetCloseButton: View {
             Button(action: action) {
                 Image(systemName: "xmark")
             }
-            .accessibilityLabel("關閉")
+            .accessibilityLabel("Close")
         }
     }
 }
@@ -27,7 +27,7 @@ struct SheetConfirmButton: View {
             Button(action: action) {
                 Image(systemName: "checkmark")
             }
-            .accessibilityLabel("完成")
+            .accessibilityLabel("Done")
         }
     }
 }

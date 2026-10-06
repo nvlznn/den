@@ -11,7 +11,8 @@ enum LiveActivityController {
         let attributes = FocusActivityAttributes(
             startedAt: session.startedAt,
             endsAt: session.plannedEnd,
-            tagName: tagName
+            tagName: tagName,
+            characterID: session.characterID
         )
         let content = ActivityContent(state: FocusActivityAttributes.ContentState(), staleDate: session.plannedEnd)
         _ = try? Activity.request(attributes: attributes, content: content, pushType: nil)

@@ -1,17 +1,19 @@
 import Foundation
 import SwiftData
 
-/// 專注標籤，例如「讀書」、「工作」。
+/// 專注標籤，例如「Study」、「Work」。
+///
+/// 會透過 iCloud 同步，所以每個欄位都要有預設值、關聯要是 optional（CloudKit 的限制）。
 @Model
 final class FocusTag {
     /// 穩定的識別碼，用來記住目前選的標籤，以及寫進進行中的計時。
-    var id: UUID
-    var name: String
+    var id: UUID = UUID()
+    var name: String = ""
     /// 在列表裡的順序，越小越前面。
-    var order: Int
+    var order: Int = 0
 
     @Relationship(deleteRule: .nullify, inverse: \FocusSession.tag)
-    var sessions: [FocusSession] = []
+    var sessions: [FocusSession]? = []
 
     init(name: String, order: Int) {
         self.id = UUID()
@@ -19,5 +21,5 @@ final class FocusTag {
         self.order = order
     }
 
-    static let defaultNames = ["讀書", "工作", "其他"]
+    static let defaultNames = ["Study", "Work", "Other"]
 }

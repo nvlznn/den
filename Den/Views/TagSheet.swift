@@ -34,11 +34,11 @@ struct TagSheet: View {
                         nameDraft = ""
                         isAdding = true
                     } label: {
-                        Label("新增標籤", systemImage: "plus.circle.fill")
+                        Label("Add Tag", systemImage: "plus.circle.fill")
                     }
                 }
             }
-            .navigationTitle("選擇標籤")
+            .navigationTitle("Select Tag")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -48,15 +48,15 @@ struct TagSheet: View {
                     EditButton()
                 }
             }
-            .alert("新增標籤", isPresented: $isAdding) {
-                TextField("名稱", text: $nameDraft)
-                Button("取消", role: .cancel) {}
-                Button("新增", action: add)
+            .alert("Add Tag", isPresented: $isAdding) {
+                TextField("Name", text: $nameDraft)
+                Button("Cancel", role: .cancel) {}
+                Button("Add", action: add)
             }
-            .alert("重新命名", isPresented: isRenaming, presenting: renaming) { tag in
-                TextField("名稱", text: $nameDraft)
-                Button("取消", role: .cancel) {}
-                Button("儲存") { rename(tag) }
+            .alert("Rename", isPresented: isRenaming, presenting: renaming) { tag in
+                TextField("Name", text: $nameDraft)
+                Button("Cancel", role: .cancel) {}
+                Button("Save") { rename(tag) }
             }
         }
     }
@@ -88,13 +88,13 @@ struct TagSheet: View {
             Button(role: .destructive) {
                 delete(tag)
             } label: {
-                Label("刪除", systemImage: "trash")
+                Label("Delete", systemImage: "trash")
             }
             Button {
                 nameDraft = tag.name
                 renaming = tag
             } label: {
-                Label("重新命名", systemImage: "pencil")
+                Label("Rename", systemImage: "pencil")
             }
         }
     }

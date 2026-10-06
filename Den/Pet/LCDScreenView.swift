@@ -5,10 +5,13 @@ struct LCDScreenView: View {
     /// 螢幕寬度固定 48 格，高度依比例。
     static let columns = 48
 
+    let character: PetCharacter
     let level: Int
     let pet: PetState
     /// 升級時 `Lv` 閃兩下。
     let levelFlashSince: Date?
+    /// 指定的話就一直做這件事（慶祝畫面用），不看時間與計時狀態。
+    var activityOverride: PetActivity?
     let onPetTap: () -> Void
 
     private static let levelFlashDuration: TimeInterval = 1.2
@@ -16,7 +19,7 @@ struct LCDScreenView: View {
 
     var body: some View {
         TimelineView(.animation(minimumInterval: 0.1)) { context in
-            let activity = pet.activity(at: context.date)
+            let activity = activityOverride ?? pet.activity(at: context.date)
             Canvas { graphics, size in
                 draw(in: graphics, size: size, date: context.date, activity: activity)
             }
@@ -25,7 +28,7 @@ struct LCDScreenView: View {
             .contentShape(shape)
             .onTapGesture(perform: onPetTap)
             .accessibilityElement()
-            .accessibilityLabel("你的寵物，等級 \(level)，\(activity.spokenDescription)")
+            .accessibilityLabel("\(character.name), level \(level), \(activity.spokenDescription)")
             .accessibilityAddTraits(.isButton)
             .accessibilityAction { onPetTap() }
         }
@@ -44,10 +47,10 @@ struct LCDScreenView: View {
         }
 
         // 寵物在中央偏下。
-        let frame = PetSprites.frame(for: activity, at: date, happySince: pet.happySince)
+        let frame = character.frame(for: activity, at: date, happySince: pet.happySince)
         let restingY = min(Int(Double(rows) * 0.62) - PetSprites.size / 2, rows - PetSprites.size - 3)
         let petOrigin = PixelPoint(
-            x: (columns - PetSprites.size) / 2,
+            x: (columns - PetSprites.size) / 2 + frame.offsetX,
             y: max(levelOrigin.y + LCDFont.height + 4, restingY) + frame.offsetY
         )
         grid.stamp(frame.sprite, at: petOrigin)
@@ -91,10 +94,11 @@ struct LCDScreenView: View {
 private extension PetActivity {
     var spokenDescription: String {
         switch self {
-        case .idle: "正在休息"
-        case .sleeping: "正在睡覺"
-        case .studying: "正在陪你專注"
-        case .happy: "很開心"
+        case .idle: "resting"
+        case .sleeping: "sleeping"
+        case .studying: "focusing with you"
+        case .happy: "happy"
+        case .dancing: "dancing"
         }
     }
 }

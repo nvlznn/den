@@ -11,4 +11,6 @@ struct FocusActivityAttributes: ActivityAttributes {
     var endsAt: Date?
     /// 開始時選的標籤。
     var tagName: String?
+    /// 陪著專注的角色，動態島上畫的就是牠。
+    var characterID: String?
 }

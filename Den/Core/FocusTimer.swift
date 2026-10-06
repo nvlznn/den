@@ -8,6 +8,8 @@ struct ActiveSession: Codable, Hashable, Sendable {
     let mode: TimerMode
     /// 開始時選的標籤。
     var tagID: UUID?
+    /// 開始時陪著的角色。
+    var characterID: String?
 
     /// 倒數的預定結束時間；正計時沒有。
     var plannedEnd: Date? {
@@ -36,7 +38,12 @@ struct ActiveSession: Codable, Hashable, Sendable {
 
     /// 在 `now` 結束時會留下的紀錄。倒數過期後才結束，仍以預定結束時間計算。
     func finished(at now: Date) -> FinishedSession {
-        FinishedSession(startedAt: startedAt, endedAt: startedAt.addingTimeInterval(elapsed(at: now)), tagID: tagID)
+        FinishedSession(
+            startedAt: startedAt,
+            endedAt: startedAt.addingTimeInterval(elapsed(at: now)),
+            tagID: tagID,
+            characterID: characterID
+        )
     }
 }
 
@@ -48,6 +55,7 @@ struct FinishedSession: Hashable, Sendable {
     let startedAt: Date
     let endedAt: Date
     var tagID: UUID?
+    var characterID: String?
 
     var duration: TimeInterval { endedAt.timeIntervalSince(startedAt) }
 
@@ -56,7 +64,12 @@ struct FinishedSession: Hashable, Sendable {
     /// 把時長往下修正（忘記按結束、睡著了）。不能往上調。
     func shortened(to newDuration: TimeInterval) -> FinishedSession {
         let clamped = min(max(0, newDuration), duration)
-        return FinishedSession(startedAt: startedAt, endedAt: startedAt.addingTimeInterval(clamped), tagID: tagID)
+        return FinishedSession(
+            startedAt: startedAt,
+            endedAt: startedAt.addingTimeInterval(clamped),
+            tagID: tagID,
+            characterID: characterID
+        )
     }
 }
 
@@ -86,8 +99,8 @@ final class FocusTimer {
         }
     }
 
-    func start(_ mode: TimerMode, tagID: UUID? = nil, at now: Date = .now) {
-        let session = ActiveSession(startedAt: now, mode: mode, tagID: tagID)
+    func start(_ mode: TimerMode, tagID: UUID? = nil, characterID: String? = nil, at now: Date = .now) {
+        let session = ActiveSession(startedAt: now, mode: mode, tagID: tagID, characterID: characterID)
         active = session
         defaults.set(try? JSONEncoder().encode(session), forKey: Self.storageKey)
     }

@@ -147,15 +147,17 @@ struct FocusTimerTests {
         #expect(FocusTimer(defaults: defaults).active == nil)
     }
 
-    @Test func tagSurvivesRelaunchAndEndsUpInRecord() throws {
+    @Test func tagAndCharacterSurviveRelaunchAndEndUpInRecord() throws {
         let tagID = UUID()
-        FocusTimer(defaults: defaults).start(.countdown(planned: 1500), tagID: tagID, at: start)
+        FocusTimer(defaults: defaults).start(.countdown(planned: 1500), tagID: tagID, characterID: "orb", at: start)
 
         let relaunched = FocusTimer(defaults: defaults)
         #expect(relaunched.active?.tagID == tagID)
+        #expect(relaunched.active?.characterID == "orb")
         let finished = try #require(relaunched.completeIfExpired(at: start.addingTimeInterval(9999)))
         #expect(finished.tagID == tagID)
-        #expect(finished.shortened(to: 60).tagID == tagID)
+        #expect(finished.characterID == "orb")
+        #expect(finished.shortened(to: 60).characterID == "orb")
     }
 
     /// 舊版存下、沒有 tagID 的計時也要讀得回來。
@@ -165,6 +167,7 @@ struct FocusTimerTests {
         let active = try #require(FocusTimer(defaults: defaults).active)
         #expect(active.mode == .stopwatch)
         #expect(active.tagID == nil)
+        #expect(active.characterID == nil)
     }
 
     @Test func restorePicksUpChangesFromStorage() {

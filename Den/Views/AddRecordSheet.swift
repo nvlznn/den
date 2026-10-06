@@ -1,7 +1,7 @@
 import SwiftData
 import SwiftUI
 
-/// 手動補一筆紀錄，例如忘了開計時。
+/// 手動補一筆紀錄，例如忘了開計時。會出現在紀錄裡，但不算進任何角色的等級。
 struct AddRecordSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -16,20 +16,20 @@ struct AddRecordSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Picker("標籤", selection: $tagID) {
-                    Text("無").tag(UUID?.none)
+                Picker("Tag", selection: $tagID) {
+                    Text("None").tag(UUID?.none)
                     ForEach(tags) { tag in
                         Text(tag.name).tag(Optional(tag.id))
                     }
                 }
 
-                DatePicker("開始時間", selection: $startedAt, in: ...Date.now)
+                DatePicker("Start", selection: $startedAt, in: ...Date.now)
 
-                Section("時長") {
+                Section("Duration") {
                     HourMinuteWheel(totalMinutes: $minutes, range: 1...720)
                 }
             }
-            .navigationTitle("新增紀錄")
+            .navigationTitle("Add Record")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -50,7 +50,8 @@ struct AddRecordSheet: View {
         modelContext.insert(FocusSession(
             startedAt: startedAt,
             endedAt: startedAt.addingTimeInterval(TimeInterval(minutes * 60)),
-            tag: tag
+            tag: tag,
+            isManual: true
         ))
         try? modelContext.save()
         dismiss()

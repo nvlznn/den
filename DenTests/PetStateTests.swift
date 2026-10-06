@@ -41,24 +41,37 @@ struct PetStateTests {
         #expect(pet.activity(at: now.addingTimeInterval(1.5), calendar: calendar) == .sleeping)
     }
 
-    @Test func spritesAreSixteenSquare() {
+    @Test(arguments: PetSprites.characters)
+    func spritesAreSixteenSquare(character: PetCharacter) {
         let sprites = [
-            PetSprites.idle, PetSprites.idleBlink, PetSprites.sleep,
-            PetSprites.study1, PetSprites.study2, PetSprites.happy,
+            character.idle, character.blink, character.sleep,
+            character.study1, character.study2, character.happy,
         ]
         for sprite in sprites {
             #expect(sprite.count == PetSprites.size)
             #expect(sprite.allSatisfy { $0.count == PetSprites.size })
             #expect(sprite.joined().allSatisfy { $0 == "#" || $0 == "." })
         }
+        // 每個表情都要看得出差別。
+        #expect(Set([character.idle, character.blink, character.study1, character.study2, character.happy]).count == 5)
     }
 
-    @Test func everyActivityHasTwoFrames() {
+    @Test(arguments: PetSprites.characters)
+    func everyActivityHasTwoFrames(character: PetCharacter) {
         let start = Date(timeIntervalSinceReferenceDate: 0)
-        for activity in [PetActivity.idle, .sleeping, .studying, .happy] {
-            let first = PetSprites.frame(for: activity, at: start, happySince: start)
-            let second = PetSprites.frame(for: activity, at: start.addingTimeInterval(0.6), happySince: start)
-            #expect(first != second, "\(activity)")
+        for activity in [PetActivity.idle, .sleeping, .studying, .happy, .dancing] {
+            let first = character.frame(for: activity, at: start, happySince: start)
+            let second = character.frame(for: activity, at: start.addingTimeInterval(0.6), happySince: start)
+            #expect(first != second, "\(character.name) \(activity)")
         }
+    }
+
+    @Test func charactersHaveUniqueIDsAndFangFangIsDefault() {
+        let ids = PetSprites.characters.map(\.id)
+        #expect(Set(ids).count == ids.count)
+        #expect(PetSprites.characters.first?.id == PetSprites.defaultCharacterID)
+        #expect(PetSprites.character(id: nil).name == "Boxy")
+        #expect(PetSprites.character(id: "no-such-character").name == "Boxy")
+        #expect(PetSprites.character(id: "mochi").name == "Mochi")
     }
 }

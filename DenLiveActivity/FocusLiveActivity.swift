@@ -10,7 +10,7 @@ struct FocusLiveActivity: Widget {
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    PetIcon(color: LCDPalette.background)
+                    PetIcon(characterID: context.attributes.characterID, color: LCDPalette.background)
                         .frame(width: 36, height: 36)
                         .padding(.leading, 4)
                 }
@@ -21,18 +21,18 @@ struct FocusLiveActivity: Widget {
                         .padding(.trailing, 4)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text(context.attributes.tagName ?? (context.attributes.endsAt == nil ? "正計時" : "倒數"))
+                    Text(context.attributes.tagName ?? (context.attributes.endsAt == nil ? "Stopwatch" : "Countdown"))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
             } compactLeading: {
-                PetIcon(color: LCDPalette.background)
+                PetIcon(characterID: context.attributes.characterID, color: LCDPalette.background)
                     .frame(width: 20, height: 20)
             } compactTrailing: {
                 TimerText(attributes: context.attributes, isStale: context.isStale)
                     .frame(maxWidth: 64, alignment: .trailing)
             } minimal: {
-                PetIcon(color: LCDPalette.background)
+                PetIcon(characterID: context.attributes.characterID, color: LCDPalette.background)
                     .frame(width: 20, height: 20)
             }
         }
@@ -45,13 +45,13 @@ private struct LockScreenView: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            PetIcon(color: LCDPalette.pixelOn)
+            PetIcon(characterID: attributes.characterID, color: LCDPalette.pixelOn)
                 .padding(8)
                 .frame(width: 52, height: 52)
                 .background(LCDPalette.background, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
             VStack(alignment: .leading, spacing: 2) {
-                Text([attributes.endsAt == nil ? "專注中" : "倒數中", attributes.tagName].compactMap { $0 }.joined(separator: " · "))
+                Text([attributes.endsAt == nil ? "Focusing" : "Countdown", attributes.tagName].compactMap { $0 }.joined(separator: " · "))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 TimerText(attributes: attributes, isStale: isStale)
@@ -74,7 +74,7 @@ private struct TimerText: View {
         Group {
             if let endsAt = attributes.endsAt {
                 if isStale || endsAt <= .now {
-                    Text("時間到了")
+                    Text("Time's up")
                 } else {
                     Text(timerInterval: attributes.startedAt...endsAt, countsDown: true)
                 }
@@ -90,48 +90,20 @@ private struct TimerText: View {
     }
 }
 
-/// 陪讀中的寵物像素圖。
+/// 陪讀中的角色像素圖。
 private struct PetIcon: View {
+    let characterID: String?
     let color: Color
 
     var body: some View {
-        PixelSprite(pixels: PetSprites.study1)
+        PixelSprite(pixels: PetSprites.character(id: characterID).study1)
             .fill(color)
             .aspectRatio(1, contentMode: .fit)
             .accessibilityHidden(true)
     }
 }
 
-private struct PixelSprite: Shape {
-    let pixels: [String]
-
-    func path(in rect: CGRect) -> Path {
-        let rows = pixels.count
-        let columns = pixels.map(\.count).max() ?? 0
-        guard rows > 0, columns > 0 else { return Path() }
-
-        let cell = min(rect.width / CGFloat(columns), rect.height / CGFloat(rows))
-        let origin = CGPoint(
-            x: rect.midX - cell * CGFloat(columns) / 2,
-            y: rect.midY - cell * CGFloat(rows) / 2
-        )
-
-        var path = Path()
-        for (row, line) in pixels.enumerated() {
-            for (column, character) in line.enumerated() where character == "#" {
-                path.addRect(CGRect(
-                    x: origin.x + CGFloat(column) * cell,
-                    y: origin.y + CGFloat(row) * cell,
-                    width: cell,
-                    height: cell
-                ))
-            }
-        }
-        return path
-    }
-}
-
-#Preview("倒數", as: .content, using: FocusActivityAttributes(startedAt: .now, endsAt: .now.addingTimeInterval(25 * 60), tagName: "讀書")) {
+#Preview("Countdown", as: .content, using: FocusActivityAttributes(startedAt: .now, endsAt: .now.addingTimeInterval(25 * 60), tagName: "Study", characterID: "fangfang")) {
     FocusLiveActivity()
 } contentStates: {
     FocusActivityAttributes.ContentState()

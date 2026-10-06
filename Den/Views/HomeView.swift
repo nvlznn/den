@@ -10,14 +10,29 @@ struct HomeView: View {
 
     @AppStorage("focusMinutes") private var focusMinutes = 25
     @AppStorage("selectedTagID") private var selectedTagID = ""
+    @AppStorage("characterID") private var characterID = PetSprites.defaultCharacterID
 
+    @State private var isChoosingCharacter = false
     @State private var isChoosingTag = false
     @State private var isChoosingDuration = false
 
     private var timer: FocusTimer { controller.timer }
 
+    /// 計時中顯示開始時的那隻；平常顯示目前選的那隻。
+    private var character: PetCharacter {
+        PetSprites.character(id: timer.active?.characterID ?? characterID)
+    }
+
+    /// 每個角色的等級各自計算。
     private var level: Level {
-        Level(totalSeconds: sessions.reduce(0) { $0 + $1.duration })
+        Level(totalSeconds: Level.totalSeconds(
+            of: character.id,
+            defaultID: PetSprites.defaultCharacterID,
+            in: sessions,
+            characterOf: \.characterID,
+            isManual: \.isManual,
+            duration: \.duration
+        ))
     }
 
     private var selectedTag: FocusTag? {
@@ -34,18 +49,17 @@ struct HomeView: View {
         List {
             Section {
                 LCDScreenView(
+                    character: character,
                     level: level.number,
                     pet: PetState(isTiming: timer.isRunning, happySince: controller.happySince),
-                    levelFlashSince: controller.levelFlashSince,
+                    levelFlashSince: nil,
                     onPetTap: controller.petTapped
                 )
                 .aspectRatio(1, contentMode: .fit)
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
             } footer: {
-                if !timer.isRunning {
-                    levelProgress
-                }
+                levelProgress
             }
 
             if let active = timer.active {
@@ -55,16 +69,19 @@ struct HomeView: View {
                         .listRowBackground(Color.clear)
                 }
             } else {
-                Section("今天") {
-                    LabeledContent("專注次數", value: "\(today.count)")
-                    LabeledContent("專注時長", value: DurationText.hoursAndMinutes(today.duration))
+                Section("Today") {
+                    LabeledContent("Total Focus Sessions", value: "\(today.count)")
+                    LabeledContent("Total Focus Duration", value: DurationText.hoursAndMinutes(today.duration))
                 }
 
-                Section("專注設定") {
-                    SettingRow(title: "專注標籤", value: selectedTag?.name ?? "無") {
+                Section("Focus Settings") {
+                    SettingRow(title: "Character", value: character.name) {
+                        isChoosingCharacter = true
+                    }
+                    SettingRow(title: "Focus Tag", value: selectedTag?.name ?? "None") {
                         isChoosingTag = true
                     }
-                    SettingRow(title: "專注時長", value: DurationSheet.rowLabel(focusMinutes)) {
+                    SettingRow(title: "Focus Duration", value: DurationSheet.rowLabel(focusMinutes)) {
                         isChoosingDuration = true
                     }
                 }
@@ -75,6 +92,9 @@ struct HomeView: View {
                 .padding(.bottom, 8)
         }
         .animation(.default, value: timer.isRunning)
+        .sheet(isPresented: $isChoosingCharacter) {
+            CharacterSheet(characterID: $characterID)
+        }
         .sheet(isPresented: $isChoosingTag) {
             TagSheet(selectedTagID: $selectedTagID)
         }
@@ -84,12 +104,19 @@ struct HomeView: View {
     }
 
     private var levelProgress: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            ProgressView(value: level.progressToNext)
-                .accessibilityLabel("距離 Lv \(level.number + 1) 的進度")
-            Text("累積 \(DurationText.hoursAndMinutes(level.totalSeconds))")
+        // 剩下的時間無條件進位到分鐘，避免最後一分鐘顯示「0 min」。
+        let minutesLeft = (level.secondsToNext / 60).rounded(.up) * 60
+        let timeLeft = DurationText.hoursAndMinutes(minutesLeft)
+
+        return VStack(alignment: .leading, spacing: 8) {
+            SegmentedProgressBar(progress: level.progressToNext)
+                .frame(height: 18)
+            Text("Evolves in \(timeLeft)")
         }
         .padding(.top, 12)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Progress to Lv \(level.number + 1)")
+        .accessibilityValue("Evolves in \(timeLeft)")
     }
 
     @ViewBuilder
@@ -99,7 +126,7 @@ struct HomeView: View {
             Button {
                 controller.endTapped(context: modelContext)
             } label: {
-                Text("結束")
+                Text("End")
                     .padding(.horizontal, 48)
             }
             .buttonStyle(.bordered)
@@ -108,9 +135,10 @@ struct HomeView: View {
             .background(Color(.systemBackground), in: Capsule())
         } else {
             Button {
-                controller.start(focusMinutes: focusMinutes, tag: selectedTag)
+                controller.start(focusMinutes: focusMinutes, tag: selectedTag, character: character)
             } label: {
-                Text("開始專注")
+                Text("Start Focusing")
+                    .fontWeight(.bold)
                     .padding(.horizontal, 48)
             }
             .buttonStyle(.borderedProminent)
@@ -122,6 +150,28 @@ struct HomeView: View {
     private func tagName(for session: ActiveSession) -> String? {
         guard let id = session.tagID else { return nil }
         return tags.first { $0.id == id }?.name
+    }
+}
+
+/// 外框裡一格一格填滿的進度條，像老式的 loading bar。
+private struct SegmentedProgressBar: View {
+    static let segments = 20
+
+    let progress: Double
+
+    var body: some View {
+        let filled = Int((min(max(progress, 0), 1) * Double(Self.segments)).rounded(.down))
+        HStack(spacing: 2) {
+            ForEach(0..<Self.segments, id: \.self) { index in
+                Rectangle()
+                    .fill(index < filled ? Color.primary : Color.clear)
+            }
+        }
+        .padding(4)
+        .overlay {
+            Rectangle()
+                .strokeBorder(Color.primary, lineWidth: 2)
+        }
     }
 }
 
@@ -164,7 +214,7 @@ private struct RunningTime: View {
             TimelineView(.periodic(from: session.startedAt, by: 1)) { context in
                 let seconds = session.displayedSeconds(at: context.date)
                 Text(DurationText.clock(seconds))
-                    .font(.system(size: fontSize, weight: .light))
+                    .font(.system(size: fontSize, weight: .semibold))
                     .monospacedDigit()
                     .lineLimit(1)
                     .minimumScaleFactor(0.4)
@@ -180,7 +230,7 @@ private struct RunningTime: View {
 
     private func accessibilityText(_ seconds: Int) -> String {
         let text = DurationText.hoursAndMinutes(TimeInterval(seconds))
-        return session.plannedEnd == nil ? "已專注 \(text)" : "還剩 \(text)"
+        return session.plannedEnd == nil ? "Focused for \(text)" : "\(text) left"
     }
 }
 

@@ -25,8 +25,8 @@ final class CountdownNotifier: NSObject, UNUserNotificationCenterDelegate {
         guard interval > 0 else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = "時間到了"
-        content.body = "\(DurationText.hoursAndMinutes(planned))，辛苦了。"
+        content.title = "Time's up"
+        content.body = "\(DurationText.hoursAndMinutes(planned)). Nice work."
         content.sound = .default
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)

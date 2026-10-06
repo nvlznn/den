@@ -7,17 +7,17 @@ struct HourMinuteWheel: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            Picker("小時", selection: hours) {
+            Picker("Hours", selection: hours) {
                 ForEach(range.lowerBound / 60...range.upperBound / 60, id: \.self) { hour in
-                    Text("\(hour) 小時").tag(hour)
+                    Text("\(hour) hr").tag(hour)
                 }
             }
             .frame(maxWidth: .infinity)
             .clipped()
 
-            Picker("分鐘", selection: minutes) {
+            Picker("Minutes", selection: minutes) {
                 ForEach(minuteOptions, id: \.self) { minute in
-                    Text("\(minute) 分鐘").tag(minute)
+                    Text("\(minute) min").tag(minute)
                 }
             }
             .frame(maxWidth: .infinity)
@@ -27,7 +27,7 @@ struct HourMinuteWheel: View {
         .labelsHidden()
     }
 
-    /// 只列出在範圍內的分鐘，例如上限 3 小時時，3 小時那一格只有 0 分鐘。
+    /// 只列出在範圍內的分鐘，例如上限 3 小時時，3 hr 那一格只有 0 min。
     private var minuteOptions: ClosedRange<Int> {
         let hour = totalMinutes / 60
         let lower = hour == range.lowerBound / 60 ? range.lowerBound % 60 : 0

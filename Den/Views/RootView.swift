@@ -1,3 +1,4 @@
+import CoreData
 import SwiftData
 import SwiftUI
 
@@ -8,34 +9,48 @@ struct RootView: View {
     @Environment(FocusController.self) private var controller
 
     @AppStorage("selectedTagID") private var selectedTagID = ""
-    @AppStorage("didSeedTags") private var didSeedTags = false
 
     var body: some View {
         @Bindable var controller = controller
 
-        TabView {
-            HomeView()
-                .tabItem { Label("專注", systemImage: "hourglass") }
-            RecordsView()
-                .tabItem { Label("紀錄", systemImage: "book.closed") }
+        Group {
+            if controller.timer.isRunning {
+                // 專注中只留 LCD、進度條、數字、標籤和 End，不顯示 tab bar。
+                HomeView()
+            } else {
+                TabView {
+                    HomeView()
+                        .tabItem { Label("Focus", systemImage: "hourglass") }
+                    RecordsView()
+                        .tabItem { Label("Records", systemImage: "book.closed") }
+                    StatisticsView()
+                        .tabItem { Label("Statistics", systemImage: "chart.pie") }
+                }
+            }
         }
-        .sheet(item: $controller.sessionToConfirm) { session in
-            EndSessionSheet(
-                session: session,
-                onSave: { controller.saveConfirmed($0, context: modelContext) },
-                onDiscard: controller.discardStopwatch
-            )
+        .animation(.default, value: controller.timer.isRunning)
+        .fullScreenCover(item: $controller.celebration) { celebration in
+            CelebrationView(celebration: celebration) {
+                controller.celebration = nil
+            }
         }
         .task(id: controller.timer.active) {
             await controller.waitForCountdownEnd(context: modelContext)
         }
         .task {
-            seedTagsIfNeeded()
+            if let first = TagMaintenance.seedIfNeeded(context: modelContext) {
+                selectedTagID = first.id.uuidString
+            }
         }
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active {
                 controller.sceneBecameActive(context: modelContext)
+                mergeDuplicateTags()
             }
+        }
+        // iCloud 同步進來新資料時
+        .onReceive(NotificationCenter.default.publisher(for: .NSPersistentStoreRemoteChange).receive(on: RunLoop.main)) { _ in
+            mergeDuplicateTags()
         }
         .sensoryFeedback(.impact(weight: .light), trigger: controller.petTaps)
         .sensoryFeedback(.success, trigger: controller.celebrations)
@@ -43,20 +58,11 @@ struct RootView: View {
         .sensoryFeedback(.stop, trigger: controller.stops)
     }
 
-    /// 第一次打開時放幾個預設標籤，之後使用者怎麼改都不再動。
-    private func seedTagsIfNeeded() {
-        guard !didSeedTags else { return }
-        didSeedTags = true
-        let existing = (try? modelContext.fetchCount(FetchDescriptor<FocusTag>())) ?? 0
-        guard existing == 0 else { return }
-
-        let tags = FocusTag.defaultNames.enumerated().map { FocusTag(name: $1, order: $0) }
-        tags.forEach(modelContext.insert)
-        try? modelContext.save()
-        selectedTagID = tags.first?.id.uuidString ?? ""
+    /// 同名標籤合併後，如果目前選的是被合併掉的那個，改選留下來的。
+    private func mergeDuplicateTags() {
+        let replaced = TagMaintenance.mergeDuplicates(context: modelContext)
+        if let current = UUID(uuidString: selectedTagID), let keeper = replaced[current] {
+            selectedTagID = keeper.uuidString
+        }
     }
-}
-
-extension FinishedSession: Identifiable {
-    var id: Date { startedAt }
 }

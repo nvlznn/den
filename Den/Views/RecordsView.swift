@@ -23,7 +23,7 @@ struct RecordsView: View {
                 .listRowInsets(EdgeInsets())
 
                 if days.isEmpty {
-                    ContentUnavailableView("這週沒有紀錄", systemImage: "book.closed")
+                    ContentUnavailableView("No Records This Week", systemImage: "book.closed")
                         .listRowBackground(Color.clear)
                 }
 
@@ -41,13 +41,13 @@ struct RecordsView: View {
                     }
                 }
             }
-            .navigationTitle("紀錄")
+            .navigationTitle("Records")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         isAdding = true
                     } label: {
-                        Label("新增紀錄", systemImage: "plus")
+                        Label("Add Record", systemImage: "plus")
                     }
                 }
             }
@@ -64,7 +64,7 @@ struct RecordsView: View {
             } label: {
                 Image(systemName: "chevron.left")
             }
-            .accessibilityLabel("上一週")
+            .accessibilityLabel("Previous Week")
 
             Spacer()
 
@@ -79,7 +79,7 @@ struct RecordsView: View {
             } label: {
                 Image(systemName: "chevron.right")
             }
-            .accessibilityLabel("下一週")
+            .accessibilityLabel("Next Week")
             .disabled(week.interval.end > .now)
         }
         .buttonStyle(.bordered)
@@ -96,7 +96,7 @@ private struct DayHeader: View {
             Text(RecordFormat.day(day.day))
                 .font(.title3.weight(.semibold))
                 .foregroundStyle(Color.primary)
-            Text("\(DurationText.hoursAndMinutes(day.totalDuration))，\(day.count) 次")
+            Text("\(DurationText.hoursAndMinutes(day.totalDuration)), \(RecordFormat.sessions(day.count))")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
@@ -110,14 +110,15 @@ private struct RecordRow: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            Image(systemName: "hourglass")
+            // 手動補的用鉛筆，和計時的沙漏區分。
+            Image(systemName: session.isManual ? "pencil" : "hourglass")
                 .font(.title3)
                 .foregroundStyle(.tint)
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(session.tag?.name ?? FocusSession.untaggedName)
-                Text(RecordFormat.time(session.startedAt))
+                Text(session.isManual ? "\(RecordFormat.time(session.startedAt)) · Added manually" : RecordFormat.time(session.startedAt))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
@@ -146,17 +147,22 @@ enum RecordFormat {
     }
 
     private static let timeFormatter = formatter("HH:mm")
-    private static let monthDayFormatter = formatter("M月d日")
+    private static let monthDayFormatter = formatter("MMM d")
     private static let weekdayFormatter = formatter("EEE")
 
-    /// 「10月4日 ~ 10月10日」
+    /// 「Oct 4 ~ Oct 10」
     static func weekRange(_ week: RecordWeek) -> String {
         "\(monthDay(week.firstDay)) ~ \(monthDay(week.lastDay()))"
     }
 
-    /// 「10月6日 週二」
+    /// 「Tue, Oct 6」
     static func day(_ date: Date) -> String {
-        "\(monthDay(date)) \(weekdayFormatter.string(from: date))"
+        "\(weekdayFormatter.string(from: date)), \(monthDay(date))"
+    }
+
+    /// 「1 session」、「3 sessions」
+    static func sessions(_ count: Int) -> String {
+        count == 1 ? "1 session" : "\(count) sessions"
     }
 
     /// 「11:33」

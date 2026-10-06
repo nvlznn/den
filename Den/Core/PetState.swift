@@ -10,6 +10,8 @@ enum PetActivity: Equatable, Sendable {
     case studying
     /// 被點到、剛升級、倒數完成。約 1.5 秒後回到原狀態。
     case happy
+    /// 專注結束的慶祝畫面：左右搖擺、跳著舞。
+    case dancing
 }
 
 /// 依時間與計時狀態決定寵物在做什麼。
