@@ -111,12 +111,12 @@ struct HomeView: View {
         return VStack(alignment: .leading, spacing: 8) {
             SegmentedProgressBar(progress: level.progressToNext)
                 .frame(height: 18)
-            Text("Evolves in \(timeLeft)")
+            Text("Focus \(timeLeft) more to evolve")
         }
         .padding(.top, 12)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Progress to Lv \(level.number + 1)")
-        .accessibilityValue("Evolves in \(timeLeft)")
+        .accessibilityValue("Focus \(timeLeft) more to evolve")
     }
 
     @ViewBuilder
