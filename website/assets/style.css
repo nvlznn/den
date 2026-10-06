@@ -240,7 +240,7 @@ section { scroll-margin-top: 72px; }
 }
 
 .section h2 {
-  margin: 0 0 12px;
+  margin: 0 0 28px;
   font-size: clamp(30px, 4.4vw, 42px);
   line-height: 1.12;
   letter-spacing: -0.02em;
@@ -269,7 +269,7 @@ section { scroll-margin-top: 72px; }
 }
 
 .feature h3 {
-  margin: 0 0 6px;
+  margin: 0;
   font-size: 18px;
 }
 
