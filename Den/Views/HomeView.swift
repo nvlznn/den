@@ -214,22 +214,13 @@ private struct RunningTime: View {
             TimelineView(.periodic(from: session.startedAt, by: 1)) { context in
                 let seconds = session.displayedSeconds(at: context.date)
                 let overtime = session.overtimeSeconds(at: context.date)
-                VStack(spacing: 4) {
-                    Text(DurationText.clock(seconds))
-                        .font(.system(size: fontSize, weight: .semibold))
-                        .monospacedDigit()
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.4)
-                    // 倒數到了之後還在專注：在 0:00 下面往上數。
-                    if overtime > 0 {
-                        Text("+ \(DurationText.clock(overtime))")
-                            .font(.title3)
-                            .monospacedDigit()
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(accessibilityText(seconds, overtime: overtime))
+                // 倒數到了之後只剩一個大數字：從 +0:00 開始往上數超時的部分。
+                Text(overtime > 0 ? "+\(DurationText.clock(overtime))" : DurationText.clock(seconds))
+                    .font(.system(size: fontSize, weight: .semibold))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.4)
+                    .accessibilityLabel(accessibilityText(seconds, overtime: overtime))
             }
             if let tagName {
                 Label(tagName, systemImage: "tag.fill")
