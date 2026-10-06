@@ -15,8 +15,6 @@ struct CharacterSheet: View {
                     ForEach(PetSprites.characters) { character in
                         row(for: character)
                     }
-                } footer: {
-                    Text("Each character has its own level.")
                 }
             }
             .navigationTitle("Select Character")

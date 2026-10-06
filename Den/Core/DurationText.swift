@@ -17,6 +17,11 @@ enum DurationText {
         }
     }
 
+    /// 慶祝畫面用：不到 1 分鐘顯示秒數（「45 sec」），其他同 `hoursAndMinutes`。
+    static func spoken(_ interval: TimeInterval) -> String {
+        interval < 60 ? "\(Int(max(0, interval))) sec" : hoursAndMinutes(interval)
+    }
+
     /// 「1:23:45」；不到 1 小時是「24:59」。
     static func clock(_ seconds: Int) -> String {
         let seconds = max(0, seconds)

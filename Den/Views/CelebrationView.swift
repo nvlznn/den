@@ -35,7 +35,7 @@ struct CelebrationView: View {
                 Text("You focused for")
                     .font(.headline)
                     .foregroundStyle(.secondary)
-                Text(DurationText.hoursAndMinutes(celebration.duration))
+                Text(DurationText.spoken(celebration.duration))
                     .font(.system(size: 48, weight: .bold))
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)

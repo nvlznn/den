@@ -23,16 +23,17 @@ struct HomeView: View {
         PetSprites.character(id: timer.active?.characterID ?? characterID)
     }
 
-    /// 每個角色的等級各自計算。
-    private var level: Level {
-        Level(totalSeconds: Level.totalSeconds(
+    /// 每個角色的等級各自計算。專注中也把正在進行的這一段算進去，所以會每秒跟著變。
+    private func level(at date: Date) -> Level {
+        let saved = Level.totalSeconds(
             of: character.id,
             defaultID: PetSprites.defaultCharacterID,
             in: sessions,
             characterOf: \.characterID,
             isManual: \.isManual,
             duration: \.duration
-        ))
+        )
+        return Level(totalSeconds: saved + (timer.active?.elapsed(at: date) ?? 0))
     }
 
     private var selectedTag: FocusTag? {
@@ -48,18 +49,25 @@ struct HomeView: View {
     var body: some View {
         List {
             Section {
-                LCDScreenView(
-                    character: character,
-                    level: level.number,
-                    pet: PetState(isTiming: timer.isRunning, happySince: controller.happySince),
-                    levelFlashSince: nil,
-                    onPetTap: controller.petTapped
-                )
+                // 每秒更新一次，專注中的 Lv 才會即時變化。TimelineView 放在內容裡，
+                // 不要包住整個 Section，不然 List 會把進度條和文字整個框進灰色的卡片。
+                TimelineView(.periodic(from: .now, by: 1)) { context in
+                    LCDScreenView(
+                        character: character,
+                        level: level(at: context.date).number,
+                        pet: PetState(isTiming: timer.isRunning, happySince: controller.happySince),
+                        levelFlashSince: nil,
+                        onPetTap: controller.petTapped
+                    )
+                }
                 .aspectRatio(1, contentMode: .fit)
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
             } footer: {
-                levelProgress
+                // 進度條和剩餘時間也每秒更新。
+                TimelineView(.periodic(from: .now, by: 1)) { context in
+                    levelProgress(level(at: context.date))
+                }
             }
 
             if let active = timer.active {
@@ -103,7 +111,7 @@ struct HomeView: View {
         }
     }
 
-    private var levelProgress: some View {
+    private func levelProgress(_ level: Level) -> some View {
         // 剩下的時間無條件進位到分鐘，避免最後一分鐘顯示「0 min」。
         let minutesLeft = (level.secondsToNext / 60).rounded(.up) * 60
         let timeLeft = DurationText.hoursAndMinutes(minutesLeft)
@@ -127,6 +135,7 @@ struct HomeView: View {
                 controller.endTapped(context: modelContext)
             } label: {
                 Text("End")
+                    .fontWeight(.bold)
                     .padding(.horizontal, 48)
             }
             .buttonStyle(.bordered)
@@ -160,11 +169,20 @@ private struct SegmentedProgressBar: View {
     let progress: Double
 
     var body: some View {
-        let filled = Int((min(max(progress, 0), 1) * Double(Self.segments)).rounded(.down))
+        // 每一格代表 10 / 20 小時；進行中的那一格依比例部分填滿，所以每分鐘都看得到變化。
+        let position = min(max(progress, 0), 1) * Double(Self.segments)
         HStack(spacing: 2) {
             ForEach(0..<Self.segments, id: \.self) { index in
+                let fill = min(max(position - Double(index), 0), 1)
                 Rectangle()
-                    .fill(index < filled ? Color.secondary : Color.clear)
+                    .fill(Color.clear)
+                    .overlay(alignment: .leading) {
+                        GeometryReader { geometry in
+                            Rectangle()
+                                .fill(Color.secondary)
+                                .frame(width: geometry.size.width * fill)
+                        }
+                    }
             }
         }
         .padding(4)
@@ -228,6 +246,7 @@ private struct RunningTime: View {
                     .foregroundStyle(.secondary)
             }
         }
+        .padding(.top, 32)
     }
 
     private func accessibilityText(_ seconds: Int, overtime: Int) -> String {

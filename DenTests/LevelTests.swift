@@ -71,6 +71,13 @@ struct DurationTextTests {
         #expect(DurationText.hoursAndMinutes(2 * 3600 + 15 * 60) == "2 hr 15 min")
     }
 
+    @Test func spokenShowsSecondsUnderAMinute() {
+        #expect(DurationText.spoken(15) == "15 sec")
+        #expect(DurationText.spoken(59.9) == "59 sec")
+        #expect(DurationText.spoken(60) == "1 min")
+        #expect(DurationText.spoken(2 * 3600 + 15 * 60) == "2 hr 15 min")
+    }
+
     @Test func clock() {
         #expect(DurationText.clock(0) == "0:00")
         #expect(DurationText.clock(25 * 60) == "25:00")

@@ -48,8 +48,8 @@ struct ActiveSession: Codable, Hashable, Sendable {
 
 /// 一段已結束、準備存檔的專注。
 struct FinishedSession: Hashable, Sendable {
-    /// 不到 1 分鐘的紀錄直接丟掉。
-    static let minimumDuration: TimeInterval = 60
+    /// 不到 15 秒的紀錄直接丟掉。
+    static let minimumDuration: TimeInterval = 15
 
     let startedAt: Date
     let endedAt: Date

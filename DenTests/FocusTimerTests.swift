@@ -127,9 +127,10 @@ struct FocusTimerTests {
 
     // MARK: 最短紀錄
 
-    @Test func underOneMinuteIsDropped() {
-        #expect(!FinishedSession(startedAt: start, endedAt: start.addingTimeInterval(59)).isWorthKeeping)
-        #expect(FinishedSession(startedAt: start, endedAt: start.addingTimeInterval(60)).isWorthKeeping)
+    @Test func underFifteenSecondsIsDropped() {
+        #expect(!FinishedSession(startedAt: start, endedAt: start.addingTimeInterval(14)).isWorthKeeping)
+        #expect(FinishedSession(startedAt: start, endedAt: start.addingTimeInterval(15)).isWorthKeeping)
+        #expect(FinishedSession(startedAt: start, endedAt: start.addingTimeInterval(16)).isWorthKeeping)
     }
 
     @Test func clearDiscards() {
