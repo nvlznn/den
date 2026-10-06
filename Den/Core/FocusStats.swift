@@ -89,6 +89,8 @@ struct FocusStats: Sendable {
     /// 一天中專注最多的小時（0–23）。
     let bestHour: Int?
     let bestDay: Date?
+    /// 長條圖裡專注最多的那一根（年檢視就是最好的月份）。
+    let bestBucket: Date?
     /// 依時長由多到少。
     let tags: [TagShare]
 
@@ -113,6 +115,7 @@ struct FocusStats: Sendable {
             .mapValues { $0.reduce(0) { $0 + $1.duration } }
         bestHour = byHour.max { $0.value < $1.value || ($0.value == $1.value && $0.key > $1.key) }?.key
         bestDay = days.filter { $0.duration > 0 }.max { $0.duration < $1.duration }?.start
+        bestBucket = buckets.filter { $0.duration > 0 }.max { $0.duration < $1.duration }?.start
 
         let total = totalDuration
         tags = Dictionary(grouping: inRange, by: \.tagName)

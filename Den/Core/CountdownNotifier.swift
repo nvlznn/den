@@ -4,7 +4,7 @@ import UserNotifications
 /// 倒數結束的本機通知。這是 app 唯一的一種通知。
 ///
 /// - 第一次開始倒數時才請求權限；被拒絕就安靜地不發，不再詢問也不引導去設定。
-/// - App 在前景時不顯示橫幅，由寵物自己反應。
+/// - 時間到了之後計時不會停，使用者按 End 才結束，所以前景也會顯示橫幅。
 @MainActor
 final class CountdownNotifier: NSObject, UNUserNotificationCenterDelegate {
     static let shared = CountdownNotifier()
@@ -59,7 +59,7 @@ final class CountdownNotifier: NSObject, UNUserNotificationCenterDelegate {
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification
     ) async -> UNNotificationPresentationOptions {
-        // App 在前景時寵物會自己開心，不需要橫幅。
-        []
+        // 倒數到了之後計時還會繼續，所以前景也要提醒。
+        [.banner, .sound]
     }
 }

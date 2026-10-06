@@ -17,26 +17,25 @@ struct ActiveSession: Codable, Hashable, Sendable {
         return startedAt.addingTimeInterval(planned)
     }
 
-    /// 已經過的時間。倒數不會超過預定時長。
+    /// 已經過的時間。倒數時間到了之後仍然繼續計，直到使用者按結束。
     func elapsed(at now: Date) -> TimeInterval {
-        let raw = max(0, now.timeIntervalSince(startedAt))
-        guard case .countdown(let planned) = mode else { return raw }
-        return min(raw, planned)
+        max(0, now.timeIntervalSince(startedAt))
     }
 
-    func isExpired(at now: Date) -> Bool {
-        guard let plannedEnd else { return false }
-        return now >= plannedEnd
-    }
-
-    /// 畫面上顯示的整數秒：正計時是經過時間，倒數是剩餘時間。
+    /// 畫面上顯示的整數秒：正計時是經過時間，倒數是剩餘時間（到 0 為止）。
     func displayedSeconds(at now: Date) -> Int {
         let elapsedSeconds = Int(elapsed(at: now))
         guard case .countdown(let planned) = mode else { return elapsedSeconds }
         return max(0, Int(planned.rounded()) - elapsedSeconds)
     }
 
-    /// 在 `now` 結束時會留下的紀錄。倒數過期後才結束，仍以預定結束時間計算。
+    /// 倒數時間到之後多專注了幾秒；還沒到或是正計時就是 0。
+    func overtimeSeconds(at now: Date) -> Int {
+        guard case .countdown(let planned) = mode else { return 0 }
+        return max(0, Int(elapsed(at: now)) - Int(planned.rounded()))
+    }
+
+    /// 在 `now` 結束時會留下的紀錄，包含倒數時間到之後多專注的時間。
     func finished(at now: Date) -> FinishedSession {
         FinishedSession(
             startedAt: startedAt,
@@ -105,14 +104,7 @@ final class FocusTimer {
         defaults.set(try? JSONEncoder().encode(session), forKey: Self.storageKey)
     }
 
-    /// 倒數時間已到就結束，回傳以「開始 + 預定時長」計算的紀錄；否則回傳 nil。
-    func completeIfExpired(at now: Date = .now) -> FinishedSession? {
-        guard let active, active.isExpired(at: now) else { return nil }
-        clear()
-        return active.finished(at: now)
-    }
-
-    /// 使用者按下結束。已經過的時間照樣算數。
+    /// 使用者按下結束。已經過的時間（含倒數之後的超時）照樣算數。
     func end(at now: Date = .now) -> FinishedSession? {
         guard let active else { return nil }
         clear()

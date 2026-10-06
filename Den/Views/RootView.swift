@@ -34,9 +34,6 @@ struct RootView: View {
                 controller.celebration = nil
             }
         }
-        .task(id: controller.timer.active) {
-            await controller.waitForCountdownEnd(context: modelContext)
-        }
         .task {
             if let first = TagMaintenance.seedIfNeeded(context: modelContext) {
                 selectedTagID = first.id.uuidString
@@ -44,7 +41,7 @@ struct RootView: View {
         }
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active {
-                controller.sceneBecameActive(context: modelContext)
+                controller.sceneBecameActive()
                 mergeDuplicateTags()
             }
         }

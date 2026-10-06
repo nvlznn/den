@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 選擇專注時長。最上面的 No limit 是正計時，其他是倒數。
+/// 選擇專注時長。最上面的 Stopwatch 是正計時，其他是倒數。
 struct DurationSheet: View {
     @Binding var minutes: Int
 
@@ -46,7 +46,7 @@ struct DurationSheet: View {
     }
 
     static func wheelLabel(_ minutes: Int) -> String {
-        minutes == TimerMode.unlimitedMinutes ? "No limit" : "\(minutes) minutes"
+        minutes == TimerMode.unlimitedMinutes ? "Stopwatch" : "\(minutes) minutes"
     }
 
     /// 設定列上顯示的文字。

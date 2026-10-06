@@ -8,6 +8,7 @@ struct RecordsView: View {
 
     @State private var week = RecordWeek(containing: .now)
     @State private var isAdding = false
+    @State private var editing: FocusSession?
 
     private var days: [DayGroup<FocusSession>] {
         RecordGrouping.days(sessions, in: week.interval, startedAt: \.startedAt, duration: \.duration)
@@ -30,11 +31,19 @@ struct RecordsView: View {
                 ForEach(days) { day in
                     Section {
                         ForEach(day.items) { session in
+                            // 用點擊手勢而不是 Button：Button 會把刪除時的點擊也接走，編輯頁就跳出來了。
                             RecordRow(session: session)
-                        }
-                        .onDelete { offsets in
-                            offsets.map { day.items[$0] }.forEach(modelContext.delete)
-                            try? modelContext.save()
+                                .onTapGesture {
+                                    editing = session
+                                }
+                                .accessibilityAddTraits(.isButton)
+                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                    Button(role: .destructive) {
+                                        delete(session)
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
+                                }
                         }
                     } header: {
                         DayHeader(day: day)
@@ -52,9 +61,21 @@ struct RecordsView: View {
                 }
             }
             .sheet(isPresented: $isAdding) {
-                AddRecordSheet()
+                RecordSheet()
+            }
+            .sheet(item: $editing) { session in
+                RecordSheet(editing: session)
             }
         }
+    }
+
+    /// 直接刪掉，不開任何畫面。
+    private func delete(_ session: FocusSession) {
+        if editing == session {
+            editing = nil
+        }
+        modelContext.delete(session)
+        try? modelContext.save()
     }
 
     private var weekNavigator: some View {
@@ -109,31 +130,35 @@ private struct RecordRow: View {
     let session: FocusSession
 
     var body: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 10) {
             // 手動補的用鉛筆，和計時的沙漏區分。
             Image(systemName: session.isManual ? "pencil" : "hourglass")
-                .font(.title3)
+                .font(.subheadline)
                 .foregroundStyle(.tint)
+                .frame(width: 18)
                 .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 0) {
                 Text(session.tag?.name ?? FocusSession.untaggedName)
-                Text(session.isManual ? "\(RecordFormat.time(session.startedAt)) · Added manually" : RecordFormat.time(session.startedAt))
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.primary)
+                Text(session.isManual ? "\(RecordFormat.time(session.startedAt)) · Added manually" : RecordFormat.time(session.startedAt))
+                    .font(.caption)
+                    .foregroundStyle(Color.secondary)
                     .monospacedDigit()
             }
 
             Spacer()
 
             Text(DurationText.clock(Int(session.duration)))
-                .font(.title3)
+                .font(.callout)
                 .monospacedDigit()
                 .foregroundStyle(.tint)
                 .accessibilityLabel(DurationText.hoursAndMinutes(session.duration))
         }
-        .padding(.vertical, 4)
+        .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
+        .accessibilityHint("Edit record")
     }
 }
 

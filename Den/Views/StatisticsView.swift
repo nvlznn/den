@@ -44,10 +44,16 @@ struct StatisticsView: View {
                     LabeledContent("Total Focus Duration", value: DurationText.hoursAndMinutes(stats.totalDuration))
                 }
 
-                if range.period != .day {
-                    Section("Focus Days") {
-                        FocusDaysView(stats: stats)
-                        StatsGrid(stats: stats)
+                if let title = StatsFormat.summaryTitle(range.period) {
+                    Section(title) {
+                        VStack(spacing: 16) {
+                            FocusDaysView(stats: stats)
+                            if range.period != .year {
+                                Divider()
+                            }
+                            StatsGrid(stats: stats)
+                        }
+                        .padding(.vertical, 6)
                     }
                 }
 
@@ -111,14 +117,14 @@ struct StatisticsView: View {
 
 // MARK: - Focus Days
 
-/// 週：七個圓圈；月：月曆；年：十二個月。有專注的打勾。
+/// 週：七個圓圈；月：完整月曆。有專注的日子實心，下面顯示時長，今天下面有一個小點。年不顯示。
 private struct FocusDaysView: View {
     let stats: FocusStats
 
     var body: some View {
         switch stats.range.period {
         case .week:
-            HStack(alignment: .top) {
+            HStack(alignment: .top, spacing: 0) {
                 ForEach(stats.days) { day in
                     VStack(spacing: 6) {
                         Text(StatsFormat.weekdayInitial(day.start))
@@ -126,39 +132,36 @@ private struct FocusDaysView: View {
                             .foregroundStyle(.secondary)
                         DayMark(isFocused: day.duration > 0)
                             .frame(width: 34, height: 34)
-                        Text(day.duration > 0 ? StatsFormat.shortDuration(day.duration) : " ")
-                            .font(.caption2)
-                            .monospacedDigit()
-                            .foregroundStyle(.secondary)
+                        DayCaption(day: day)
                     }
                     .frame(maxWidth: .infinity)
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(StatsFormat.dayAccessibility(day))
                 }
             }
-            .padding(.vertical, 4)
 
         case .month:
             MonthGrid(days: stats.days)
 
-        case .year:
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 12) {
-                ForEach(stats.buckets) { month in
-                    VStack(spacing: 6) {
-                        DayMark(isFocused: month.duration > 0)
-                            .frame(width: 30, height: 30)
-                        Text(StatsFormat.monthShort(month.start))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("\(StatsFormat.monthShort(month.start)), \(DurationText.hoursAndMinutes(month.duration))")
-                }
-            }
-            .padding(.vertical, 4)
-
-        case .day:
+        case .day, .year:
             EmptyView()
+        }
+    }
+}
+
+/// 圓圈下面的時長，今天再加一個小點。固定高度，沒專注的日子也佔位，格子才不會跳動。
+private struct DayCaption: View {
+    let day: FocusStats.Bucket
+
+    var body: some View {
+        VStack(spacing: 3) {
+            Text(day.duration > 0 ? StatsFormat.shortDuration(day.duration) : " ")
+                .font(.caption2)
+                .monospacedDigit()
+                .foregroundStyle(.secondary)
+            Circle()
+                .fill(Calendar.current.isDateInToday(day.start) ? Color.accentColor : Color.clear)
+                .frame(width: 5, height: 5)
         }
     }
 }
@@ -166,7 +169,7 @@ private struct FocusDaysView: View {
 private struct MonthGrid: View {
     let days: [FocusStats.Bucket]
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
 
     var body: some View {
         let calendar = Calendar.current
@@ -174,31 +177,35 @@ private struct MonthGrid: View {
             (calendar.component(.weekday, from: $0.start) - calendar.firstWeekday + 7) % 7
         } ?? 0
 
-        LazyVGrid(columns: columns, spacing: 8) {
+        LazyVGrid(columns: columns, spacing: 10) {
             ForEach(StatsFormat.weekdayInitials(), id: \.offset) { item in
                 Text(item.element)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
             ForEach(0..<leadingBlanks, id: \.self) { _ in
-                Color.clear.frame(height: 30)
+                Color.clear.frame(height: 1)
             }
             ForEach(days) { day in
                 let number = calendar.component(.day, from: day.start)
-                Text("\(number)")
-                    .font(.footnote.weight(day.duration > 0 ? .semibold : .regular))
-                    .monospacedDigit()
-                    .foregroundStyle(day.duration > 0 ? Color.white : Color.primary)
-                    .frame(width: 30, height: 30)
-                    .background {
-                        if day.duration > 0 {
-                            Circle().fill(Color.accentColor)
+                let isFocused = day.duration > 0
+                VStack(spacing: 4) {
+                    Text("\(number)")
+                        .font(.body.weight(isFocused ? .semibold : .regular))
+                        .monospacedDigit()
+                        .foregroundStyle(isFocused ? Color.white : Color.primary)
+                        .frame(width: 34, height: 34)
+                        .background {
+                            if isFocused {
+                                Circle().fill(Color.accentColor)
+                            }
                         }
-                    }
-                    .accessibilityLabel(StatsFormat.dayAccessibility(day))
+                    DayCaption(day: day)
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(StatsFormat.dayAccessibility(day))
             }
         }
-        .padding(.vertical, 4)
     }
 }
 
@@ -236,11 +243,15 @@ private struct StatsGrid: View {
                 StatCell(title: "Per Active Day", value: DurationText.hoursAndMinutes(stats.perActiveDay))
             }
             GridRow {
-                StatCell(title: "Best Day", value: stats.bestDay.map(RecordFormat.day) ?? "–")
-                    .gridCellColumns(2)
+                if stats.range.period == .year {
+                    StatCell(title: "Best Month", value: stats.bestBucket.map(StatsFormat.monthShort) ?? "–")
+                        .gridCellColumns(2)
+                } else {
+                    StatCell(title: "Best Day", value: stats.bestDay.map(RecordFormat.day) ?? "–")
+                        .gridCellColumns(2)
+                }
             }
         }
-        .padding(.vertical, 6)
     }
 }
 
@@ -435,6 +446,16 @@ enum StatsFormat {
         case .week: "Week"
         case .month: "Month"
         case .year: "Year"
+        }
+    }
+
+    /// 日檢視沒有這一區。
+    static func summaryTitle(_ period: StatsPeriod) -> String? {
+        switch period {
+        case .day: nil
+        case .week: "Weekly Focus Days"
+        case .month: "Monthly Focus Calendar"
+        case .year: "Yearly Summary"
         }
     }
 

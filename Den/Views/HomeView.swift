@@ -164,13 +164,13 @@ private struct SegmentedProgressBar: View {
         HStack(spacing: 2) {
             ForEach(0..<Self.segments, id: \.self) { index in
                 Rectangle()
-                    .fill(index < filled ? Color.primary : Color.clear)
+                    .fill(index < filled ? Color.secondary : Color.clear)
             }
         }
         .padding(4)
         .overlay {
             Rectangle()
-                .strokeBorder(Color.primary, lineWidth: 2)
+                .strokeBorder(Color.secondary, lineWidth: 2)
         }
     }
 }
@@ -213,12 +213,23 @@ private struct RunningTime: View {
         VStack(spacing: 4) {
             TimelineView(.periodic(from: session.startedAt, by: 1)) { context in
                 let seconds = session.displayedSeconds(at: context.date)
-                Text(DurationText.clock(seconds))
-                    .font(.system(size: fontSize, weight: .semibold))
-                    .monospacedDigit()
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.4)
-                    .accessibilityLabel(accessibilityText(seconds))
+                let overtime = session.overtimeSeconds(at: context.date)
+                VStack(spacing: 4) {
+                    Text(DurationText.clock(seconds))
+                        .font(.system(size: fontSize, weight: .semibold))
+                        .monospacedDigit()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.4)
+                    // 倒數到了之後還在專注：在 0:00 下面往上數。
+                    if overtime > 0 {
+                        Text("+ \(DurationText.clock(overtime))")
+                            .font(.title3)
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(accessibilityText(seconds, overtime: overtime))
             }
             if let tagName {
                 Label(tagName, systemImage: "tag.fill")
@@ -228,9 +239,11 @@ private struct RunningTime: View {
         }
     }
 
-    private func accessibilityText(_ seconds: Int) -> String {
+    private func accessibilityText(_ seconds: Int, overtime: Int) -> String {
         let text = DurationText.hoursAndMinutes(TimeInterval(seconds))
-        return session.plannedEnd == nil ? "Focused for \(text)" : "\(text) left"
+        if session.plannedEnd == nil { return "Focused for \(text)" }
+        if overtime > 0 { return "Time is up, \(DurationText.hoursAndMinutes(TimeInterval(overtime))) over" }
+        return "\(text) left"
     }
 }
 

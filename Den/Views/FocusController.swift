@@ -44,7 +44,7 @@ final class FocusController {
         guard let active = timer.active else { return }
         stops += 1
 
-        // 倒數提早結束，已經過的時間照樣存；正計時也直接存。
+        // 不管提早結束、剛好到、還是超時，已經過的時間都照樣存。
         CountdownNotifier.shared.cancel()
         LiveActivityController.end()
         if let finished = timer.end(at: .now) {
@@ -52,38 +52,12 @@ final class FocusController {
         }
     }
 
-    // MARK: 倒數到期
-
-    func waitForCountdownEnd(context: ModelContext) async {
-        guard let end = timer.active?.plannedEnd else { return }
-        let delay = end.timeIntervalSinceNow
-        if delay > 0 {
-            do {
-                try await Task.sleep(for: .seconds(delay + 0.05))
-            } catch {
-                return
-            }
-        }
-        finishExpiredCountdown(context: context)
-    }
-
-    /// App 啟動或回到前景。
-    func sceneBecameActive(context: ModelContext) {
+    /// App 啟動或回到前景。倒數時間到了不會自動結束，只有使用者按 End 才結束。
+    func sceneBecameActive() {
         timer.restore()
-        if timer.isRunning {
-            finishExpiredCountdown(context: context)
-        } else {
+        if !timer.isRunning {
             LiveActivityController.end()
         }
-    }
-
-    /// 倒數時間到：以「開始 + 預定時長」存檔，不跳確認視窗。
-    /// 使用者在時間到之後才打開 app 也一樣。
-    private func finishExpiredCountdown(context: ModelContext) {
-        guard let finished = timer.completeIfExpired() else { return }
-        CountdownNotifier.shared.cancel()
-        LiveActivityController.end()
-        record(finished, context: context)
     }
 
     // MARK: 寵物

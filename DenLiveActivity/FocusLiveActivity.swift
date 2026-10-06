@@ -74,7 +74,11 @@ private struct TimerText: View {
         Group {
             if let endsAt = attributes.endsAt {
                 if isStale || endsAt <= .now {
-                    Text("Time's up")
+                    // 時間到之後計時不會停：從 0 開始往上數超時的部分。
+                    HStack(spacing: 2) {
+                        Text("+")
+                        Text(timerInterval: endsAt...endsAt.addingTimeInterval(Self.stopwatchSpan), countsDown: false)
+                    }
                 } else {
                     Text(timerInterval: attributes.startedAt...endsAt, countsDown: true)
                 }

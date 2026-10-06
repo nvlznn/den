@@ -21,7 +21,7 @@ struct FocusTimerTests {
         #expect(active.elapsed(at: start.addingTimeInterval(90)) == 90)
         #expect(active.displayedSeconds(at: start.addingTimeInterval(5025)) == 5025)
         #expect(active.plannedEnd == nil)
-        #expect(!active.isExpired(at: start.addingTimeInterval(100_000)))
+        #expect(active.overtimeSeconds(at: start.addingTimeInterval(100_000)) == 0)
     }
 
     @Test func stopwatchSurvivesRelaunch() throws {
@@ -44,13 +44,6 @@ struct FocusTimerTests {
         #expect(finished.duration == 8100)
         #expect(timer.active == nil)
         #expect(FocusTimer(defaults: defaults).active == nil)
-    }
-
-    @Test func stopwatchNeverExpires() {
-        let timer = FocusTimer(defaults: defaults)
-        timer.start(.stopwatch, at: start)
-        #expect(timer.completeIfExpired(at: start.addingTimeInterval(1_000_000)) == nil)
-        #expect(timer.isRunning)
     }
 
     @Test func shortenOnlyGoesDown() {
@@ -84,33 +77,32 @@ struct FocusTimerTests {
         #expect(active.displayedSeconds(at: start.addingTimeInterval(600)) == 2100)
     }
 
-    @Test func countdownNotExpiredBeforeEnd() {
+    /// 時間到了不會自動結束：計時繼續，超時的部分往上數。
+    @Test func countdownKeepsRunningPastZero() throws {
         let timer = FocusTimer(defaults: defaults)
         timer.start(.countdown(planned: 1500), at: start)
-        #expect(timer.completeIfExpired(at: start.addingTimeInterval(1499)) == nil)
+        let active = try #require(timer.active)
+
+        #expect(active.overtimeSeconds(at: start.addingTimeInterval(1499)) == 0)
+        #expect(active.overtimeSeconds(at: start.addingTimeInterval(1500)) == 0)
+        #expect(active.overtimeSeconds(at: start.addingTimeInterval(1500 + 136)) == 136)
+        #expect(active.displayedSeconds(at: start.addingTimeInterval(1500 + 136)) == 0)
+        #expect(active.elapsed(at: start.addingTimeInterval(1500 + 136)) == 1636)
         #expect(timer.isRunning)
     }
 
-    @Test func countdownCompletesAtPlannedEnd() throws {
-        let timer = FocusTimer(defaults: defaults)
-        timer.start(.countdown(planned: 1500), at: start)
-
-        let finished = try #require(timer.completeIfExpired(at: start.addingTimeInterval(1500)))
-        #expect(finished.endedAt == start.addingTimeInterval(1500))
-        #expect(timer.active == nil)
-    }
-
-    /// 使用者在時間到之後才打開 app：照樣用「開始 + 預定時長」存檔，不用打開當下的時間。
-    @Test func countdownOpenedLateSavesPlannedEnd() throws {
+    /// 倒數時間到之後才回來，計時照樣還在，按 End 時總時間含超時。
+    @Test func countdownOpenedLateKeepsRunningAndCountsEverything() throws {
         FocusTimer(defaults: defaults).start(.countdown(planned: 1500), at: start)
 
-        let openedTwoDaysLater = start.addingTimeInterval(2 * 24 * 3600)
+        let openedLater = start.addingTimeInterval(3 * 3600)
         let relaunched = FocusTimer(defaults: defaults)
-        let finished = try #require(relaunched.completeIfExpired(at: openedTwoDaysLater))
+        let active = try #require(relaunched.active)
+        #expect(active.overtimeSeconds(at: openedLater) == 3 * 3600 - 1500)
 
+        let finished = try #require(relaunched.end(at: openedLater))
         #expect(finished.startedAt == start)
-        #expect(finished.endedAt == start.addingTimeInterval(1500))
-        #expect(finished.duration == 1500)
+        #expect(finished.duration == 3 * 3600)
         #expect(FocusTimer(defaults: defaults).active == nil)
     }
 
@@ -124,12 +116,13 @@ struct FocusTimerTests {
         #expect(finished.isWorthKeeping)
     }
 
-    @Test func countdownEndedAfterExpiryIsCapped() throws {
+    @Test func countdownEndedAfterExpiryCountsOvertime() throws {
         let timer = FocusTimer(defaults: defaults)
         timer.start(.countdown(planned: 1500), at: start)
 
         let finished = try #require(timer.end(at: start.addingTimeInterval(4000)))
-        #expect(finished.endedAt == start.addingTimeInterval(1500))
+        #expect(finished.endedAt == start.addingTimeInterval(4000))
+        #expect(finished.duration == 4000)
     }
 
     // MARK: 最短紀錄
@@ -154,7 +147,7 @@ struct FocusTimerTests {
         let relaunched = FocusTimer(defaults: defaults)
         #expect(relaunched.active?.tagID == tagID)
         #expect(relaunched.active?.characterID == "orb")
-        let finished = try #require(relaunched.completeIfExpired(at: start.addingTimeInterval(9999)))
+        let finished = try #require(relaunched.end(at: start.addingTimeInterval(9999)))
         #expect(finished.tagID == tagID)
         #expect(finished.characterID == "orb")
         #expect(finished.shortened(to: 60).characterID == "orb")

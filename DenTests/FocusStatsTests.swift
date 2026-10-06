@@ -88,6 +88,7 @@ struct FocusStatsTests {
         let yearStats = FocusStats(items: weekItems, range: year, now: date(10, 6, 20), calendar: calendar)
         #expect(yearStats.buckets.count == 12)
         #expect(yearStats.buckets[9].duration == yearStats.totalDuration)
+        #expect(yearStats.bestBucket == date(10, 1))
         #expect(yearStats.days.count == 365)
     }
 
