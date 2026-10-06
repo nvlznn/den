@@ -1,0 +1,556 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D0000000000000000000E001 /* DenLiveActivityExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D0000000000000000000A022 /* DenLiveActivityExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D0000000000000000000E011 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D0000000000000000000A001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D0000000000000000000B003;
+			remoteInfo = DenLiveActivityExtension;
+		};
+		D0000000000000000000E013 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D0000000000000000000A001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D0000000000000000000B001;
+			remoteInfo = Den;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D0000000000000000000C004 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				D0000000000000000000E001 /* DenLiveActivityExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		D0000000000000000000A020 /* Den.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Den.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0000000000000000000A021 /* DenTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DenTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0000000000000000000A022 /* DenLiveActivityExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DenLiveActivityExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		D0000000000000000000A030 /* Exceptions for "Den" folder in "DenLiveActivityExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				LiveActivity/FocusActivityAttributes.swift,
+				Pet/LCDPalette.swift,
+				Pet/PetSprites.swift,
+			);
+			target = D0000000000000000000B003 /* DenLiveActivityExtension */;
+		};
+		D0000000000000000000A031 /* Exceptions for "DenLiveActivity" folder in "DenLiveActivityExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = D0000000000000000000B003 /* DenLiveActivityExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		D0000000000000000000A010 /* Den */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				D0000000000000000000A030 /* Exceptions for "Den" folder in "DenLiveActivityExtension" target */,
+			);
+			path = Den;
+			sourceTree = "<group>";
+		};
+		D0000000000000000000A011 /* DenTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DenTests;
+			sourceTree = "<group>";
+		};
+		D0000000000000000000A012 /* DenLiveActivity */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				D0000000000000000000A031 /* Exceptions for "DenLiveActivity" folder in "DenLiveActivityExtension" target */,
+			);
+			path = DenLiveActivity;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D0000000000000000000C002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D0000000000000000000C012 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D0000000000000000000C022 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D0000000000000000000A002 = {
+			isa = PBXGroup;
+			children = (
+				D0000000000000000000A010 /* Den */,
+				D0000000000000000000A011 /* DenTests */,
+				D0000000000000000000A012 /* DenLiveActivity */,
+				D0000000000000000000A003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D0000000000000000000A003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D0000000000000000000A020 /* Den.app */,
+				D0000000000000000000A021 /* DenTests.xctest */,
+				D0000000000000000000A022 /* DenLiveActivityExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D0000000000000000000B001 /* Den */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D0000000000000000000F002 /* Build configuration list for PBXNativeTarget "Den" */;
+			buildPhases = (
+				D0000000000000000000C001 /* Sources */,
+				D0000000000000000000C002 /* Frameworks */,
+				D0000000000000000000C003 /* Resources */,
+				D0000000000000000000C004 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D0000000000000000000E010 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D0000000000000000000A010 /* Den */,
+			);
+			name = Den;
+			packageProductDependencies = (
+			);
+			productName = Den;
+			productReference = D0000000000000000000A020 /* Den.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D0000000000000000000B002 /* DenTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D0000000000000000000F003 /* Build configuration list for PBXNativeTarget "DenTests" */;
+			buildPhases = (
+				D0000000000000000000C011 /* Sources */,
+				D0000000000000000000C012 /* Frameworks */,
+				D0000000000000000000C013 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D0000000000000000000E012 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D0000000000000000000A011 /* DenTests */,
+			);
+			name = DenTests;
+			packageProductDependencies = (
+			);
+			productName = DenTests;
+			productReference = D0000000000000000000A021 /* DenTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D0000000000000000000B003 /* DenLiveActivityExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D0000000000000000000F004 /* Build configuration list for PBXNativeTarget "DenLiveActivityExtension" */;
+			buildPhases = (
+				D0000000000000000000C021 /* Sources */,
+				D0000000000000000000C022 /* Frameworks */,
+				D0000000000000000000C023 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				D0000000000000000000A012 /* DenLiveActivity */,
+			);
+			name = DenLiveActivityExtension;
+			packageProductDependencies = (
+			);
+			productName = DenLiveActivityExtension;
+			productReference = D0000000000000000000A022 /* DenLiveActivityExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D0000000000000000000A001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					D0000000000000000000B001 = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					D0000000000000000000B002 = {
+						CreatedOnToolsVersion = 27.0;
+						TestTargetID = D0000000000000000000B001;
+					};
+					D0000000000000000000B003 = {
+						CreatedOnToolsVersion = 27.0;
+					};
+				};
+			};
+			buildConfigurationList = D0000000000000000000F001 /* Build configuration list for PBXProject "Den" */;
+			developmentRegion = "zh-Hant";
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				"zh-Hant",
+				Base,
+			);
+			mainGroup = D0000000000000000000A002;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = D0000000000000000000A003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D0000000000000000000B001 /* Den */,
+				D0000000000000000000B002 /* DenTests */,
+				D0000000000000000000B003 /* DenLiveActivityExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D0000000000000000000C003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D0000000000000000000C013 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D0000000000000000000C023 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D0000000000000000000C001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D0000000000000000000C011 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D0000000000000000000C021 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D0000000000000000000E010 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D0000000000000000000B003 /* DenLiveActivityExtension */;
+			targetProxy = D0000000000000000000E011 /* PBXContainerItemProxy */;
+		};
+		D0000000000000000000E012 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D0000000000000000000B001 /* Den */;
+			targetProxy = D0000000000000000000E013 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		D0000000000000000000F101 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		D0000000000000000000F102 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 6.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D0000000000000000000F103 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6KB6SVY565;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Den;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.noky.den;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		D0000000000000000000F104 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6KB6SVY565;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Den;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.noky.den;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		D0000000000000000000F105 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.noky.denTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Den.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Den";
+			};
+			name = Debug;
+		};
+		D0000000000000000000F106 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.noky.denTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Den.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Den";
+			};
+			name = Release;
+		};
+		D0000000000000000000F107 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DenLiveActivity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Den;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.noky.den.LiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		D0000000000000000000F108 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DenLiveActivity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Den;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.noky.den.LiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D0000000000000000000F001 /* Build configuration list for PBXProject "Den" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D0000000000000000000F101 /* Debug */,
+				D0000000000000000000F102 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D0000000000000000000F002 /* Build configuration list for PBXNativeTarget "Den" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D0000000000000000000F103 /* Debug */,
+				D0000000000000000000F104 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D0000000000000000000F003 /* Build configuration list for PBXNativeTarget "DenTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D0000000000000000000F105 /* Debug */,
+				D0000000000000000000F106 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D0000000000000000000F004 /* Build configuration list for PBXNativeTarget "DenLiveActivityExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D0000000000000000000F107 /* Debug */,
+				D0000000000000000000F108 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D0000000000000000000A001 /* Project object */;
+}
