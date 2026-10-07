@@ -156,14 +156,19 @@
     };
     show(0);
 
-    heroCanvas.closest(".hero-lcd").addEventListener("click", () => {
-      happySince = performance.now();
+    const heroScreen = heroCanvas.closest(".hero-lcd");
+    const cheer = () => { happySince = performance.now(); };
+    heroScreen.addEventListener("click", cheer);
+    heroScreen.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        cheer();
+      }
     });
 
     everyFrame((now) => {
       if (!reduceMotion && now - switchedAt > 6000) {
         show(index + 1);
-        happySince = now; // 新的一隻出場時跳一下
       }
       const id = order[index];
       const frame = petFrame(sprites[id], now, happySince);

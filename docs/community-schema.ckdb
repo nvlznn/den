@@ -1,0 +1,10 @@
+// Reference fragment: merge this record type into the EXISTING exported schema.
+// Do not replace the container's full SwiftData schema with this fragment.
+DEFINE SCHEMA
+    RECORD TYPE FocusContribution (
+        "___recordID" REFERENCE QUERYABLE,
+        seconds DOUBLE,
+        GRANT WRITE TO "_creator",
+        GRANT CREATE TO "_icloud",
+        GRANT READ TO "_world"
+    );

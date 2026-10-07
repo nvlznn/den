@@ -4,6 +4,7 @@ import WidgetKit
 
 /// 把今天的專注摘要寫給 Widget，紀錄或角色一變就更新。掛在最外層，不管在哪個分頁都會執行。
 struct WidgetSync: ViewModifier {
+    @Query(sort: [SortDescriptor(\CharacterLibrary.createdAt), SortDescriptor(\CharacterLibrary.id)]) private var libraries: [CharacterLibrary]
     @Query private var sessions: [FocusSession]
     @AppStorage("characterID") private var characterID = PetSprites.defaultCharacterID
 
@@ -32,7 +33,7 @@ struct WidgetSync: ViewModifier {
             day: calendar.startOfDay(for: .now),
             todaySeconds: today.reduce(0) { $0 + $1.duration },
             todaySessions: today.count,
-            characterID: character.id,
+            characterID: libraries.first?.collection.displayID(for: character.id) ?? "egg",
             level: level.number,
             progressToNext: level.progressToNext,
             secondsToNext: level.secondsToNext

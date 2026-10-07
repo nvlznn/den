@@ -7,7 +7,7 @@
 只有一個檔案：`assets/config.js`
 
 - `appStoreUrl`：App 上架後貼上 App Store 網址，兩個「Download on the App Store」按鈕就會啟用。留空時顯示「Coming soon to the App Store」，按了沒反應。
-- `supportEmail`：Privacy & Support 頁上的聯絡信箱。留空時改顯示「請透過 App Store 頁面的支援連結聯絡」。
+- `supportEmail`：首頁與 Privacy & Support 頁上的聯絡信箱，已設為 `support@noky.dev`。留空時改顯示「請透過 App Store 頁面的支援連結聯絡」。修改信箱時也請同步更新兩個 HTML 檔案中的預設 `mailto:` 連結，讓停用 JavaScript 的使用者仍可聯絡。
 
 建議：上架後把按鈕換成 Apple 官方的 App Store 徽章（到 Apple 的 Marketing Resources 網站下載），App Store 審核和品牌規範都偏好官方徽章。
 

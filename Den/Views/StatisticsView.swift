@@ -6,7 +6,7 @@ import SwiftUI
 struct StatisticsView: View {
     @Query private var sessions: [FocusSession]
 
-    @State private var range = StatsRange(period: .week, containing: .now)
+    @State private var range = StatsRange(period: .day, containing: .now)
 
     private var stats: FocusStats {
         let items = sessions.map {
@@ -40,8 +40,8 @@ struct StatisticsView: View {
                 .listRowSeparator(.hidden)
 
                 Section("Overview") {
-                    LabeledContent("Total Focus Sessions", value: "\(stats.totalSessions)")
-                    LabeledContent("Total Focus Duration", value: DurationText.hoursAndMinutes(stats.totalDuration))
+                    LabeledContent("Sessions", value: "\(stats.totalSessions)")
+                    LabeledContent("Time", value: DurationText.hoursAndMinutes(stats.totalDuration))
                 }
 
                 if let title = StatsFormat.summaryTitle(range.period) {
@@ -57,13 +57,13 @@ struct StatisticsView: View {
                     }
                 }
 
-                Section("Focus Time Distribution") {
+                Section("Focus Time") {
                     DistributionChart(stats: stats)
                 }
 
-                Section("Focus Content Breakdown") {
+                Section("Tags") {
                     if stats.tags.isEmpty {
-                        Text("No focus sessions in this period.")
+                        Text("No sessions")
                             .foregroundStyle(.secondary)
                     } else {
                         BreakdownView(stats: stats)

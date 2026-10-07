@@ -6,25 +6,31 @@ struct RecordsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \FocusSession.startedAt, order: .reverse) private var sessions: [FocusSession]
 
-    @State private var week = RecordWeek(containing: .now)
+    @State private var range = StatsRange(period: .day, containing: .now)
     @State private var isAdding = false
     @State private var editing: FocusSession?
 
     private var days: [DayGroup<FocusSession>] {
-        RecordGrouping.days(sessions, in: week.interval, startedAt: \.startedAt, duration: \.duration)
+        RecordGrouping.days(sessions, in: range.interval, startedAt: \.startedAt, duration: \.duration)
     }
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    weekNavigator
+                    Picker("Period", selection: period) {
+                        Text("Day").tag(StatsPeriod.day)
+                        Text("Week").tag(StatsPeriod.week)
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    periodNavigator
                 }
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
 
                 if days.isEmpty {
-                    ContentUnavailableView("No Records This Week", systemImage: "book.closed")
+                    ContentUnavailableView(range.period == .day ? "No Records Today" : "No Records This Week", systemImage: "book.closed")
                         .listRowBackground(Color.clear)
                 }
 
@@ -78,32 +84,39 @@ struct RecordsView: View {
         try? modelContext.save()
     }
 
-    private var weekNavigator: some View {
+    private var period: Binding<StatsPeriod> {
+        Binding { range.period } set: { newPeriod in
+            let anchor = range.contains(.now) ? Date.now : range.interval.start
+            range = StatsRange(period: newPeriod, containing: anchor)
+        }
+    }
+
+    private var periodNavigator: some View {
         HStack {
             Button {
-                week = week.shifted(by: -1)
+                range = range.shifted(by: -1)
             } label: {
                 Image(systemName: "chevron.left")
                     .foregroundStyle(Color.primary)
             }
-            .accessibilityLabel("Previous Week")
+            .accessibilityLabel("Previous Period")
 
             Spacer()
 
-            Text(RecordFormat.weekRange(week))
+            Text(StatsFormat.rangeTitle(range))
                 .font(.title3.weight(.semibold))
                 .monospacedDigit()
 
             Spacer()
 
             Button {
-                week = week.shifted(by: 1)
+                range = range.shifted(by: 1)
             } label: {
                 Image(systemName: "chevron.right")
                     .foregroundStyle(Color.primary)
             }
-            .accessibilityLabel("Next Week")
-            .disabled(week.interval.end > .now)
+            .accessibilityLabel("Next Period")
+            .disabled(range.interval.end > .now)
         }
         .buttonStyle(.bordered)
         .buttonBorderShape(.circle)

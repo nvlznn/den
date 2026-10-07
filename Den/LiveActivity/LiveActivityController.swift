@@ -4,22 +4,24 @@ import Foundation
 /// 計時開始時啟動 Live Activity；暫停、繼續時更新；結束時關掉。
 @MainActor
 enum LiveActivityController {
-    static func start(for session: ActiveSession, tagName: String?) {
+    static func start(for session: ActiveSession, tagName: String?, displayCharacterID: String? = nil) {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
         end()
 
-        let attributes = FocusActivityAttributes(tagName: tagName, characterID: session.characterID)
+        let attributes = FocusActivityAttributes(tagName: tagName, characterID: displayCharacterID ?? "egg")
         _ = try? Activity.request(attributes: attributes, content: content(for: session), pushType: nil)
     }
 
     /// 暫停或繼續之後，把新的時間資料送給 Live Activity。
-    static func update(for session: ActiveSession) {
+    static func update(for session: ActiveSession, displayCharacterID: String? = nil) {
         let content = content(for: session)
         let ids = Set(Activity<FocusActivityAttributes>.activities.map(\.id))
         guard !ids.isEmpty else { return }
         Task {
             for activity in Activity<FocusActivityAttributes>.activities where ids.contains(activity.id) {
-                await activity.update(content)
+                var state = content.state
+                state.displayCharacterID = displayCharacterID ?? activity.content.state.displayCharacterID
+                await activity.update(ActivityContent(state: state, staleDate: content.staleDate))
             }
         }
     }
@@ -59,7 +61,8 @@ extension FocusActivityAttributes.ContentState {
             startedAt: session.effectiveStart,
             endsAt: session.plannedEnd,
             pausedAt: session.pausedAt,
-            pausedText: pausedText
+            pausedText: pausedText,
+            appearance: UserDefaults.standard.string(forKey: "liveActivityAppearance") ?? "glass"
         )
     }
 }

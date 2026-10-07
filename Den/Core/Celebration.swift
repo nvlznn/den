@@ -8,6 +8,7 @@ struct Celebration: Identifiable, Equatable, Sendable {
     let levelBefore: Int
     let levelAfter: Int
     let message: String
+    var didHatch: Bool = false
 
     var didLevelUp: Bool { levelAfter > levelBefore }
 
@@ -20,12 +21,13 @@ struct Celebration: Identifiable, Equatable, Sendable {
         "Yay! One more step forward!",
     ]
 
-    init(characterID: String, duration: TimeInterval, levelBefore: Int, levelAfter: Int, characterName: String) {
+    init(characterID: String, duration: TimeInterval, levelBefore: Int, levelAfter: Int, characterName: String, didHatch: Bool = false) {
         self.characterID = characterID
         self.duration = duration
         self.levelBefore = levelBefore
         self.levelAfter = levelAfter
-        message = levelAfter > levelBefore
+        self.didHatch = didHatch
+        message = didHatch ? "Hello, \(characterName)! Your egg hatched!" : levelAfter > levelBefore
             ? "Yay! \(characterName) evolved to Lv \(levelAfter)!"
             : Self.messages.randomElement() ?? Self.messages[0]
     }

@@ -235,7 +235,8 @@ private struct EvolveProgress: View {
         VStack(alignment: .leading, spacing: 4) {
             ProgressView(value: snapshot.progressToNext)
                 .tint(.secondary)
-            Text(compact ? "\(timeLeft) to evolve" : "Focus \(timeLeft) more to evolve")
+            let action = PetSprites.character(id: snapshot.characterID).isEgg ? "hatch" : "evolve"
+            Text(compact ? "\(timeLeft) to \(action)" : "Focus \(timeLeft) more to \(action)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)

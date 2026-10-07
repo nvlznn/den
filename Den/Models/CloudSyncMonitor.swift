@@ -43,7 +43,7 @@ final class CloudSyncMonitor {
         // 沒登入 iCloud 就不會有下載，直接當作 ready（資料只在這台裝置上）。
         Task { [weak self] in
             let status = try? await CKContainer(identifier: containerID).accountStatus()
-            if status != .available {
+            if status == .noAccount || status == .restricted {
                 self?.isReady = true
             }
         }

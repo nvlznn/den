@@ -13,6 +13,7 @@ final class FocusController {
     var happySince: Date?
     /// 專注結束後要顯示的慶祝畫面。
     var celebration: Celebration?
+    private var hatchedDuringSession = false
 
     // Haptic 觸發器
     private(set) var petTaps = 0
@@ -27,13 +28,14 @@ final class FocusController {
 
     // MARK: 開始與結束
 
-    func start(focusMinutes: Int, tag: FocusTag?, character: PetCharacter) {
+    func start(focusMinutes: Int, tag: FocusTag?, character: PetCharacter, displayCharacterID: String? = nil) {
+        hatchedDuringSession = false
         let mode = TimerMode(focusMinutes: focusMinutes)
         timer.start(mode, tagID: tag?.id, characterID: character.id)
         starts += 1
 
         guard let active = timer.active else { return }
-        LiveActivityController.start(for: active, tagName: tag?.name)
+        LiveActivityController.start(for: active, tagName: tag?.name, displayCharacterID: displayCharacterID)
         if case .countdown(let planned) = mode, let end = active.plannedEnd {
             Task {
                 await CountdownNotifier.shared.schedule(at: end, planned: planned)
@@ -65,7 +67,7 @@ final class FocusController {
     }
 
     func endTapped(context: ModelContext) {
-        guard let active = timer.active else { return }
+        guard timer.active != nil else { return }
         stops += 1
 
         // 不管提早結束、剛好到、還是超時，已經過的時間都照樣存。
@@ -91,6 +93,24 @@ final class FocusController {
         petTaps += 1
     }
 
+    /// Reveal as soon as an active egg reaches Lv 1 in the foreground.
+    func hatchActiveEgg(totalSeconds: TimeInterval, context: ModelContext) {
+        guard let active = timer.active, let id = active.characterID,
+              let library = CharacterLibrary.current(in: context) else { return }
+        let previous = library.collection
+        var collection = previous
+        guard collection.hatch(id, totalSeconds: totalSeconds) else { return }
+        library.collection = collection
+        do {
+            try context.save()
+            hatchedDuringSession = true
+            happySince = .now
+            LiveActivityController.update(for: active, displayCharacterID: id)
+        } catch {
+            library.collection = previous
+        }
+    }
+
     // MARK: 存檔
 
     /// 不到 1 分鐘的直接丟掉，不顯示任何畫面。存好之後顯示慶祝畫面。
@@ -109,22 +129,35 @@ final class FocusController {
             duration: \.duration
         ))
 
-        context.insert(FocusSession(
+        let record = FocusSession(
             startedAt: finished.startedAt,
             endedAt: finished.endedAt,
             // 標籤被刪掉了或找不到時，補第一個，每筆紀錄一定要有標籤。
             tag: tag(withID: finished.tagID, context: context) ?? TagMaintenance.fallbackTag(context: context),
             characterID: characterID
-        ))
+        )
+        context.insert(record)
+        FocusContribution.capture(record, context: context)
         try? context.save()
 
         let after = Level(totalSeconds: before.totalSeconds + finished.duration)
+        var didHatch = false
+        var displayID = "egg"
+        if let library = CharacterLibrary.current(in: context) {
+            var collection = library.collection
+            let hatchedNow = collection.hatch(characterID, totalSeconds: after.totalSeconds)
+            didHatch = hatchedNow || hatchedDuringSession
+            library.collection = collection
+            try? context.save()
+            displayID = collection.displayID(for: characterID)
+        }
         celebration = Celebration(
-            characterID: characterID,
+            characterID: displayID,
             duration: finished.duration,
             levelBefore: before.number,
             levelAfter: after.number,
-            characterName: PetSprites.character(id: characterID).name
+            characterName: PetSprites.character(id: displayID).name,
+            didHatch: didHatch
         )
         celebrations += 1
     }

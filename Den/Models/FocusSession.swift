@@ -16,6 +16,8 @@ final class FocusSession {
     var characterID: String?
     /// 在紀錄頁手動補的。會顯示在紀錄裡，但不算進等級。
     var isManual: Bool = false
+    /// Links to the original, immutable measured duration for community totals.
+    var contributionKey: String?
 
     var duration: TimeInterval { endedAt.timeIntervalSince(startedAt) }
 

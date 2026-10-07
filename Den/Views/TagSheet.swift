@@ -29,6 +29,7 @@ struct TagSheet: View {
                         ForEach(tags) { tag in
                             row(for: tag)
                         }
+                        .onMove(perform: move)
                     }
                 }
 
@@ -41,7 +42,7 @@ struct TagSheet: View {
                     }
                 }
             }
-            .navigationTitle("Select Tag")
+            .navigationTitle("Tags")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -113,6 +114,13 @@ struct TagSheet: View {
 
     private var trimmedDraft: String {
         nameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func move(from source: IndexSet, to destination: Int) {
+        var reordered = tags
+        reordered.move(fromOffsets: source, toOffset: destination)
+        for (index, tag) in reordered.enumerated() { tag.order = index }
+        try? modelContext.save()
     }
 
     private func add() {

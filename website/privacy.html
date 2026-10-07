@@ -29,19 +29,22 @@
     <h1>Privacy</h1>
     <p class="updated">Last updated: October 2026</p>
 
-    <p>Den does not collect, store, or share any personal data. The app has no accounts, no analytics, no advertising, and no third-party code.</p>
+    <p>Den has no advertising or third-party analytics. It uses Apple iCloud for private sync and a public community focus total, and Apple StoreKit for optional character egg purchases.</p>
 
     <h2>Your records</h2>
-    <p>Your focus sessions, tags, and character levels are stored on your device. If you are signed in to iCloud, they are also stored in your own private iCloud database so they can sync between your devices and be restored if you reinstall the app. This data can only be accessed through your Apple ID. The developer cannot see it.</p>
+    <p>Your focus sessions, tags, egg choices, and character levels are stored on your device. If you are signed in to iCloud, they are also stored in your own private iCloud database so they can sync between your devices and be restored if you reinstall the app. This data can only be accessed through your Apple ID. The developer cannot see it.</p>
+
+    <h2>Community focus total</h2>
+    <p>When you are signed in to iCloud, Den contributes each real timed session’s original duration and an opaque record identifier to a public CloudKit database. These contributions can be read by the developer and other app users. CloudKit also maintains standard metadata, including a pseudonymous creator identifier and upload time. Your tags, characters, and focus start times are not copied to the public database. Manual entries are excluded. Editing or deleting a private record does not remove time already contributed. Offline contributions are retried later; if you are not signed in to iCloud, they wait until you sign in.</p>
+
+    <h2>Purchases</h2>
+    <p>Apple processes optional character egg purchases. Den verifies repeatable New Egg purchases and saves the delivered characters and purchase receipts in its private iCloud data. Den does not receive your payment card details.</p>
 
     <h2>Notifications</h2>
-    <p>Den sends one kind of notification: a local notification when a countdown you started reaches zero. It is created on your device. Nothing is sent to a server.</p>
+    <p>Den sends one kind of notification: a local notification when a countdown you started reaches zero. Notification scheduling takes place on your device.</p>
 
     <h2>Live Activities</h2>
     <p>While you focus, Den can show your timer on the Lock Screen and in the Dynamic Island. This is handled entirely on your device.</p>
-
-    <h2>Children</h2>
-    <p>Den does not collect data from anyone, including children.</p>
 
     <h2>Changes</h2>
     <p>If this policy changes, the updated version will be posted on this page with a new date.</p>
@@ -49,8 +52,8 @@
     <h2 id="support">Support</h2>
     <p>Questions, ideas, or something not working the way you expect? We'd love to hear from you.</p>
     <div class="contact">
-      <p data-support-block hidden>Email: <span data-support-email></span></p>
-      <p data-support-fallback>You can reach us through the support link on Den's App Store page.</p>
+      <p data-support-block>Email: <span data-support-email><a class="text-link" href="mailto:support@noky.dev">support@noky.dev</a></span></p>
+      <p data-support-fallback hidden>You can reach us through the support link on Den's App Store page.</p>
     </div>
 
     <h2>Common questions</h2>

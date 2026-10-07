@@ -9,28 +9,71 @@ struct RootView: View {
     @Environment(FocusController.self) private var controller
     @Environment(CloudSyncMonitor.self) private var cloudSync
 
+    @Environment(EggStore.self) private var store
+    @Environment(CommunityFocusStore.self) private var community
+    @Query private var sessions: [FocusSession]
+    @Query private var purchases: [EggPurchase]
+    @Query(sort: [SortDescriptor(\CharacterLibrary.createdAt), SortDescriptor(\CharacterLibrary.id)]) private var libraries: [CharacterLibrary]
+    @AppStorage("characterID") private var characterID = PetSprites.defaultCharacterID
+    @State private var libraryError: String?
+    @State private var selectedTab = 0
+
     @AppStorage("selectedTagID") private var selectedTagID = ""
 
     var body: some View {
         @Bindable var controller = controller
 
         Group {
-            if controller.timer.isRunning {
+            if let library = libraries.first, library.collection.needsFirstEgg {
+                FirstEggView(library: library, selectedCharacterID: $characterID)
+            } else if controller.timer.isRunning {
                 // 專注中只留 LCD、進度條、數字、標籤和 End，不顯示 tab bar。
                 HomeView()
             } else {
-                TabView {
+                TabView(selection: $selectedTab) {
                     HomeView()
-                        .tabItem { Label("Focus", systemImage: "hourglass") }
+                        .tabItem { Label("Focus", systemImage: "hourglass") }.tag(0)
                     RecordsView()
-                        .tabItem { Label("Records", systemImage: "book.closed") }
+                        .tabItem { Label("Records", systemImage: "book.closed") }.tag(1)
                     StatisticsView()
-                        .tabItem { Label("Statistics", systemImage: "chart.pie") }
+                        .tabItem { Label("Statistics", systemImage: "chart.pie") }.tag(2)
+                    SettingsView()
+                        .tabItem { Label("Settings", systemImage: "gearshape") }.tag(3)
                 }
             }
         }
         .animation(.default, value: controller.timer.isRunning)
         .syncsWidgets()
+        .task { await store.load(context: modelContext) }
+        .task(id: libraryInput) {
+            guard cloudSync.isReady || !libraries.isEmpty else { return }
+            do {
+                let library = try CharacterLibrary.prepare(in: modelContext)
+                var collection = library.collection
+                collection.paidEggs.formUnion(store.legacyEggs)
+                library.collection = collection
+                try library.reconcile(purchases: purchases, context: modelContext)
+                try library.reconcile(sessions: sessions, context: modelContext)
+                if !collection.ownedIDs.contains(characterID), let first = collection.ownedIDs.first {
+                    characterID = first
+                }
+                for session in sessions { FocusContribution.capture(session, context: modelContext) }
+                try modelContext.save()
+            } catch { libraryError = "Your progress could not be saved. Please reopen Den and try again." }
+        }
+        .task(id: purchaseInput) {
+            guard cloudSync.isReady || !libraries.isEmpty else { return }
+            await store.retryUnfinished(context: modelContext)
+        }
+        .task(id: contributionInput) {
+            guard cloudSync.isReady, scenePhase == .active, selectedTab != 3 || controller.timer.isRunning else { return }
+            // Debounce edits/sync bursts; no request every timer tick.
+            do { try await Task.sleep(for: .seconds(2)) } catch { return }
+            await community.refresh(context: modelContext)
+        }
+        .alert("Unable to Save", isPresented: Binding(get: { libraryError != nil }, set: { if !$0 { libraryError = nil } })) {
+            Button("OK") { libraryError = nil }
+        } message: { Text(libraryError ?? "") }
         .fullScreenCover(item: $controller.celebration) { celebration in
             CelebrationView(celebration: celebration) {
                 controller.celebration = nil
@@ -59,6 +102,21 @@ struct RootView: View {
         .sensoryFeedback(.start, trigger: controller.starts)
         .sensoryFeedback(.stop, trigger: controller.stops)
         .sensoryFeedback(.impact(weight: .medium), trigger: controller.pauseToggles)
+    }
+
+    private var libraryInput: [String] {
+        [String(cloudSync.isReady), store.legacyEggs.map(\.id).sorted().description] + purchaseInput
+            + libraries.map { $0.payload.base64EncodedString() }
+            + sessions.map { "\($0.characterID ?? ""):\($0.duration):\($0.isManual)" }
+    }
+
+    private var purchaseInput: [String] {
+        [String(cloudSync.isReady), String(describing: scenePhase)] + libraries.map { $0.id.uuidString }
+            + purchases.map { "\($0.id):\($0.transactionID):\($0.state):\($0.revoked)" }.sorted()
+    }
+
+    private var contributionInput: [String] {
+        [String(cloudSync.isReady), String(describing: scenePhase), String(selectedTab), String(controller.timer.isRunning)] + sessions.compactMap(\.contributionKey).sorted()
     }
 
     /// 同名標籤合併後，如果目前選的是被合併掉的那個，改選留下來的。

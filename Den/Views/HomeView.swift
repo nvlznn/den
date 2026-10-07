@@ -5,6 +5,7 @@ import SwiftUI
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(FocusController.self) private var controller
+    @Query(sort: [SortDescriptor(\CharacterLibrary.createdAt), SortDescriptor(\CharacterLibrary.id)]) private var libraries: [CharacterLibrary]
     @Query private var sessions: [FocusSession]
     @Query(sort: \FocusTag.order) private var tags: [FocusTag]
 
@@ -21,6 +22,11 @@ struct HomeView: View {
     /// 計時中顯示開始時的那隻；平常顯示目前選的那隻。
     private var character: PetCharacter {
         PetSprites.character(id: timer.active?.characterID ?? characterID)
+    }
+
+    private var displayedCharacter: PetCharacter {
+        let id = libraries.first?.collection.displayID(for: character.id) ?? "egg"
+        return PetSprites.character(id: id)
     }
 
     /// 每個角色的等級各自計算。專注中也把正在進行的這一段算進去，所以會每秒跟著變。
@@ -54,12 +60,16 @@ struct HomeView: View {
                 // 不要包住整個 Section，不然 List 會把進度條和文字整個框進灰色的卡片。
                 TimelineView(.periodic(from: .now, by: 1)) { context in
                     LCDScreenView(
-                        character: character,
+                        character: displayedCharacter,
                         level: level(at: context.date).number,
                         pet: PetState(isTiming: timer.isRunning, happySince: controller.happySince),
                         levelFlashSince: nil,
                         onPetTap: controller.petTapped
                     )
+                    .onChange(of: level(at: context.date).number, initial: true) { _, number in
+                        guard number >= 1 else { return }
+                        controller.hatchActiveEgg(totalSeconds: level(at: context.date).totalSeconds, context: modelContext)
+                    }
                 }
                 .aspectRatio(1, contentMode: .fit)
                 .listRowInsets(EdgeInsets())
@@ -79,18 +89,18 @@ struct HomeView: View {
                 }
             } else {
                 Section("Today") {
-                    LabeledContent("Total Focus Sessions", value: "\(today.count)")
-                    LabeledContent("Total Focus Duration", value: DurationText.hoursAndMinutes(today.duration))
+                    LabeledContent("Sessions", value: "\(today.count)")
+                    LabeledContent("Time", value: DurationText.hoursAndMinutes(today.duration))
                 }
 
-                Section("Focus Settings") {
-                    SettingRow(title: "Character", value: character.name) {
+                Section("Focus") {
+                    SettingRow(title: "Character", value: displayedCharacter.name) {
                         isChoosingCharacter = true
                     }
-                    SettingRow(title: "Focus Tag", value: selectedTag?.name ?? "–") {
+                    SettingRow(title: "Tag", value: selectedTag?.name ?? "–") {
                         isChoosingTag = true
                     }
-                    SettingRow(title: "Focus Duration", value: DurationSheet.rowLabel(focusMinutes)) {
+                    SettingRow(title: "Duration", value: DurationSheet.rowLabel(focusMinutes)) {
                         isChoosingDuration = true
                     }
                 }
@@ -120,7 +130,7 @@ struct HomeView: View {
         return VStack(alignment: .leading, spacing: 8) {
             SegmentedProgressBar(progress: level.progressToNext)
                 .frame(height: 18)
-            Text("Focus \(timeLeft) more to evolve")
+            Text("\(timeLeft) to \(displayedCharacter.isEgg ? "hatch" : "Lv \(level.number + 1)")")
         }
         .padding(.top, 12)
         .accessibilityElement(children: .ignore)
@@ -162,12 +172,13 @@ struct HomeView: View {
             }
         } else {
             Button {
-                controller.start(focusMinutes: focusMinutes, tag: selectedTag, character: character)
+                controller.start(focusMinutes: focusMinutes, tag: selectedTag, character: character, displayCharacterID: displayedCharacter.id)
             } label: {
-                Text("Start Focusing")
+                Text("Start")
                     .fontWeight(.bold)
                     .padding(.horizontal, 48)
             }
+            .disabled(libraries.first == nil || libraries.first?.collection.needsFirstEgg == true)
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.capsule)
             .controlSize(.extraLarge)

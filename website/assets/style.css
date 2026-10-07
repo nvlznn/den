@@ -452,7 +452,7 @@ section { scroll-margin-top: 72px; }
   font-size: 15px;
 }
 
-.doc .contact {
+.contact {
   margin-top: 16px;
   padding: 20px;
   background: var(--surface);
@@ -460,7 +460,14 @@ section { scroll-margin-top: 72px; }
   border-radius: 16px;
 }
 
+.contact h2 { margin: 0 0 12px; }
+.contact p { color: var(--muted); }
+.contact .text-link { overflow-wrap: anywhere; }
+.contact p:last-child { margin-bottom: 0; }
+
 .doc .contact p { margin: 0; }
+
+#support { scroll-margin-top: 80px; }
 
 @media (prefers-reduced-motion: reduce) {
   .store-button { transition: none; }

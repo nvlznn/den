@@ -4,8 +4,8 @@
 //   例如 "https://apps.apple.com/app/id1234567890"
 //   留空時，按鈕顯示「Coming soon to the App Store」而且不能點。
 //
-// supportEmail：Privacy & Support 頁面上給使用者聯絡的信箱。留空時不顯示信箱。
+// supportEmail：首頁與 Privacy & Support 頁面上給使用者聯絡的信箱。
 window.DEN_CONFIG = {
   appStoreUrl: "",
-  supportEmail: "",
+  supportEmail: "support@noky.dev",
 };

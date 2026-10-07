@@ -13,6 +13,8 @@ struct FocusActivityAttributes: ActivityAttributes {
         var pausedAt: Date?
         /// 暫停時要顯示的固定文字（例如 `12:34`、`+0:45`）。暫停時不靠任何計時元件，直接顯示它，數字才一定不動。
         var pausedText: String?
+        var appearance: String? = nil
+        var displayCharacterID: String? = nil
     }
 
     /// 開始時選的標籤。

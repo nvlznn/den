@@ -22,7 +22,7 @@ struct WidgetSnapshot: Codable, Equatable, Sendable {
             day: calendar.startOfDay(for: date),
             todaySeconds: 0,
             todaySessions: 0,
-            characterID: PetSprites.defaultCharacterID,
+            characterID: "egg",
             level: 0,
             progressToNext: 0,
             secondsToNext: 10 * 3600

@@ -7,6 +7,8 @@ struct DenApp: App {
     static let cloudContainerID = "iCloud.dev.noky.den"
 
     @State private var controller = FocusController(timer: FocusTimer())
+    @State private var eggStore = EggStore()
+    @State private var community = CommunityFocusStore()
     @State private var cloudSync: CloudSyncMonitor
 
     private let modelContainer: ModelContainer
@@ -23,6 +25,8 @@ struct DenApp: App {
             RootView()
                 .environment(controller)
                 .environment(cloudSync)
+                .environment(eggStore)
+                .environment(community)
         }
         .modelContainer(modelContainer)
     }
@@ -31,7 +35,7 @@ struct DenApp: App {
     /// 沒登入 iCloud 時照樣存在本機，登入後自動上傳。
     /// 回傳的 `usesCloud` 表示這次是不是真的接上了 iCloud。
     private static func makeModelContainer() -> (ModelContainer, usesCloud: Bool) {
-        let schema = Schema([FocusSession.self, FocusTag.self])
+        let schema = Schema([FocusSession.self, FocusTag.self, CharacterLibrary.self, FocusContribution.self, EggPurchase.self])
         let cloud = ModelConfiguration(schema: schema, cloudKitDatabase: .private(cloudContainerID))
         if let container = try? ModelContainer(for: schema, configurations: cloud) {
             return (container, true)

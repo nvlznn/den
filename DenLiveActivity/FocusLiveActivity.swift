@@ -10,7 +10,7 @@ struct FocusLiveActivity: Widget {
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    PetIcon(characterID: context.attributes.characterID, color: LCDPalette.background)
+                    PetIcon(characterID: context.state.displayCharacterID ?? context.attributes.characterID, color: LCDPalette.background)
                         .frame(width: 36, height: 36)
                         .padding(.leading, 4)
                 }
@@ -26,13 +26,13 @@ struct FocusLiveActivity: Widget {
                         .foregroundStyle(.secondary)
                 }
             } compactLeading: {
-                PetIcon(characterID: context.attributes.characterID, color: LCDPalette.background)
+                PetIcon(characterID: context.state.displayCharacterID ?? context.attributes.characterID, color: LCDPalette.background)
                     .frame(width: 20, height: 20)
             } compactTrailing: {
                 TimerText(state: context.state, isStale: context.isStale)
                     .frame(maxWidth: 64, alignment: .trailing)
             } minimal: {
-                PetIcon(characterID: context.attributes.characterID, color: LCDPalette.background)
+                PetIcon(characterID: context.state.displayCharacterID ?? context.attributes.characterID, color: LCDPalette.background)
                     .frame(width: 20, height: 20)
             }
         }
@@ -40,13 +40,29 @@ struct FocusLiveActivity: Widget {
 }
 
 private struct LockScreenView: View {
+    // Background opacity: 0 = fully transparent, 1 = opaque.
+    // Kept here for quick on-device tuning without changing content opacity.
+    private static let glassBackgroundOpacity = 0.04
+
     let attributes: FocusActivityAttributes
     let state: FocusActivityAttributes.ContentState
     let isStale: Bool
 
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
     var body: some View {
+        if #available(iOS 26.0, *), state.appearance == "glass", !reduceTransparency {
+            content
+                .activityBackgroundTint(Color.black.opacity(Self.glassBackgroundOpacity))
+        } else {
+            content
+                .activityBackgroundTint(Color(.secondarySystemBackground))
+        }
+    }
+
+    private var content: some View {
         HStack(spacing: 14) {
-            PetIcon(characterID: attributes.characterID, color: LCDPalette.pixelOn)
+            PetIcon(characterID: state.displayCharacterID ?? attributes.characterID, color: LCDPalette.pixelOn)
                 .padding(8)
                 .frame(width: 52, height: 52)
                 .background(LCDPalette.background, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
