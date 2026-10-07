@@ -2,6 +2,9 @@
 
 所有給你檢查的圖片集中在這裡。
 
+- `app-store/overview.png`：七張 App Store 宣傳圖總覽。
+- `app-store/screenshots/`：1206 × 2622 px 正式尺寸 PNG，Widgets 排最後。
+
 - `characters.png`：所有角色與蛋的素材表。
 - `onboarding/overview.png`：選蛋與三頁 guide 的總覽。
 - `onboarding/`：首次開啟流程的個別畫面。
