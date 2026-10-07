@@ -7,6 +7,7 @@ struct RootView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
     @Environment(FocusController.self) private var controller
+    @Environment(CloudSyncMonitor.self) private var cloudSync
 
     @AppStorage("selectedTagID") private var selectedTagID = ""
 
@@ -29,15 +30,19 @@ struct RootView: View {
             }
         }
         .animation(.default, value: controller.timer.isRunning)
+        .syncsWidgets()
         .fullScreenCover(item: $controller.celebration) { celebration in
             CelebrationView(celebration: celebration) {
                 controller.celebration = nil
             }
         }
-        .task {
-            if let first = TagMaintenance.seedIfNeeded(context: modelContext) {
+        // 等 iCloud 第一次下載完（或沒有 iCloud）才判斷要不要建預設標籤，重新安裝時才不會多一組。
+        .onChange(of: cloudSync.isReady, initial: true) { _, isReady in
+            guard isReady else { return }
+            if let first = TagMaintenance.seedIfEmpty(context: modelContext) {
                 selectedTagID = first.id.uuidString
             }
+            mergeDuplicateTags()
         }
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active {

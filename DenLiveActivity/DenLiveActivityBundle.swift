@@ -5,5 +5,6 @@ import WidgetKit
 struct DenLiveActivityBundle: WidgetBundle {
     var body: some Widget {
         FocusLiveActivity()
+        TodayWidget()
     }
 }

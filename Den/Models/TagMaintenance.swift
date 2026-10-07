@@ -4,19 +4,11 @@ import SwiftData
 /// 預設標籤的建立與 iCloud 同步後的整理。
 @MainActor
 enum TagMaintenance {
-    /// 記在 iCloud Key-Value 裡，刪掉 app 重裝也記得已經建過預設標籤。
-    private static let seededKey = "didSeedTags"
-
-    /// 第一次使用時放幾個預設標籤。回傳新建的第一個標籤，給畫面當作預設選擇。
-    static func seedIfNeeded(context: ModelContext) -> FocusTag? {
-        let cloud = NSUbiquitousKeyValueStore.default
-        cloud.synchronize()
-        let local = UserDefaults.standard
-        guard !cloud.bool(forKey: seededKey), !local.bool(forKey: seededKey) else { return nil }
-
-        cloud.set(true, forKey: seededKey)
-        local.set(true, forKey: seededKey)
-
+    /// 帳號第一次使用時放幾個預設標籤。回傳新建的第一個標籤，給畫面當作預設選擇。
+    ///
+    /// 只能在 iCloud 第一次下載完成之後呼叫（見 `CloudSyncMonitor`）。用過 app 的帳號至少一定有一個標籤，
+    /// 所以下載完還是 0 個標籤，才代表這個帳號第一次使用；重新安裝不會再建一組。
+    static func seedIfEmpty(context: ModelContext) -> FocusTag? {
         let existing = (try? context.fetchCount(FetchDescriptor<FocusTag>())) ?? 0
         guard existing == 0 else { return nil }
 
