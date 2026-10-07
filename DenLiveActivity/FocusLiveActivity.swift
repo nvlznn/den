@@ -83,10 +83,8 @@ private struct TimerText: View {
             } else if let endsAt = state.endsAt {
                 if isStale || endsAt <= .now {
                     // 時間到之後計時不會停：從 0 開始往上數超時的部分。
-                    HStack(spacing: 2) {
-                        Text("+")
-                        Text(timerInterval: endsAt...endsAt.addingTimeInterval(Self.stopwatchSpan), countsDown: false)
-                    }
+                    // 「+」和計時器串成同一段文字，字級、基準線、縮放才會一致，不會一個大一個小、上下錯開。
+                    Text("+") + Text(timerInterval: endsAt...endsAt.addingTimeInterval(Self.stopwatchSpan), countsDown: false)
                 } else {
                     Text(timerInterval: state.startedAt...endsAt, countsDown: true)
                 }
@@ -99,6 +97,8 @@ private struct TimerText: View {
         }
         .monospacedDigit()
         .multilineTextAlignment(.trailing)
+        // 系統的計時文字會依數值改變寬度；固定靠右，數字變長變短時右邊界不會移動。
+        .frame(maxWidth: .infinity, alignment: .trailing)
     }
 }
 
