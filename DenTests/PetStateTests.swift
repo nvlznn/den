@@ -43,12 +43,14 @@ struct PetStateTests {
 
     @Test(arguments: PetSprites.characters)
     func spritesAreSixteenSquare(character: PetCharacter) {
-        let sprites = [
-            character.idle, character.blink, character.sleep,
-            character.study1, character.study2, character.happy,
-        ]
-        for sprite in sprites {
+        for sprite in [character.idle, character.blink, character.sleep, character.happy] {
             #expect(sprite.count == PetSprites.size)
+            #expect(sprite.allSatisfy { $0.count == PetSprites.size })
+            #expect(sprite.joined().allSatisfy { $0 == "#" || $0 == "." })
+        }
+        // 看書時書蓋在角色下方，所以比 16 列高；寬度一樣是 16。
+        for sprite in [character.study1, character.study2] {
+            #expect(sprite.count >= PetSprites.size)
             #expect(sprite.allSatisfy { $0.count == PetSprites.size })
             #expect(sprite.joined().allSatisfy { $0 == "#" || $0 == "." })
         }
