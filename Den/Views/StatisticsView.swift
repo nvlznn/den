@@ -169,41 +169,49 @@ private struct DayCaption: View {
 private struct MonthGrid: View {
     let days: [FocusStats.Bucket]
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
-
     var body: some View {
         let calendar = Calendar.current
         let leadingBlanks = days.first.map {
             (calendar.component(.weekday, from: $0.start) - calendar.firstWeekday + 7) % 7
         } ?? 0
 
-        LazyVGrid(columns: columns, spacing: 10) {
-            ForEach(StatsFormat.weekdayInitials(), id: \.offset) { item in
-                Text(item.element)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-            ForEach(0..<leadingBlanks, id: \.self) { _ in
-                Color.clear.frame(height: 1)
-            }
-            ForEach(days) { day in
-                let number = calendar.component(.day, from: day.start)
-                let isFocused = day.duration > 0
-                VStack(spacing: 4) {
-                    Text("\(number)")
-                        .font(.body.weight(isFocused ? .semibold : .regular))
-                        .monospacedDigit()
-                        .foregroundStyle(isFocused ? Color.white : Color.primary)
-                        .frame(width: 34, height: 34)
-                        .background {
-                            if isFocused {
-                                Circle().fill(Color.accentColor)
-                            }
-                        }
-                    DayCaption(day: day)
+        // The month has at most six rows. Eager rows keep its height stable inside List.
+        VStack(spacing: 10) {
+            HStack(spacing: 0) {
+                ForEach(StatsFormat.weekdayInitials(), id: \.offset) { item in
+                    Text(item.element)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity)
                 }
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(StatsFormat.dayAccessibility(day))
+            }
+            ForEach(0..<((leadingBlanks + days.count + 6) / 7), id: \.self) { row in
+                HStack(alignment: .top, spacing: 0) {
+                    ForEach(0..<7, id: \.self) { column in
+                        let index = row * 7 + column - leadingBlanks
+                        if days.indices.contains(index) {
+                            let day = days[index]
+                            let number = calendar.component(.day, from: day.start)
+                            let isFocused = day.duration > 0
+                            VStack(spacing: 4) {
+                                Text("\(number)")
+                                    .font(.body.weight(isFocused ? .semibold : .regular))
+                                    .monospacedDigit()
+                                    .foregroundStyle(isFocused ? Color.white : Color.primary)
+                                    .frame(width: 34, height: 34)
+                                    .background {
+                                        if isFocused { Circle().fill(Color.accentColor) }
+                                    }
+                                DayCaption(day: day)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel(StatsFormat.dayAccessibility(day))
+                        } else {
+                            Color.clear.frame(maxWidth: .infinity).frame(height: 34)
+                        }
+                    }
+                }
             }
         }
     }
@@ -235,19 +243,12 @@ private struct StatsGrid: View {
     var body: some View {
         Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 14) {
             GridRow {
-                StatCell(title: "Focus Days", value: "\(stats.focusDays) / \(stats.elapsedDays) days")
-                StatCell(title: "Best Focus Hour", value: stats.bestHour.map { String(format: "%02d:00", $0) } ?? "–")
-            }
-            GridRow {
                 StatCell(title: "Daily Average", value: DurationText.hoursAndMinutes(stats.dailyAverage))
                 StatCell(title: "Per Active Day", value: DurationText.hoursAndMinutes(stats.perActiveDay))
             }
-            GridRow {
-                if stats.range.period == .year {
+            if stats.range.period == .year {
+                GridRow {
                     StatCell(title: "Best Month", value: stats.bestBucket.map(StatsFormat.monthShort) ?? "–")
-                        .gridCellColumns(2)
-                } else {
-                    StatCell(title: "Best Day", value: stats.bestDay.map(RecordFormat.day) ?? "–")
                         .gridCellColumns(2)
                 }
             }

@@ -25,4 +25,4 @@ Support
 Questions or problems? Email: nxzvnn@gmail.com
 
 Development
-See [Apple service setup](docs/apple-services-setup.md) for StoreKit products and CloudKit schema requirements. See the [character sheet](assets/characters.png) for all character and egg frames. The editable pixel source is `Den/Pet/PetSprites.swift`.
+See [Apple service setup](docs/apple-services-setup.md) for StoreKit products and CloudKit schema requirements. See the [character sheet](previews/characters.png) for all character and egg frames. The editable pixel source is `Den/Pet/PetSprites.swift`.

@@ -7,8 +7,8 @@ struct TodayWidget: Widget {
         StaticConfiguration(kind: "DenToday", provider: TodayProvider()) { entry in
             TodayWidgetView(snapshot: entry.snapshot)
         }
-        .configurationDisplayName("Today")
-        .description("Your friend and today's focus time.")
+        .configurationDisplayName("Den")
+        .description("Your friend and focus time.")
         .supportedFamilies([
             .systemSmall, .systemMedium, .systemLarge,
             .accessoryCircular, .accessoryRectangular, .accessoryInline,
@@ -82,9 +82,6 @@ struct TodayWidgetView: View {
             LCDTile(character: character, level: nil)
                 .frame(height: 64)
             Spacer(minLength: 8)
-            Text("Today")
-                .font(.caption)
-                .foregroundStyle(.secondary)
             Text(duration)
                 .font(.title3.weight(.bold))
                 .minimumScaleFactor(0.6)
@@ -103,9 +100,6 @@ struct TodayWidgetView: View {
             LCDTile(character: character, level: snapshot.level)
                 .aspectRatio(1, contentMode: .fit)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Today")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
                 Text(duration)
                     .font(.title.weight(.bold))
                     .minimumScaleFactor(0.6)
@@ -114,7 +108,7 @@ struct TodayWidgetView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 Spacer(minLength: 6)
-                EvolveProgress(snapshot: snapshot, compact: true)
+                EvolveProgress(snapshot: snapshot)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -128,9 +122,6 @@ struct TodayWidgetView: View {
                 .frame(maxHeight: .infinity)
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Today")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
                     Text(duration)
                         .font(.title.weight(.bold))
                         .lineLimit(1)
@@ -141,7 +132,7 @@ struct TodayWidgetView: View {
                     .font(.headline)
                     .foregroundStyle(.secondary)
             }
-            EvolveProgress(snapshot: snapshot, compact: false)
+            EvolveProgress(snapshot: snapshot)
         }
         .containerBackground(for: .widget) { Color(.systemBackground) }
     }
@@ -160,7 +151,7 @@ struct TodayWidgetView: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(duration) focused today")
+        .accessibilityLabel("\(duration) focused")
         .containerBackground(for: .widget) {}
     }
 
@@ -176,7 +167,7 @@ struct TodayWidgetView: View {
                     .font(.headline)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
-                Text("today · \(sessions)")
+                Text(sessions)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -188,7 +179,7 @@ struct TodayWidgetView: View {
 
     // 鎖定畫面・單行（時鐘上方那一行）。
     private var inline: some View {
-        Text("\(duration) focused today")
+        Text("\(duration) focused")
             .containerBackground(for: .widget) {}
     }
 
@@ -224,24 +215,13 @@ private struct LCDTile: View {
     }
 }
 
-/// 「Focus X more to evolve」和進度條。
+/// 升級進度只用進度條顯示。
 private struct EvolveProgress: View {
     let snapshot: WidgetSnapshot
-    let compact: Bool
 
     var body: some View {
-        // 和 app 一樣：剩下的時間無條件進位到分鐘。
-        let timeLeft = DurationText.hoursAndMinutes((snapshot.secondsToNext / 60).rounded(.up) * 60)
-        VStack(alignment: .leading, spacing: 4) {
-            ProgressView(value: snapshot.progressToNext)
-                .tint(.secondary)
-            let action = PetSprites.character(id: snapshot.characterID).isEgg ? "hatch" : "evolve"
-            Text(compact ? "\(timeLeft) to \(action)" : "Focus \(timeLeft) more to \(action)")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-        }
+        ProgressView(value: snapshot.progressToNext)
+            .tint(.secondary)
     }
 }
 

@@ -5,6 +5,7 @@ struct EggColorPicker: View {
     let collection: CharacterCollection
     @Binding var selection: EggColor
     var reservedIDs: Set<String> = []
+    var thumbnailSize: CGFloat = 88
 
     var body: some View {
         HStack(spacing: 16) {
@@ -15,10 +16,16 @@ struct EggColorPicker: View {
                 } label: {
                     VStack(spacing: 10) {
                         CharacterThumbnail(character: PetSprites.character(id: color.spriteID))
-                            .frame(width: 88, height: 88)
+                            .frame(width: thumbnailSize, height: thumbnailSize)
                         Text(color.name).font(.headline)
-                        Image(systemName: selection == color ? "checkmark.circle.fill" : "circle")
-                            .foregroundStyle(selection == color ? Color.accentColor : Color.secondary)
+                        if remaining == 0 {
+                            Text("Sold Out")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Image(systemName: selection == color ? "checkmark.circle.fill" : "circle")
+                                .foregroundStyle(selection == color ? Color.accentColor : Color.secondary)
+                        }
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
@@ -28,8 +35,8 @@ struct EggColorPicker: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(remaining == 0)
-                .opacity(remaining == 0 ? 0.45 : 1)
-                .accessibilityLabel("\(color.name), \(remaining) remaining")
+                .opacity(remaining == 0 ? 0.65 : 1)
+                .accessibilityLabel(remaining == 0 ? "\(color.name), sold out" : "\(color.name), \(remaining) remaining")
                 .accessibilityAddTraits(selection == color ? .isSelected : [])
             }
         }

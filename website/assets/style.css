@@ -258,7 +258,15 @@ section { scroll-margin-top: 72px; }
 .features {
   display: grid;
   gap: 16px;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 560px) {
+  .features { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 880px) {
+  .features { grid-template-columns: repeat(4, 1fr); }
 }
 
 .feature {

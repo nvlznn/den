@@ -7,6 +7,10 @@ struct SettingsView: View {
     @AppStorage("liveActivityAppearance") private var appearance = "glass"
     @State private var displayedSeconds: Double?
 
+    private var appVersion: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -17,7 +21,7 @@ struct SettingsView: View {
                     }
                 }
                 Section {
-                    LabeledContent("Global Focus") {
+                    LabeledContent("All Users’ Focus Time") {
                         if let seconds = displayedSeconds {
                             Text("\(Int(seconds / 3600).formatted()) hr")
                                 .monospacedDigit()
@@ -25,8 +29,9 @@ struct SettingsView: View {
                             Text("—")
                         }
                     }
-                } footer: {
-                    Text("Actual focus · Updates automatically")
+                }
+                Section {
+                    LabeledContent("Version", value: appVersion)
                 }
             }
             .navigationTitle("Settings")

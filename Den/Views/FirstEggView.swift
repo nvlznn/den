@@ -5,29 +5,40 @@ struct FirstEggView: View {
     let library: CharacterLibrary
     @Binding var selectedCharacterID: String
     @Environment(\.modelContext) private var modelContext
+    @AppStorage("onboardingGuidePending") private var guidePending = false
     @State private var color: EggColor = .white
     @State private var saveError = false
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 28) {
-                Text("Choose Your Egg")
-                    .font(.largeTitle.bold())
-                    .multilineTextAlignment(.center)
-                EggColorPicker(collection: library.collection, selection: $color)
-                Text("Hatches at Lv 1 · 10 hr")
-                    .font(.subheadline).foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                Button("Start") { choose() }
-                    .buttonStyle(.borderedProminent)
-                    .buttonBorderShape(.capsule)
-                    .controlSize(.extraLarge)
-                    .disabled(library.collection.remainingCount(of: color) == 0)
-                Text("2 free eggs")
-                    .font(.footnote).foregroundStyle(.secondary)
+        GeometryReader { geometry in
+            ScrollView {
+                VStack(spacing: 24) {
+                    Text("Choose your egg to begin your journey")
+                        .font(.largeTitle.bold())
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 24)
+
+                    Spacer(minLength: 32)
+
+                    VStack(spacing: 24) {
+                        EggColorPicker(collection: library.collection, selection: $color, thumbnailSize: 116)
+                    }
+
+                    Spacer(minLength: 32)
+
+                    Button(action: choose) {
+                        Text("Let’s go!")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                    }
+                        .buttonStyle(.borderedProminent)
+                        .buttonBorderShape(.capsule)
+                        .controlSize(.extraLarge)
+                        .disabled(library.collection.remainingCount(of: color) == 0)
+                }
+                .padding(24)
+                .frame(minHeight: geometry.size.height)
             }
-            .padding(24)
-            .padding(.top, 48)
         }
         .onAppear {
             if library.collection.remainingCount(of: color) == 0 {
@@ -47,6 +58,7 @@ struct FirstEggView: View {
         do {
             try modelContext.save()
             selectedCharacterID = id
+            guidePending = true
         } catch {
             library.collection = previous
             saveError = true

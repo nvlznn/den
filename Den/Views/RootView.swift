@@ -17,6 +17,7 @@ struct RootView: View {
     @AppStorage("characterID") private var characterID = PetSprites.defaultCharacterID
     @State private var libraryError: String?
     @State private var selectedTab = 0
+    @AppStorage("onboardingGuidePending") private var guidePending = false
 
     @AppStorage("selectedTagID") private var selectedTagID = ""
 
@@ -43,6 +44,11 @@ struct RootView: View {
             }
         }
         .animation(.default, value: controller.timer.isRunning)
+        .sheet(isPresented: $guidePending) {
+            OnboardingGuideView(eggColor: EggColor.of(characterID: characterID) ?? .white) {
+                guidePending = false
+            }
+        }
         .syncsWidgets()
         .task { await store.load(context: modelContext) }
         .task(id: libraryInput) {

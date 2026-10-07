@@ -38,4 +38,4 @@
 - `assets/sprites.js`：六隻角色的像素圖，由 `Den/Pet/PetSprites.swift` 產生；改了角色之後要重新產生
 - `assets/site.js`：LCD 繪製、寵物動畫、套用設定
 - `assets/style.css`：樣式，跟著系統的淺色／深色模式切換
-- `assets/screens/`：App 截圖（603×1311，從 6.3 吋截圖縮小一半）
+- `assets/screens/`：App 截圖（603×1311）與 `08-widgets.svg` widget 預覽素材

@@ -6,7 +6,7 @@ struct RecordsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \FocusSession.startedAt, order: .reverse) private var sessions: [FocusSession]
 
-    @State private var range = StatsRange(period: .day, containing: .now)
+    @State private var range = StatsRange(period: .week, containing: .now)
     @State private var isAdding = false
     @State private var editing: FocusSession?
 
@@ -18,19 +18,13 @@ struct RecordsView: View {
         NavigationStack {
             List {
                 Section {
-                    Picker("Period", selection: period) {
-                        Text("Day").tag(StatsPeriod.day)
-                        Text("Week").tag(StatsPeriod.week)
-                    }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
                     periodNavigator
                 }
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
 
                 if days.isEmpty {
-                    ContentUnavailableView(range.period == .day ? "No Records Today" : "No Records This Week", systemImage: "book.closed")
+                    ContentUnavailableView("No Records", systemImage: "book.closed")
                         .listRowBackground(Color.clear)
                 }
 
@@ -82,13 +76,6 @@ struct RecordsView: View {
         }
         modelContext.delete(session)
         try? modelContext.save()
-    }
-
-    private var period: Binding<StatsPeriod> {
-        Binding { range.period } set: { newPeriod in
-            let anchor = range.contains(.now) ? Date.now : range.interval.start
-            range = StatsRange(period: newPeriod, containing: anchor)
-        }
     }
 
     private var periodNavigator: some View {
