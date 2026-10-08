@@ -81,10 +81,23 @@ struct RootView: View {
             Button("OK") { libraryError = nil }
         } message: { Text(libraryError ?? "") }
         .fullScreenCover(item: $controller.celebration) { celebration in
-            CelebrationView(celebration: celebration) {
-                controller.celebration = nil
+            CelebrationView(celebration: celebration) { name in
+                controller.finishCelebration(naming: name, context: modelContext)
             }
         }
+        #if DEBUG
+        // 模擬器看慶祝畫面用：啟動參數 `-demoCelebration hatch` 或 `-demoCelebration levelUp`。
+        .task {
+            switch UserDefaults.standard.string(forKey: "demoCelebration") {
+            case "hatch":
+                controller.celebration = Celebration(characterID: "mochi", duration: 1800, levelBefore: 0, levelAfter: 1, characterName: "Mochi", didHatch: true)
+            case "levelUp":
+                controller.celebration = Celebration(characterID: "fangfang", duration: 2700, levelBefore: 2, levelAfter: 3, characterName: "Boxy")
+            default:
+                break
+            }
+        }
+        #endif
         // 等 iCloud 第一次下載完（或沒有 iCloud）才判斷要不要建預設標籤，重新安裝時才不會多一組。
         .onChange(of: cloudSync.isReady, initial: true) { _, isReady in
             guard isReady else { return }

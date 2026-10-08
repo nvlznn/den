@@ -64,6 +64,30 @@ struct CharacterCollectionTests {
         #expect(collection.displayID(for: "fangfang") == "fangfang")
     }
 
+    @Test func onlyHatchedCharactersCanBeNamedAndBlankRestoresTheOriginal() throws {
+        var collection = CharacterCollection(shuffledIDs: ids)
+        let claimed = collection.claimFreeEgg(color: .white)
+        let id = try #require(claimed)
+        let species = PetSprites.character(id: id).name
+        collection.rename(id, to: "Pebble")
+        #expect(collection.name(for: id) == PetSprites.character(id: "egg.white").name)
+
+        _ = collection.hatch(id, totalSeconds: Level.secondsPerLevel)
+        #expect(collection.name(for: id) == species)
+        collection.rename(id, to: "  Pebble  ")
+        #expect(collection.name(for: id) == "Pebble")
+        collection.rename(id, to: String(repeating: "a", count: 40))
+        #expect(collection.name(for: id).count == CharacterCollection.maxNameLength)
+
+        let decoded = try JSONDecoder().decode(CharacterCollection.self, from: JSONEncoder().encode(collection))
+        #expect(decoded == collection)
+
+        collection.rename(id, to: "   ")
+        #expect(collection.name(for: id) == species)
+        collection.rename(id, to: species)
+        #expect(collection.nicknames.isEmpty)
+    }
+
     @Test func purchasingEveryRemainingEggProducesSixDistinctCharacters() {
         for _ in 0..<30 {
             var collection = CharacterCollection(shuffledIDs: ids.shuffled())

@@ -788,6 +788,16 @@
         }
       }
     },
+    "Name Your New Friend": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "幫新夥伴取名字"
+          }
+        }
+      }
+    },
     "New Egg": {
       "localizations": {
         "zh-Hant": {

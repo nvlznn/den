@@ -8,13 +8,15 @@ struct LCDScreenView: View {
     let character: PetCharacter
     let level: Int
     let pet: PetState
-    /// 升級時 `Lv` 閃兩下。
-    let levelFlashSince: Date?
+    /// 升級的那一刻：`Lv` 閃兩下、旁邊多一個 `UP!`，寵物四周放一圈一圈的像素煙火。
+    let levelUpSince: Date?
     /// 指定的話就一直做這件事（慶祝畫面用），不看時間與計時狀態。
     var activityOverride: PetActivity?
     let onPetTap: () -> Void
 
     private static let levelFlashDuration: TimeInterval = 1.2
+    /// `UP!` 留在螢幕上的時間；煙火在這之內放完。
+    private static let levelUpDuration: TimeInterval = 4
     private let shape = RoundedRectangle(cornerRadius: 22, style: .continuous)
 
     var body: some View {
@@ -43,7 +45,8 @@ struct LCDScreenView: View {
 
         let levelOrigin = PixelPoint(x: 2, y: 2)
         if showsLevel(at: date) {
-            grid.stamp(LCDFont.render("Lv \(level)"), at: levelOrigin)
+            let text = levelUpElapsed(at: date) != nil ? "Lv \(level) UP!" : "Lv \(level)"
+            grid.stamp(LCDFont.render(text), at: levelOrigin)
         }
 
         // 寵物在中央偏下。
@@ -56,6 +59,12 @@ struct LCDScreenView: View {
         grid.stamp(frame.sprite, at: petOrigin)
         for z in frame.zMarks {
             grid.stamp(PetSprites.z, at: PixelPoint(x: petOrigin.x + z.x, y: petOrigin.y + z.y))
+        }
+        if let elapsed = levelUpElapsed(at: date) {
+            let center = PixelPoint(x: petOrigin.x + PetSprites.size / 2, y: petOrigin.y + PetSprites.size / 2)
+            for (sparkle, point) in Self.sparkles(around: center, elapsed: elapsed) {
+                grid.stamp(sparkle, at: point)
+            }
         }
 
         // 方塊之間留縫，看起來才像點陣；沒亮的格子也畫出來，是 LCD 質感的關鍵。
@@ -82,12 +91,42 @@ struct LCDScreenView: View {
         graphics.fill(lit, with: .color(LCDPalette.pixelOn))
     }
 
+    /// 升級後經過的秒數；不在升級動畫期間就是 nil。
+    private func levelUpElapsed(at date: Date) -> TimeInterval? {
+        guard let levelUpSince else { return nil }
+        let elapsed = date.timeIntervalSince(levelUpSince)
+        return (0..<Self.levelUpDuration).contains(elapsed) ? elapsed : nil
+    }
+
     /// 平常一直顯示；升級後的 1.2 秒內熄、亮、熄、亮。
     private func showsLevel(at date: Date) -> Bool {
-        guard let levelFlashSince else { return true }
-        let elapsed = date.timeIntervalSince(levelFlashSince)
-        guard (0..<Self.levelFlashDuration).contains(elapsed) else { return true }
+        guard let elapsed = levelUpElapsed(at: date), elapsed < Self.levelFlashDuration else { return true }
         return Int(elapsed / (Self.levelFlashDuration / 4)) % 2 == 1
+    }
+
+    /// 三波煙火，每波 8 顆從寵物身邊往外飛：先是十字星，飛遠了縮成一點。
+    /// 相鄰兩波錯開 22.5°，看起來才像一閃一閃。
+    private static func sparkles(around center: PixelPoint, elapsed: TimeInterval) -> [([String], PixelPoint)] {
+        let star = [".#.", "###", ".#."]
+        let dot = ["#"]
+        let waveLength: TimeInterval = 0.9
+        var result: [([String], PixelPoint)] = []
+        for wave in 0..<3 {
+            let t = (elapsed - Double(wave) * 0.55) / waveLength
+            guard (0..<1).contains(t) else { continue }
+            let radius = 11 + t * 12
+            let sprite = t < 0.6 ? star : dot
+            let half = sprite.count / 2
+            for ray in 0..<8 {
+                let angle = (Double(ray) + (wave.isMultiple(of: 2) ? 0 : 0.5)) * .pi / 4
+                let point = PixelPoint(
+                    x: center.x + Int((cos(angle) * radius).rounded()) - half,
+                    y: center.y + Int((sin(angle) * radius * 0.85).rounded()) - half
+                )
+                result.append((sprite, point))
+            }
+        }
+        return result
     }
 }
 
@@ -133,13 +172,16 @@ private struct PixelGrid {
     }
 }
 
-/// 3×5 的像素字，只收 `Lv` 會用到的字元。
+/// 3×5 的像素字（`!` 只有 1 格寬），只收 `Lv` 會用到的字元。
 private enum LCDFont {
     static let height = 5
 
     private static let glyphs: [Character: [String]] = [
         "L": ["#..", "#..", "#..", "#..", "###"],
         "v": ["...", "...", "#.#", "#.#", ".#."],
+        "U": ["#.#", "#.#", "#.#", "#.#", "###"],
+        "P": ["###", "#.#", "###", "#..", "#.."],
+        "!": ["#", "#", "#", ".", "#"],
         " ": ["..", "..", "..", "..", ".."],
         "0": ["###", "#.#", "#.#", "#.#", "###"],
         "1": [".#.", "##.", ".#.", ".#.", "###"],

@@ -17,6 +17,8 @@ struct HomeView: View {
     @State private var isChoosingTag = false
     @State private var isConfirmingAbort = false
     @State private var isChoosingDuration = false
+    /// 專注中跨過一級的那一刻，LCD 放一次煙火。
+    @State private var levelUpSince: Date?
 
     private var timer: FocusTimer { controller.timer }
 
@@ -64,10 +66,11 @@ struct HomeView: View {
                         character: displayedCharacter,
                         level: level(at: context.date).number,
                         pet: PetState(isTiming: timer.isRunning, happySince: controller.happySince),
-                        levelFlashSince: nil,
+                        levelUpSince: levelUpSince,
                         onPetTap: controller.petTapped
                     )
-                    .onChange(of: level(at: context.date).number, initial: true) { _, number in
+                    .onChange(of: level(at: context.date).number, initial: true) { old, number in
+                        if number > old, timer.isRunning { levelUpSince = .now }
                         guard number >= 1 else { return }
                         controller.hatchActiveEgg(totalSeconds: level(at: context.date).totalSeconds, context: modelContext)
                     }
@@ -99,7 +102,7 @@ struct HomeView: View {
                 }
 
                 Section("Focus") {
-                    SettingRow(title: "Character", value: displayedCharacter.name) {
+                    SettingRow(title: "Character", value: libraries.first?.collection.name(for: character.id) ?? displayedCharacter.name) {
                         isChoosingCharacter = true
                     }
                     SettingRow(title: "Tag", value: selectedTag?.name ?? "–") {

@@ -161,6 +161,7 @@ final class FocusController {
         let after = Level(totalSeconds: before.totalSeconds + finished.duration)
         var didHatch = false
         var displayID = "egg"
+        var name = PetSprites.character(id: displayID).name
         if let library = CharacterLibrary.current(in: context) {
             var collection = library.collection
             let hatchedNow = collection.hatch(characterID, totalSeconds: after.totalSeconds)
@@ -168,16 +169,28 @@ final class FocusController {
             library.collection = collection
             try? context.save()
             displayID = collection.displayID(for: characterID)
+            name = collection.name(for: characterID)
         }
         celebration = Celebration(
             characterID: displayID,
             duration: finished.duration,
             levelBefore: before.number,
             levelAfter: after.number,
-            characterName: PetSprites.character(id: displayID).name,
+            characterName: name,
             didHatch: didHatch
         )
         celebrations += 1
+    }
+
+    /// 關掉慶祝畫面。剛孵化的話順便存使用者取的名字（nil 就是沒取，維持原名）。
+    func finishCelebration(naming name: String?, context: ModelContext) {
+        defer { celebration = nil }
+        guard let celebration, celebration.didHatch, let name,
+              let library = CharacterLibrary.current(in: context) else { return }
+        var collection = library.collection
+        collection.rename(celebration.characterID, to: name)
+        library.collection = collection
+        try? context.save()
     }
 
     private func tag(withID id: UUID?, context: ModelContext) -> FocusTag? {

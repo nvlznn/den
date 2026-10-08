@@ -32,6 +32,10 @@ struct CharacterCollection: Codable, Equatable, Sendable {
     var paidEggs: Set<EggSlot> = [] // Previous non-consumable development purchases.
     var purchasedIDs: Set<String> = []
     var revealed: Set<String>
+    /// Names the user gave after hatching. Missing means the species name.
+    private(set) var nicknames: [String: String] = [:]
+
+    static let maxNameLength = 20
 
     init(legacyIDs: [String] = [], shuffledIDs: [String]) {
         var seen = Set<String>()
@@ -90,9 +94,26 @@ struct CharacterCollection: Codable, Equatable, Sendable {
         return (EggColor.of(characterID: characterID) ?? .white).spriteID
     }
 
+    /// The nickname once hatched; otherwise the species (or egg) name.
+    func name(for characterID: String) -> String {
+        if revealed.contains(characterID), let nickname = nicknames[characterID] { return nickname }
+        return PetSprites.character(id: displayID(for: characterID)).name
+    }
+
+    /// Blank, or the species name itself, goes back to the default name.
+    mutating func rename(_ characterID: String, to name: String) {
+        guard revealed.contains(characterID) else { return }
+        let trimmed = String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(Self.maxNameLength))
+        if trimmed.isEmpty || trimmed == PetSprites.character(id: characterID).name {
+            nicknames[characterID] = nil
+        } else {
+            nicknames[characterID] = trimmed
+        }
+    }
+
     // Preserve data from the earlier single-color development build as well.
     private enum CodingKeys: String, CodingKey {
-        case order, freeIDs, legacyIDs, paidEggs, purchasedIDs, revealed, freeCount, legacyCount, paidSlots
+        case order, freeIDs, legacyIDs, paidEggs, purchasedIDs, revealed, nicknames, freeCount, legacyCount, paidSlots
     }
 
     init(from decoder: Decoder) throws {
@@ -100,6 +121,7 @@ struct CharacterCollection: Codable, Equatable, Sendable {
         order = try data.decode([String].self, forKey: .order)
         revealed = try data.decode(Set<String>.self, forKey: .revealed)
         purchasedIDs = try data.decodeIfPresent(Set<String>.self, forKey: .purchasedIDs) ?? []
+        nicknames = try data.decodeIfPresent([String: String].self, forKey: .nicknames) ?? [:]
         if let free = try data.decodeIfPresent([String].self, forKey: .freeIDs) {
             freeIDs = free
             legacyIDs = try data.decode(Set<String>.self, forKey: .legacyIDs)
@@ -123,5 +145,6 @@ struct CharacterCollection: Codable, Equatable, Sendable {
         try data.encode(paidEggs, forKey: .paidEggs)
         try data.encode(purchasedIDs, forKey: .purchasedIDs)
         try data.encode(revealed, forKey: .revealed)
+        if !nicknames.isEmpty { try data.encode(nicknames, forKey: .nicknames) }
     }
 }
