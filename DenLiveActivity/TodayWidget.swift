@@ -61,7 +61,7 @@ struct TodayWidgetView: View {
     private var character: PetCharacter { PetSprites.character(id: snapshot.characterID) }
     private var duration: String { DurationText.hoursAndMinutes(snapshot.todaySeconds) }
     private var sessions: String {
-        snapshot.todaySessions == 1 ? "1 session" : "\(snapshot.todaySessions) sessions"
+        String(localized: "\(snapshot.todaySessions) sessions")
     }
 
     var body: some View {
@@ -211,7 +211,7 @@ private struct LCDTile: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(level.map { "\(character.name), level \($0)" } ?? character.name)
+        .accessibilityLabel(level.map { String(localized: "\(character.name), level \($0)") } ?? character.name)
     }
 }
 

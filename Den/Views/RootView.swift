@@ -65,7 +65,7 @@ struct RootView: View {
                 }
                 for session in sessions { FocusContribution.capture(session, context: modelContext) }
                 try modelContext.save()
-            } catch { libraryError = "Your progress could not be saved. Please reopen Den and try again." }
+            } catch { libraryError = String(localized: "Your progress could not be saved. Please reopen Den and try again.") }
         }
         .task(id: purchaseInput) {
             guard cloudSync.isReady || !libraries.isEmpty else { return }

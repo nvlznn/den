@@ -94,11 +94,11 @@ struct LCDScreenView: View {
 private extension PetActivity {
     var spokenDescription: String {
         switch self {
-        case .idle: "resting"
-        case .sleeping: "sleeping"
-        case .studying: "focusing with you"
-        case .happy: "happy"
-        case .dancing: "dancing"
+        case .idle: String(localized: "resting")
+        case .sleeping: String(localized: "sleeping")
+        case .studying: String(localized: "focusing with you")
+        case .happy: String(localized: "happy")
+        case .dancing: String(localized: "dancing")
         }
     }
 }

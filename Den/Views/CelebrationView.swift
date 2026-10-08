@@ -28,7 +28,7 @@ struct CelebrationView: View {
 
             VStack(spacing: 8) {
                 if celebration.didLevelUp {
-                    Label(celebration.didHatch ? "Your egg hatched!" : "Level Up!  Lv \(celebration.levelBefore) → Lv \(celebration.levelAfter)", systemImage: "sparkles")
+                    Label(celebration.didHatch ? String(localized: "Your egg hatched!") : String(localized: "Level Up!  Lv \(celebration.levelBefore) → Lv \(celebration.levelAfter)"), systemImage: "sparkles")
                         .font(.headline)
                         .foregroundStyle(.tint)
                 }

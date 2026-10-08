@@ -37,7 +37,7 @@ struct PetCharacter: Identifiable, Hashable, Sendable {
 enum EggColor: String, CaseIterable, Codable, Hashable, Sendable, Identifiable {
     case white, black
     var id: String { rawValue }
-    var name: String { self == .white ? "White Egg" : "Black Egg" }
+    var name: String { self == .white ? String(localized: "White Egg") : String(localized: "Black Egg") }
     var spriteID: String { "egg.\(rawValue)" }
     var characterIDs: [String] {
         switch self {
@@ -76,7 +76,7 @@ enum PetSprites {
     /// Original 16×16 speckled egg; no eyes or species clues before hatching.
     static let whiteEgg = PetCharacter(
         id: "egg.white",
-        name: "White Egg",
+        name: String(localized: "White Egg"),
         idle: [
             "................",
             "................",
@@ -190,7 +190,7 @@ enum PetSprites {
     /// Solid black shell with the same speckles and rocking frames.
     static let blackEgg = PetCharacter(
         id: "egg.black",
-        name: "Black Egg",
+        name: String(localized: "Black Egg"),
         idle: [
             "................",
             "................",
@@ -305,7 +305,7 @@ enum PetSprites {
 
     static let fangfang = PetCharacter(
         id: "fangfang",
-        name: "Boxy",
+        name: String(localized: "Boxy"),
         // 待機
         idle: [
             "................",
@@ -428,7 +428,7 @@ enum PetSprites {
 
     static let doudou = PetCharacter(
         id: "doudou",
-        name: "Bean",
+        name: String(localized: "Bean"),
         // 待機
         idle: [
             "................",
@@ -551,7 +551,7 @@ enum PetSprites {
 
     static let mochi = PetCharacter(
         id: "mochi",
-        name: "Mochi",
+        name: String(localized: "Mochi"),
         // 待機
         idle: [
             "................",
@@ -682,7 +682,7 @@ enum PetSprites {
 
     static let drop = PetCharacter(
         id: "drop",
-        name: "Drop",
+        name: String(localized: "Drop"),
         // 待機
         idle: [
             "................",
@@ -811,7 +811,7 @@ enum PetSprites {
 
     static let cloud = PetCharacter(
         id: "cloud",
-        name: "Puff",
+        name: String(localized: "Puff"),
         // 待機
         idle: [
             "................",
@@ -938,7 +938,7 @@ enum PetSprites {
 
     static let orb = PetCharacter(
         id: "orb",
-        name: "Orb",
+        name: String(localized: "Orb"),
         // 待機
         idle: [
             "..........#.....",

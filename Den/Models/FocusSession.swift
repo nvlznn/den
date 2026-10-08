@@ -36,5 +36,5 @@ final class FocusSession {
     }
 
     /// 沒有標籤、也沒有備份名稱時顯示的名稱。
-    static let untaggedName = "Focus"
+    static let untaggedName = String(localized: "Focus")
 }

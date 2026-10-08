@@ -1,0 +1,239 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ focused": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "專注%@"
+          }
+        }
+      }
+    },
+    "%@, level %lld": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@，等級%2$lld"
+          }
+        }
+      }
+    },
+    "%lld hr": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld小時"
+          }
+        }
+      }
+    },
+    "%lld hr %lld min": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld小時%2$lld分鐘"
+          }
+        }
+      }
+    },
+    "%lld min": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld分鐘"
+          }
+        }
+      }
+    },
+    "%lld sec": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld秒"
+          }
+        }
+      }
+    },
+    "%lld sessions": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld session"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld sessions"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hant": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld個"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "+": {
+      "shouldTranslate": false
+    },
+    "Bean": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "豆豆"
+          }
+        }
+      }
+    },
+    "Black Egg": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "黑色的蛋"
+          }
+        }
+      }
+    },
+    "Boxy": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "方方"
+          }
+        }
+      }
+    },
+    "Countdown": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "倒數"
+          }
+        }
+      }
+    },
+    "Den": {
+      "shouldTranslate": false
+    },
+    "Drop": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "水滴"
+          }
+        }
+      }
+    },
+    "Focus": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "專注"
+          }
+        }
+      }
+    },
+    "Lv %lld": {
+      "shouldTranslate": false
+    },
+    "Mochi": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "麻糬"
+          }
+        }
+      }
+    },
+    "Orb": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圓仔"
+          }
+        }
+      }
+    },
+    "Paused": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已暫停"
+          }
+        }
+      }
+    },
+    "Puff": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲雲"
+          }
+        }
+      }
+    },
+    "Stopwatch": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正計時"
+          }
+        }
+      }
+    },
+    "White Egg": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "白色的蛋"
+          }
+        }
+      }
+    },
+    "Your friend and focus time.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你的朋友和專注時間。"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

@@ -46,7 +46,7 @@ struct DurationSheet: View {
     }
 
     static func wheelLabel(_ minutes: Int) -> String {
-        minutes == TimerMode.unlimitedMinutes ? "Stopwatch" : "\(minutes) minutes"
+        minutes == TimerMode.unlimitedMinutes ? String(localized: "Stopwatch") : String(localized: "\(minutes) minutes")
     }
 
     /// 設定列上顯示的文字。

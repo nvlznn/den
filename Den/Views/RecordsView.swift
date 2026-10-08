@@ -141,7 +141,7 @@ private struct RecordRow: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text(session.displayTagName)
                     .foregroundStyle(Color.primary)
-                Text(session.isManual ? "\(RecordFormat.time(session.startedAt)) · Added manually" : RecordFormat.time(session.startedAt))
+                Text(session.isManual ? String(localized: "\(RecordFormat.time(session.startedAt)) · Added manually") : RecordFormat.time(session.startedAt))
                     .font(.subheadline)
                     .foregroundStyle(Color.secondary)
                     .monospacedDigit()
@@ -162,16 +162,15 @@ private struct RecordRow: View {
 
 /// 紀錄頁的日期格式。
 enum RecordFormat {
-    private static func formatter(_ format: String) -> DateFormatter {
+    private static func formatter(_ template: String) -> DateFormatter {
         let formatter = DateFormatter()
-        formatter.locale = DurationText.locale
-        formatter.dateFormat = format
+        formatter.setLocalizedDateFormatFromTemplate(template)
         return formatter
     }
 
-    private static let timeFormatter = formatter("HH:mm")
-    private static let monthDayFormatter = formatter("MMM d")
-    private static let weekdayFormatter = formatter("EEE")
+    private static let timeFormatter = formatter("Hm")
+    private static let monthDayFormatter = formatter("MMMd")
+    private static let dayFormatter = formatter("MMMEd")
 
     /// 「Oct 4 ~ Oct 10」
     static func weekRange(_ week: RecordWeek) -> String {
@@ -180,12 +179,12 @@ enum RecordFormat {
 
     /// 「Tue, Oct 6」
     static func day(_ date: Date) -> String {
-        "\(weekdayFormatter.string(from: date)), \(monthDay(date))"
+        dayFormatter.string(from: date)
     }
 
     /// 「1 session」、「3 sessions」
     static func sessions(_ count: Int) -> String {
-        count == 1 ? "1 session" : "\(count) sessions"
+        String(localized: "\(count) sessions")
     }
 
     /// 「11:33」

@@ -49,7 +49,7 @@ final class CommunityFocusStore {
                 }
                 status = nil
             } else {
-                status = "Sign in to iCloud to include your focus time. Saved time will be contributed when you reconnect."
+                status = String(localized: "Sign in to iCloud to include your focus time. Saved time will be contributed when you reconnect.")
             }
             var sum = 0.0
             let database = container.publicCloudDatabase
@@ -72,7 +72,7 @@ final class CommunityFocusStore {
         } catch is CancellationError {
             // Keep the last successful value. Pending uploads remain retryable.
         } catch {
-            status = "Community total is unavailable. Your focus time is saved and will sync later."
+            status = String(localized: "Community total is unavailable. Your focus time is saved and will sync later.")
         }
     }
 }

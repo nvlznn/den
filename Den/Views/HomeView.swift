@@ -132,7 +132,7 @@ struct HomeView: View {
         return VStack(alignment: .leading, spacing: 8) {
             SegmentedProgressBar(progress: level.progressToNext)
                 .frame(height: 18)
-            Text("\(timeLeft) to \(displayedCharacter.isEgg ? "hatch" : "Lv \(level.number + 1)")")
+            Text(displayedCharacter.isEgg ? String(localized: "\(timeLeft) to hatch") : String(localized: "\(timeLeft) to Lv \(level.number + 1)"))
         }
         .padding(.top, 12)
         .accessibilityElement(children: .ignore)
@@ -157,7 +157,7 @@ struct HomeView: View {
                 .buttonBorderShape(.circle)
                 .controlSize(.extraLarge)
                 .background(Color(.systemBackground), in: Circle())
-                .accessibilityLabel(isPaused ? "Resume" : "Pause")
+                .accessibilityLabel(isPaused ? String(localized: "Resume") : String(localized: "Pause"))
 
                 // 結束不是破壞性操作，用次要樣式，不用紅色。
                 Button {
@@ -238,7 +238,7 @@ private struct SegmentedProgressBar: View {
 
 /// 「名稱　值 ›」的設定列，點了開 sheet。
 private struct SettingRow: View {
-    let title: String
+    let title: LocalizedStringKey
     let value: String
     let action: () -> Void
 
@@ -296,18 +296,18 @@ private struct RunningTime: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Tag, \(tagName ?? "none")")
+            .accessibilityLabel(String(localized: "Tag, \(tagName ?? String(localized: "none"))"))
             .accessibilityHint("Change tag")
         }
         .padding(.top, 32)
     }
 
     private func accessibilityText(_ seconds: Int, overtime: Int) -> String {
-        if session.isPaused { return "Paused, " + DurationText.hoursAndMinutes(TimeInterval(session.plannedEnd == nil ? seconds : max(seconds, overtime))) }
+        if session.isPaused { return String(localized: "Paused, \(DurationText.hoursAndMinutes(TimeInterval(session.plannedEnd == nil ? seconds : max(seconds, overtime))))") }
         let text = DurationText.hoursAndMinutes(TimeInterval(seconds))
-        if session.plannedEnd == nil { return "Focused for \(text)" }
-        if overtime > 0 { return "Time is up, \(DurationText.hoursAndMinutes(TimeInterval(overtime))) over" }
-        return "\(text) left"
+        if session.plannedEnd == nil { return String(localized: "Focused for \(text)") }
+        if overtime > 0 { return String(localized: "Time is up, \(DurationText.hoursAndMinutes(TimeInterval(overtime))) over") }
+        return String(localized: "\(text) left")
     }
 }
 

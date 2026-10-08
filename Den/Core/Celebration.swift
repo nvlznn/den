@@ -13,12 +13,12 @@ struct Celebration: Identifiable, Equatable, Sendable {
     var didLevelUp: Bool { levelAfter > levelBefore }
 
     private static let messages = [
-        "Yay! Nicely done!",
-        "Yay! That was a great session!",
-        "Yay! You showed up and it counted!",
-        "Yay! Time well spent!",
-        "Yay! Take a deep breath, you earned it!",
-        "Yay! One more step forward!",
+        String(localized: "Yay! Nicely done!"),
+        String(localized: "Yay! That was a great session!"),
+        String(localized: "Yay! You showed up and it counted!"),
+        String(localized: "Yay! Time well spent!"),
+        String(localized: "Yay! Take a deep breath, you earned it!"),
+        String(localized: "Yay! One more step forward!"),
     ]
 
     init(characterID: String, duration: TimeInterval, levelBefore: Int, levelAfter: Int, characterName: String, didHatch: Bool = false) {
@@ -27,8 +27,8 @@ struct Celebration: Identifiable, Equatable, Sendable {
         self.levelBefore = levelBefore
         self.levelAfter = levelAfter
         self.didHatch = didHatch
-        message = didHatch ? "Hello, \(characterName)! Your egg hatched!" : levelAfter > levelBefore
-            ? "Yay! \(characterName) evolved to Lv \(levelAfter)!"
+        message = didHatch ? String(localized: "Hello, \(characterName)! Your egg hatched!") : levelAfter > levelBefore
+            ? String(localized: "Yay! \(characterName) evolved to Lv \(levelAfter)!")
             : Self.messages.randomElement() ?? Self.messages[0]
     }
 }

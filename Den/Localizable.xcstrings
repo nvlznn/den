@@ -1,0 +1,1536 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ hr": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@小時"
+          }
+        }
+      }
+    },
+    "%@ left": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剩%@"
+          }
+        }
+      }
+    },
+    "%@ to Lv %lld": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "還要%1$@升到Lv %2$lld"
+          }
+        }
+      }
+    },
+    "%@ to hatch": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "還要%@孵化"
+          }
+        }
+      }
+    },
+    "%@ | %@ | %lld%%": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ | %2$@ | %3$lld%%"
+          }
+        }
+      }
+    },
+    "%@ · Added manually": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · 手動新增"
+          }
+        }
+      }
+    },
+    "%@, %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@，%2$@"
+          }
+        }
+      }
+    },
+    "%@, %lld remaining": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@，剩%2$lld個"
+          }
+        }
+      }
+    },
+    "%@, level %lld, %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@，等級%2$lld，%3$@"
+          }
+        }
+      }
+    },
+    "%@, no focus": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@，沒有專注"
+          }
+        }
+      }
+    },
+    "%@, sold out": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@，已售完"
+          }
+        }
+      }
+    },
+    "%@. Nice work.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@。做得好！"
+          }
+        }
+      }
+    },
+    "%lld": {
+      "shouldTranslate": false
+    },
+    "%lld hr": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld小時"
+          }
+        }
+      }
+    },
+    "%lld hr %lld min": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld小時%2$lld分鐘"
+          }
+        }
+      }
+    },
+    "%lld min": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld分鐘"
+          }
+        }
+      }
+    },
+    "%lld minutes": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld分鐘"
+          }
+        }
+      }
+    },
+    "%lld sec": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld秒"
+          }
+        }
+      }
+    },
+    "%lld sessions": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld session"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld sessions"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hant": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld個"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Add": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增"
+          }
+        }
+      }
+    },
+    "Add New Egg": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增蛋"
+          }
+        }
+      }
+    },
+    "Add Record": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增紀錄"
+          }
+        }
+      }
+    },
+    "Add Tag": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增標籤"
+          }
+        }
+      }
+    },
+    "Add · Free": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增 · 免費"
+          }
+        }
+      }
+    },
+    "All Users’ Focus Time": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有使用者的專注時間"
+          }
+        }
+      }
+    },
+    "Awaiting approval.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待核准中。"
+          }
+        }
+      }
+    },
+    "Bean": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "豆豆"
+          }
+        }
+      }
+    },
+    "Black Egg": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "黑色的蛋"
+          }
+        }
+      }
+    },
+    "Boxy": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "方方"
+          }
+        }
+      }
+    },
+    "Buy · %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "購買 · %@"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消"
+          }
+        }
+      }
+    },
+    "Change tag": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更換標籤"
+          }
+        }
+      }
+    },
+    "Character": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "角色"
+          }
+        }
+      }
+    },
+    "Characters": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "角色"
+          }
+        }
+      }
+    },
+    "Choose your egg to begin your journey": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選一顆蛋，開始你的旅程"
+          }
+        }
+      }
+    },
+    "Classic": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "經典"
+          }
+        }
+      }
+    },
+    "Close": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "關閉"
+          }
+        }
+      }
+    },
+    "Community total is unavailable. Your focus time is saved and will sync later.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前無法取得社群總時數。你的專注時間已儲存，稍後會同步。"
+          }
+        }
+      }
+    },
+    "Couldn’t Save": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法儲存"
+          }
+        }
+      }
+    },
+    "Couldn’t save. No purchase started.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法儲存，尚未開始購買。"
+          }
+        }
+      }
+    },
+    "Daily Average": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每日平均"
+          }
+        }
+      }
+    },
+    "Day": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日"
+          }
+        }
+      }
+    },
+    "Delete": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除"
+          }
+        }
+      }
+    },
+    "Delete Record": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除紀錄"
+          }
+        }
+      }
+    },
+    "Done": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成"
+          }
+        }
+      }
+    },
+    "Drop": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "水滴"
+          }
+        }
+      }
+    },
+    "Duration": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時長"
+          }
+        }
+      }
+    },
+    "Edit Record": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "編輯紀錄"
+          }
+        }
+      }
+    },
+    "Edit record": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "編輯紀錄"
+          }
+        }
+      }
+    },
+    "End": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "結束"
+          }
+        }
+      }
+    },
+    "Every egg brings a new friend.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每顆蛋都會帶來一位新朋友。"
+          }
+        }
+      }
+    },
+    "Focus": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "專注"
+          }
+        }
+      }
+    },
+    "Focus %@ more to evolve": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再專注%@即可進化"
+          }
+        }
+      }
+    },
+    "Focus Duration": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "專注時長"
+          }
+        }
+      }
+    },
+    "Focus Time": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "專注時間"
+          }
+        }
+      }
+    },
+    "Focus for 10 hours to hatch a new friend.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "專注10小時，孵出一位新朋友。"
+          }
+        }
+      }
+    },
+    "Focus time distribution in %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "專注時間分布（%@）"
+          }
+        }
+      }
+    },
+    "Focus together": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一起專注"
+          }
+        }
+      }
+    },
+    "Focused for %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已專注%@"
+          }
+        }
+      }
+    },
+    "Hatch a new friend!": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "孵出新朋友！"
+          }
+        }
+      }
+    },
+    "Hello, %@! Your egg hatched!": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你好，%@！你的蛋孵化了！"
+          }
+        }
+      }
+    },
+    "Hours": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "小時"
+          }
+        }
+      }
+    },
+    "Language": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "語言"
+          }
+        }
+      }
+    },
+    "Let’s focus!": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開始專注吧！"
+          }
+        }
+      }
+    },
+    "Let’s go!": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "出發！"
+          }
+        }
+      }
+    },
+    "Level Up!  Lv %lld → Lv %lld": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升級了！Lv %1$lld → Lv %2$lld"
+          }
+        }
+      }
+    },
+    "Liquid Glass": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "液態玻璃"
+          }
+        }
+      }
+    },
+    "Live Activity": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即時動態"
+          }
+        }
+      }
+    },
+    "Loading…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "載入中…"
+          }
+        }
+      }
+    },
+    "Lv %lld · %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lv %1$lld · %2$@"
+          }
+        }
+      }
+    },
+    "Minutes": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分鐘"
+          }
+        }
+      }
+    },
+    "Mochi": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "麻糬"
+          }
+        }
+      }
+    },
+    "Month": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月"
+          }
+        }
+      }
+    },
+    "Monthly Focus Calendar": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每月專注日曆"
+          }
+        }
+      }
+    },
+    "Name": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名稱"
+          }
+        }
+      }
+    },
+    "New Egg": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新的蛋"
+          }
+        }
+      }
+    },
+    "Next": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下一步"
+          }
+        }
+      }
+    },
+    "Next Period": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下一段"
+          }
+        }
+      }
+    },
+    "No Records": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有紀錄"
+          }
+        }
+      }
+    },
+    "No sessions": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有專注紀錄"
+          }
+        }
+      }
+    },
+    "OK": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "好"
+          }
+        }
+      }
+    },
+    "Orb": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圓仔"
+          }
+        }
+      }
+    },
+    "Other": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他"
+          }
+        }
+      }
+    },
+    "Overview": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "總覽"
+          }
+        }
+      }
+    },
+    "Pause": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暫停"
+          }
+        }
+      }
+    },
+    "Paused, %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已暫停，%@"
+          }
+        }
+      }
+    },
+    "Per Active Day": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每個專注日"
+          }
+        }
+      }
+    },
+    "Period": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "期間"
+          }
+        }
+      }
+    },
+    "Please try again.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "請再試一次。"
+          }
+        }
+      }
+    },
+    "Previous": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上一個"
+          }
+        }
+      }
+    },
+    "Previous Period": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上一段"
+          }
+        }
+      }
+    },
+    "Progress to Lv %lld": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "距離Lv %lld的進度"
+          }
+        }
+      }
+    },
+    "Puff": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲雲"
+          }
+        }
+      }
+    },
+    "Purchase failed.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "購買失敗。"
+          }
+        }
+      }
+    },
+    "Purchase saved by Apple. Reopen Den to finish.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple已保存這筆購買。請重新開啟Den以完成。"
+          }
+        }
+      }
+    },
+    "Purchase verification failed.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "購買驗證失敗。"
+          }
+        }
+      }
+    },
+    "Purchases": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "購買"
+          }
+        }
+      }
+    },
+    "Records": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "紀錄"
+          }
+        }
+      }
+    },
+    "Rename": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新命名"
+          }
+        }
+      }
+    },
+    "Resume": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "繼續"
+          }
+        }
+      }
+    },
+    "Save": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "儲存"
+          }
+        }
+      }
+    },
+    "Select Duration": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇時長"
+          }
+        }
+      }
+    },
+    "Sessions": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "次數"
+          }
+        }
+      }
+    },
+    "Settings": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定"
+          }
+        }
+      }
+    },
+    "Sign in to iCloud to include your focus time. Saved time will be contributed when you reconnect.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登入iCloud即可計入你的專注時間。重新連線後，已儲存的時間會一併貢獻。"
+          }
+        }
+      }
+    },
+    "Sold Out": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已售完"
+          }
+        }
+      }
+    },
+    "Start": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開始"
+          }
+        }
+      }
+    },
+    "Start collecting your friends!": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開始收集你的朋友吧！"
+          }
+        }
+      }
+    },
+    "Statistics": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "統計"
+          }
+        }
+      }
+    },
+    "Step %lld of %lld": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "第%1$lld步，共%2$lld步"
+          }
+        }
+      }
+    },
+    "Stopwatch": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正計時"
+          }
+        }
+      }
+    },
+    "Store": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "商店"
+          }
+        }
+      }
+    },
+    "Store unavailable.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "商店目前無法使用。"
+          }
+        }
+      }
+    },
+    "Study": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "學習"
+          }
+        }
+      }
+    },
+    "Study with your little friend.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "和你的小夥伴一起讀書。"
+          }
+        }
+      }
+    },
+    "Surprise inside!": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "裡面有驚喜！"
+          }
+        }
+      }
+    },
+    "Tag": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "標籤"
+          }
+        }
+      }
+    },
+    "Tag, %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "標籤，%@"
+          }
+        }
+      }
+    },
+    "Tags": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "標籤"
+          }
+        }
+      }
+    },
+    "Time": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時間"
+          }
+        }
+      }
+    },
+    "Time is up, %@ over": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時間到，已超過%@"
+          }
+        }
+      }
+    },
+    "Time's up": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時間到了"
+          }
+        }
+      }
+    },
+    "Today": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今天"
+          }
+        }
+      }
+    },
+    "Unable to Save": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法儲存"
+          }
+        }
+      }
+    },
+    "Unavailable": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法使用"
+          }
+        }
+      }
+    },
+    "Version": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "版本"
+          }
+        }
+      }
+    },
+    "Week": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "週"
+          }
+        }
+      }
+    },
+    "Weekly Focus Days": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每週專注天數"
+          }
+        }
+      }
+    },
+    "White Egg": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "白色的蛋"
+          }
+        }
+      }
+    },
+    "Work": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "工作"
+          }
+        }
+      }
+    },
+    "Yay! %@ evolved to Lv %lld!": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "耶！%1$@進化到Lv %2$lld了！"
+          }
+        }
+      }
+    },
+    "Yay! Nicely done!": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "耶！做得好！"
+          }
+        }
+      }
+    },
+    "Yay! One more step forward!": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "耶！又往前一步！"
+          }
+        }
+      }
+    },
+    "Yay! Take a deep breath, you earned it!": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "耶！深呼吸一下，這是你應得的！"
+          }
+        }
+      }
+    },
+    "Yay! That was a great session!": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "耶！這次專注太棒了！"
+          }
+        }
+      }
+    },
+    "Yay! Time well spent!": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "耶！時間花得很值得！"
+          }
+        }
+      }
+    },
+    "Yay! You showed up and it counted!": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "耶！你出現了，而且算數！"
+          }
+        }
+      }
+    },
+    "Year": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "年"
+          }
+        }
+      }
+    },
+    "Yearly Summary": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "年度摘要"
+          }
+        }
+      }
+    },
+    "You focused for": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你專注了"
+          }
+        }
+      }
+    },
+    "Your egg hatched!": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你的蛋孵化了！"
+          }
+        }
+      }
+    },
+    "Your progress could not be saved. Please reopen Den and try again.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法儲存你的進度。請重新開啟Den後再試一次。"
+          }
+        }
+      }
+    },
+    "dancing": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跳舞中"
+          }
+        }
+      }
+    },
+    "focusing with you": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "陪你專注中"
+          }
+        }
+      }
+    },
+    "happy": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開心"
+          }
+        }
+      }
+    },
+    "hours": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "小時"
+          }
+        }
+      }
+    },
+    "minutes": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分鐘"
+          }
+        }
+      }
+    },
+    "none": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無"
+          }
+        }
+      }
+    },
+    "resting": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "休息中"
+          }
+        }
+      }
+    },
+    "sleeping": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "睡覺中"
+          }
+        }
+      }
+    },
+    "total": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "總計"
+          }
+        }
+      }
+    },
+    "—": {
+      "shouldTranslate": false
+    }
+  },
+  "version": "1.0"
+}

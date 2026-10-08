@@ -21,5 +21,5 @@ final class FocusTag {
         self.order = order
     }
 
-    static let defaultNames = ["Study", "Work", "Other"]
+    static let defaultNames = [String(localized: "Study"), String(localized: "Work"), String(localized: "Other")]
 }

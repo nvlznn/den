@@ -45,7 +45,7 @@ final class EggStore {
             }
         }
         do { products = try await Product.products(for: Self.productIDs) }
-        catch { message = "Store unavailable." }
+        catch { message = String(localized: "Store unavailable.") }
     }
 
     func retryUnfinished(context: ModelContext) async {
@@ -82,14 +82,14 @@ final class EggStore {
             context.insert(intent)
             try context.save()
         } catch {
-            message = "Couldn’t save. No purchase started."
+            message = String(localized: "Couldn’t save. No purchase started.")
             return nil
         }
         do {
             switch try await product.purchase(options: [.appAccountToken(intent.id)]) {
             case .success(let result):
                 guard case .verified(let transaction) = result else {
-                    message = "Purchase verification failed."
+                    message = String(localized: "Purchase verification failed.")
                     return nil
                 }
                 guard deliver(transaction, context: context) else { return nil }
@@ -99,7 +99,7 @@ final class EggStore {
                 if intent.isDelivered { return intent.characterID }
                 intent.state = "pending"
                 try context.save()
-                message = "Awaiting approval."
+                message = String(localized: "Awaiting approval.")
             case .userCancelled:
                 if intent.isDelivered { return intent.characterID }
                 intent.state = "cancelled"
@@ -112,7 +112,7 @@ final class EggStore {
             // unfinished transaction still has its intent for recovery.
             intent.state = "cancelled"
             try? context.save()
-            message = "Purchase failed."
+            message = String(localized: "Purchase failed.")
         }
         return nil
     }
@@ -143,7 +143,7 @@ final class EggStore {
             try context.save()
             return true
         } catch {
-            message = "Purchase saved by Apple. Reopen Den to finish."
+            message = String(localized: "Purchase saved by Apple. Reopen Den to finish.")
             return false
         }
     }

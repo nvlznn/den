@@ -127,7 +127,7 @@ struct FocusStats: Sendable {
     }
 
     /// 超過 `limit` 個標籤時，其餘的併成一個「Other」。
-    func foldedTags(limit: Int, otherName: String = "Other") -> [TagShare] {
+    func foldedTags(limit: Int, otherName: String = String(localized: "Other")) -> [TagShare] {
         guard tags.count > limit else { return tags }
         let rest = tags.dropFirst(limit)
         let other = TagShare(

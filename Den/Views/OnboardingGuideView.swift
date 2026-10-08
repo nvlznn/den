@@ -7,11 +7,11 @@ struct OnboardingGuideView: View {
     @State private var step = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private let titles = ["Focus together", "Surprise inside!", "Start collecting your friends!"]
+    private let titles = [String(localized: "Focus together"), String(localized: "Surprise inside!"), String(localized: "Start collecting your friends!")]
     private let captions = [
-        "Study with your little friend.",
-        "Focus for 10 hours to hatch a new friend.",
-        "Every egg brings a new friend.",
+        String(localized: "Study with your little friend."),
+        String(localized: "Focus for 10 hours to hatch a new friend."),
+        String(localized: "Every egg brings a new friend."),
     ]
 
     var body: some View {
@@ -57,7 +57,7 @@ struct OnboardingGuideView: View {
                     withAnimation(reduceMotion ? nil : .easeInOut) { step += 1 }
                 }
             } label: {
-                Text(step == titles.count - 1 ? "Let’s focus!" : "Next")
+                Text(step == titles.count - 1 ? String(localized: "Let’s focus!") : String(localized: "Next"))
                     .font(.headline)
                     .frame(maxWidth: .infinity)
             }

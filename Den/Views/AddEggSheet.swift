@@ -21,9 +21,9 @@ struct AddEggSheet: View {
         (collection.canClaimFreeEgg || store.product != nil)
     }
     private var buttonTitle: String {
-        if collection.canClaimFreeEgg { return "Add · Free" }
-        if let product = store.product { return "Buy · \(product.displayPrice)" }
-        return store.isLoading ? "Loading…" : "Unavailable"
+        if collection.canClaimFreeEgg { return String(localized: "Add · Free") }
+        if let product = store.product { return String(localized: "Buy · \(product.displayPrice)") }
+        return store.isLoading ? String(localized: "Loading…") : String(localized: "Unavailable")
     }
 
     var body: some View {

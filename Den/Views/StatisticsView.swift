@@ -246,18 +246,12 @@ private struct StatsGrid: View {
                 StatCell(title: "Daily Average", value: DurationText.hoursAndMinutes(stats.dailyAverage))
                 StatCell(title: "Per Active Day", value: DurationText.hoursAndMinutes(stats.perActiveDay))
             }
-            if stats.range.period == .year {
-                GridRow {
-                    StatCell(title: "Best Month", value: stats.bestBucket.map(StatsFormat.monthShort) ?? "–")
-                        .gridCellColumns(2)
-                }
-            }
         }
     }
 }
 
 private struct StatCell: View {
-    let title: String
+    let title: LocalizedStringKey
     let value: String
 
     var body: some View {
@@ -284,7 +278,8 @@ private struct DistributionChart: View {
 
     /// 「日」用分鐘，其他用小時。
     private var usesMinutes: Bool { stats.range.period == .day }
-    private var unitName: String { usesMinutes ? "Minutes" : "Hours" }
+    private var unitName: LocalizedStringResource { usesMinutes ? "Minutes" : "Hours" }
+    private var unitNameLowercased: String { usesMinutes ? String(localized: "minutes") : String(localized: "hours") }
 
     private func value(_ bucket: FocusStats.Bucket) -> Double {
         bucket.duration / (usesMinutes ? 60 : 3600)
@@ -336,7 +331,7 @@ private struct DistributionChart: View {
         }
         .frame(height: 220)
         .padding(.vertical, 8)
-        .accessibilityLabel("Focus time distribution in \(unitName.lowercased())")
+        .accessibilityLabel(String(localized: "Focus time distribution in \(unitNameLowercased)"))
     }
 
     @AxisContentBuilder
@@ -372,6 +367,8 @@ private struct BreakdownView: View {
 
     private static let tagLimit = 7
 
+    private static var isChinese: Bool { Locale.current.language.languageCode?.identifier == "zh" }
+
     var body: some View {
         let shares = stats.foldedTags(limit: Self.tagLimit)
 
@@ -390,7 +387,11 @@ private struct BreakdownView: View {
                     let rect = geometry[frame]
                     VStack(spacing: 0) {
                         Text(DurationText.hoursAndMinutes(stats.totalDuration))
-                            .font(.headline)
+                            // 中文字比較寬，同樣的字級會頂到圓環，所以縮小一級。
+                            .font(Self.isChinese ? .subheadline.weight(.semibold) : .headline)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .frame(maxWidth: rect.width * 0.55)
                         Text("total")
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -430,23 +431,24 @@ private struct BreakdownView: View {
 enum StatsFormat {
     private static func formatter(_ format: String) -> DateFormatter {
         let formatter = DateFormatter()
-        formatter.locale = DurationText.locale
-        formatter.dateFormat = format
+        if format.contains(":") {
+            formatter.dateFormat = format
+        } else {
+            formatter.setLocalizedDateFormatFromTemplate(format)
+        }
         return formatter
     }
 
-    private static let monthYear = formatter("MMMM yyyy")
-    private static let year = formatter("yyyy")
-    private static let monthShortFormatter = formatter("MMM")
+    private static let monthYear = formatter("yMMMM")
+    private static let year = formatter("y")
     private static let hourFormatter = formatter("HH:00")
-    private static let weekdayFormatter = formatter("EEE")
 
     static func title(_ period: StatsPeriod) -> String {
         switch period {
-        case .day: "Day"
-        case .week: "Week"
-        case .month: "Month"
-        case .year: "Year"
+        case .day: String(localized: "Day")
+        case .week: String(localized: "Week")
+        case .month: String(localized: "Month")
+        case .year: String(localized: "Year")
         }
     }
 
@@ -454,9 +456,9 @@ enum StatsFormat {
     static func summaryTitle(_ period: StatsPeriod) -> String? {
         switch period {
         case .day: nil
-        case .week: "Weekly Focus Days"
-        case .month: "Monthly Focus Calendar"
-        case .year: "Yearly Summary"
+        case .week: String(localized: "Weekly Focus Days")
+        case .month: String(localized: "Monthly Focus Calendar")
+        case .year: String(localized: "Yearly Summary")
         }
     }
 
@@ -478,19 +480,15 @@ enum StatsFormat {
         }
     }
 
-    static func monthShort(_ date: Date) -> String {
-        monthShortFormatter.string(from: date)
-    }
-
     /// 「S」「M」「T」…
     static func weekdayInitial(_ date: Date) -> String {
-        String(weekdayFormatter.string(from: date).prefix(1))
+        let calendar = Calendar.current
+        return calendar.veryShortStandaloneWeekdaySymbols[calendar.component(.weekday, from: date) - 1]
     }
 
     /// 依日曆的一週起始日排好的星期縮寫。
     static func weekdayInitials() -> [EnumeratedSequence<[String]>.Element] {
         var calendar = Calendar.current
-        calendar.locale = DurationText.locale
         let symbols = calendar.veryShortStandaloneWeekdaySymbols
         let first = calendar.firstWeekday - 1
         return Array((symbols[first...] + symbols[..<first]).enumerated())
@@ -504,6 +502,6 @@ enum StatsFormat {
 
     static func dayAccessibility(_ day: FocusStats.Bucket) -> String {
         let date = RecordFormat.day(day.start)
-        return day.duration > 0 ? "\(date), \(DurationText.hoursAndMinutes(day.duration))" : "\(date), no focus"
+        return day.duration > 0 ? String(localized: "\(date), \(DurationText.hoursAndMinutes(day.duration))") : String(localized: "\(date), no focus")
     }
 }

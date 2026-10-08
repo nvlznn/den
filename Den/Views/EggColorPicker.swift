@@ -36,7 +36,7 @@ struct EggColorPicker: View {
                 .buttonStyle(.plain)
                 .disabled(remaining == 0)
                 .opacity(remaining == 0 ? 0.65 : 1)
-                .accessibilityLabel(remaining == 0 ? "\(color.name), sold out" : "\(color.name), \(remaining) remaining")
+                .accessibilityLabel(remaining == 0 ? String(localized: "\(color.name), sold out") : String(localized: "\(color.name), \(remaining) remaining"))
                 .accessibilityAddTraits(selection == color ? .isSelected : [])
             }
         }
