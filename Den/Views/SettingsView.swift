@@ -61,6 +61,11 @@ struct SettingsView: View {
                 Section {
                     LabeledContent("Version", value: appVersion)
                 }
+                #if DEBUG
+                Section {
+                    NavigationLink { PreviewMenu() } label: { Text(verbatim: "Preview") }
+                }
+                #endif
             }
             .navigationTitle("Settings")
             .onAppear { displayedSeconds = community.totalSeconds }
