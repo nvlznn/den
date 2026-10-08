@@ -13,7 +13,6 @@ final class FocusController {
     var happySince: Date?
     /// 專注結束後要顯示的慶祝畫面。
     var celebration: Celebration?
-    private var hatchedDuringSession = false
 
     // Haptic 觸發器
     private(set) var petTaps = 0
@@ -29,7 +28,6 @@ final class FocusController {
     // MARK: 開始與結束
 
     func start(focusMinutes: Int, tag: FocusTag?, character: PetCharacter, displayCharacterID: String? = nil) {
-        hatchedDuringSession = false
         let mode = TimerMode(focusMinutes: focusMinutes)
         timer.start(mode, tagID: tag?.id, characterID: character.id)
         starts += 1
@@ -111,24 +109,6 @@ final class FocusController {
         petTaps += 1
     }
 
-    /// Reveal as soon as an active egg reaches Lv 1 in the foreground.
-    func hatchActiveEgg(totalSeconds: TimeInterval, context: ModelContext) {
-        guard let active = timer.active, let id = active.characterID,
-              let library = CharacterLibrary.current(in: context) else { return }
-        let previous = library.collection
-        var collection = previous
-        guard collection.hatch(id, totalSeconds: totalSeconds) else { return }
-        library.collection = collection
-        do {
-            try context.save()
-            hatchedDuringSession = true
-            happySince = .now
-            LiveActivityController.update(for: active, displayCharacterID: id)
-        } catch {
-            library.collection = previous
-        }
-    }
-
     // MARK: 存檔
 
     /// 不到 1 分鐘的直接丟掉，不顯示任何畫面。存好之後顯示慶祝畫面。
@@ -164,8 +144,8 @@ final class FocusController {
         var name = PetSprites.character(id: displayID).name
         if let library = CharacterLibrary.current(in: context) {
             var collection = library.collection
-            let hatchedNow = collection.hatch(characterID, totalSeconds: after.totalSeconds)
-            didHatch = hatchedNow || hatchedDuringSession
+            // 專注中滿 10 小時也不會先孵，按 End 才孵。
+            didHatch = collection.hatch(characterID, totalSeconds: after.totalSeconds)
             library.collection = collection
             try? context.save()
             displayID = collection.displayID(for: characterID)

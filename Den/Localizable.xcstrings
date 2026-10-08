@@ -538,12 +538,32 @@
         }
       }
     },
+    "End the session to hatch!": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "結束專注就能孵化！"
+          }
+        }
+      }
+    },
+    "End the session to level up!": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "結束專注就能升級！"
+          }
+        }
+      }
+    },
     "Every egg brings a new friend.": {
       "localizations": {
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "每顆蛋都會帶來一位新朋友。"
+            "value": "每顆蛋都會帶來一位新夥伴。"
           }
         }
       }
@@ -593,7 +613,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "專注10小時，孵出一位新朋友。"
+            "value": "專注10小時，孵出一位新夥伴。"
           }
         }
       }
@@ -633,17 +653,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "孵出新朋友！"
-          }
-        }
-      }
-    },
-    "Hello, %@! Your egg hatched!": {
-      "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "你好，%@！你的蛋孵化了！"
+            "value": "孵出新夥伴！"
           }
         }
       }
@@ -1123,7 +1133,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "開始收集你的朋友吧！"
+            "value": "開始收集你的夥伴吧！"
           }
         }
       }
@@ -1334,6 +1344,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "每週專注天數"
+          }
+        }
+      }
+    },
+    "Welcome to Den": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "歡迎來到 Den"
           }
         }
       }

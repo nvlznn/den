@@ -17,8 +17,6 @@ struct HomeView: View {
     @State private var isChoosingTag = false
     @State private var isConfirmingAbort = false
     @State private var isChoosingDuration = false
-    /// 專注中跨過一級的那一刻，LCD 放一次煙火。
-    @State private var levelUpSince: Date?
 
     private var timer: FocusTimer { controller.timer }
 
@@ -32,17 +30,21 @@ struct HomeView: View {
         return PetSprites.character(id: id)
     }
 
-    /// 每個角色的等級各自計算。專注中也把正在進行的這一段算進去，所以會每秒跟著變。
-    private func level(at date: Date) -> Level {
-        let saved = Level.totalSeconds(
+    /// 每個角色的等級各自計算。這是已經存下來的部分，LCD 上的 Lv 看這個：專注中不會升級，按 End 才升。
+    private var savedLevel: Level {
+        Level(totalSeconds: Level.totalSeconds(
             of: character.id,
             defaultID: PetSprites.defaultCharacterID,
             in: sessions,
             characterOf: \.characterID,
             isManual: \.isManual,
             duration: \.duration
-        )
-        return Level(totalSeconds: saved + (timer.active?.elapsed(at: date) ?? 0))
+        ))
+    }
+
+    /// 專注中也把正在進行的這一段算進去，進度條才會每秒跟著變。
+    private func level(at date: Date) -> Level {
+        Level(totalSeconds: savedLevel.totalSeconds + (timer.active?.elapsed(at: date) ?? 0))
     }
 
     /// 一定有一個標籤：沒選或選的已經被刪掉時，用第一個。
@@ -59,29 +61,23 @@ struct HomeView: View {
     var body: some View {
         List {
             Section {
-                // 每秒更新一次，專注中的 Lv 才會即時變化。TimelineView 放在內容裡，
-                // 不要包住整個 Section，不然 List 會把進度條和文字整個框進灰色的卡片。
-                TimelineView(.periodic(from: .now, by: 1)) { context in
-                    LCDScreenView(
-                        character: displayedCharacter,
-                        level: level(at: context.date).number,
-                        pet: PetState(isTiming: timer.isRunning, happySince: controller.happySince),
-                        levelUpSince: levelUpSince,
-                        onPetTap: controller.petTapped
-                    )
-                    .onChange(of: level(at: context.date).number, initial: true) { old, number in
-                        if number > old, timer.isRunning { levelUpSince = .now }
-                        guard number >= 1 else { return }
-                        controller.hatchActiveEgg(totalSeconds: level(at: context.date).totalSeconds, context: modelContext)
-                    }
-                }
+                LCDScreenView(
+                    character: displayedCharacter,
+                    level: savedLevel.number,
+                    pet: PetState(isTiming: timer.isRunning, happySince: controller.happySince),
+                    levelUpSince: nil,
+                    onPetTap: controller.petTapped
+                )
                 .aspectRatio(1, contentMode: .fit)
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
             } footer: {
-                // 進度條和剩餘時間也每秒更新。
+                // 進度條和剩餘時間每秒更新。TimelineView 放在內容裡，
+                // 不要包住整個 Section，不然 List 會把進度條和文字整個框進灰色的卡片。
                 TimelineView(.periodic(from: .now, by: 1)) { context in
-                    levelProgress(level(at: context.date))
+                    let level = level(at: context.date)
+                    LevelProgressView(level: level, isEgg: displayedCharacter.isEgg, isLevelUpPending: level.number > savedLevel.number)
+                        .padding(.top, 12)
                 }
             }
 
@@ -134,22 +130,6 @@ struct HomeView: View {
         .sheet(isPresented: $isChoosingDuration) {
             DurationSheet(minutes: $focusMinutes)
         }
-    }
-
-    private func levelProgress(_ level: Level) -> some View {
-        // 剩下的時間無條件進位到分鐘，避免最後一分鐘顯示「0 min」。
-        let minutesLeft = (level.secondsToNext / 60).rounded(.up) * 60
-        let timeLeft = DurationText.hoursAndMinutes(minutesLeft)
-
-        return VStack(alignment: .leading, spacing: 8) {
-            SegmentedProgressBar(progress: level.progressToNext)
-                .frame(height: 18)
-            Text(displayedCharacter.isEgg ? String(localized: "\(timeLeft) to hatch") : String(localized: "\(timeLeft) to Lv \(level.number + 1)"))
-        }
-        .padding(.top, 12)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Progress to Lv \(level.number + 1)")
-        .accessibilityValue("Focus \(timeLeft) more to evolve")
     }
 
     @ViewBuilder
@@ -211,6 +191,34 @@ struct HomeView: View {
             .buttonBorderShape(.capsule)
             .controlSize(.extraLarge)
         }
+    }
+}
+
+/// LCD 下面的進度條和還要多久升級。
+/// 專注中跨過一級時不會馬上升級：進度條停在全滿，提醒按 End 才升。
+struct LevelProgressView: View {
+    let level: Level
+    let isEgg: Bool
+    let isLevelUpPending: Bool
+
+    var body: some View {
+        // 剩下的時間無條件進位到分鐘，避免最後一分鐘顯示「0 min」。
+        let minutesLeft = (level.secondsToNext / 60).rounded(.up) * 60
+        let timeLeft = DurationText.hoursAndMinutes(minutesLeft)
+        let text = if isLevelUpPending {
+            isEgg ? String(localized: "End the session to hatch!") : String(localized: "End the session to level up!")
+        } else {
+            isEgg ? String(localized: "\(timeLeft) to hatch") : String(localized: "\(timeLeft) to Lv \(level.number + 1)")
+        }
+
+        VStack(alignment: .leading, spacing: 8) {
+            SegmentedProgressBar(progress: isLevelUpPending ? 1 : level.progressToNext)
+                .frame(height: 18)
+            Text(text)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(isLevelUpPending ? Text(text) : Text("Progress to Lv \(level.number + 1)"))
+        .accessibilityValue(isLevelUpPending ? Text(verbatim: "") : Text("Focus \(timeLeft) more to evolve"))
     }
 }
 

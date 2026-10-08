@@ -26,6 +26,7 @@ struct CelebrationView: View {
                 pet: PetState(isTiming: false),
                 levelUpSince: celebration.didLevelUp ? appearedAt : nil,
                 activityOverride: .dancing,
+                keepsCelebrating: true,
                 onPetTap: {}
             )
             .aspectRatio(1, contentMode: .fit)
@@ -33,8 +34,9 @@ struct CelebrationView: View {
             Spacer(minLength: 0)
 
             VStack(spacing: 8) {
-                if celebration.didLevelUp {
-                    Label(celebration.didHatch ? String(localized: "Your egg hatched!") : String(localized: "Level Up!  Lv \(celebration.levelBefore) → Lv \(celebration.levelAfter)"), systemImage: "sparkles")
+                // 孵化的話下面那句已經寫了，這裡不重複。
+                if celebration.didLevelUp && !celebration.didHatch {
+                    Label("Level Up!  Lv \(celebration.levelBefore) → Lv \(celebration.levelAfter)", systemImage: "sparkles")
                         .font(.headline)
                         .foregroundStyle(.tint)
                         .symbolEffect(.bounce, value: showsLevelUp)

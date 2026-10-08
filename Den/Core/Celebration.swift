@@ -27,7 +27,7 @@ struct Celebration: Identifiable, Equatable, Sendable {
         self.levelBefore = levelBefore
         self.levelAfter = levelAfter
         self.didHatch = didHatch
-        message = didHatch ? String(localized: "Hello, \(characterName)! Your egg hatched!") : levelAfter > levelBefore
+        message = didHatch ? String(localized: "Your egg hatched!") : levelAfter > levelBefore
             ? String(localized: "Yay! \(characterName) evolved to Lv \(levelAfter)!")
             : Self.messages.randomElement() ?? Self.messages[0]
     }

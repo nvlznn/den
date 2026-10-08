@@ -44,7 +44,7 @@ struct RootView: View {
             }
         }
         .animation(.default, value: controller.timer.isRunning)
-        .sheet(isPresented: $guidePending) {
+        .fullScreenCover(isPresented: $guidePending) {
             OnboardingGuideView(eggColor: EggColor.of(characterID: characterID) ?? .white) {
                 guidePending = false
             }

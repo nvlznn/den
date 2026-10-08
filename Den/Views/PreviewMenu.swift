@@ -11,6 +11,7 @@ struct PreviewMenu: View {
         case levelUp = "Level Up"
         case sessionDone = "Session Done"
         case focusLevelUp = "Level Up While Focusing"
+        case focusHatch = "Hatch While Focusing"
 
         var id: Self { self }
     }
@@ -40,7 +41,9 @@ struct PreviewMenu: View {
         case .sessionDone:
             CelebrationView(celebration: Celebration(characterID: "fangfang", duration: 1500, levelBefore: 3, levelAfter: 3, characterName: "Boxy")) { _ in close() }
         case .focusLevelUp:
-            FocusLevelUpPreview(onClose: close)
+            FocusLevelUpPreview(characterID: "fangfang", onClose: close)
+        case .focusHatch:
+            FocusLevelUpPreview(characterID: "egg.white", onClose: close)
         }
     }
 }
@@ -96,7 +99,7 @@ private struct FirstLaunchFlow: View {
     var body: some View {
         FirstEggView(library: library, selectedCharacterID: $characterID)
             .overlay(alignment: .topTrailing) { CloseButton(action: onClose) }
-            .sheet(isPresented: $guidePending) {
+            .fullScreenCover(isPresented: $guidePending) {
                 OnboardingGuideView(eggColor: EggColor.of(characterID: characterID) ?? .white) {
                     guidePending = false
                     onClose()
@@ -105,21 +108,29 @@ private struct FirstLaunchFlow: View {
     }
 }
 
-/// 專注中跨過一級時 LCD 的煙火。點 LCD 重播。
+/// 專注中跨過一級：等級不變、不放煙火，進度條停在全滿，提醒按 End 才升。
 private struct FocusLevelUpPreview: View {
+    let characterID: String
     let onClose: () -> Void
-    @State private var since = Date.now
+    @State private var happySince: Date?
 
     var body: some View {
-        VStack {
+        let character = PetSprites.character(id: characterID)
+        let level = character.isEgg ? 0 : 2
+        VStack(spacing: 12) {
             LCDScreenView(
-                character: PetSprites.character(id: "fangfang"),
-                level: 3,
-                pet: PetState(isTiming: true),
-                levelUpSince: since,
-                onPetTap: { since = .now }
+                character: character,
+                level: level,
+                pet: PetState(isTiming: true, happySince: happySince),
+                levelUpSince: nil,
+                onPetTap: { happySince = .now }
             )
             .aspectRatio(1, contentMode: .fit)
+            LevelProgressView(
+                level: Level(totalSeconds: Double(level + 1) * Level.secondsPerLevel + 600),
+                isEgg: character.isEgg,
+                isLevelUpPending: true
+            )
             Spacer()
         }
         .padding()

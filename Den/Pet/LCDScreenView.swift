@@ -12,6 +12,8 @@ struct LCDScreenView: View {
     let levelUpSince: Date?
     /// 指定的話就一直做這件事（慶祝畫面用），不看時間與計時狀態。
     var activityOverride: PetActivity?
+    /// 慶祝畫面用：`UP!` 一直留著，煙火一波接一波放個不停。
+    var keepsCelebrating = false
     let onPetTap: () -> Void
 
     private static let levelFlashDuration: TimeInterval = 1.2
@@ -62,7 +64,7 @@ struct LCDScreenView: View {
         }
         if let elapsed = levelUpElapsed(at: date) {
             let center = PixelPoint(x: petOrigin.x + PetSprites.size / 2, y: petOrigin.y + PetSprites.size / 2)
-            for (sparkle, point) in Self.sparkles(around: center, elapsed: elapsed) {
+            for (sparkle, point) in Self.sparkles(around: center, elapsed: elapsed, waves: keepsCelebrating ? nil : 3) {
                 grid.stamp(sparkle, at: point)
             }
         }
@@ -95,7 +97,8 @@ struct LCDScreenView: View {
     private func levelUpElapsed(at date: Date) -> TimeInterval? {
         guard let levelUpSince else { return nil }
         let elapsed = date.timeIntervalSince(levelUpSince)
-        return (0..<Self.levelUpDuration).contains(elapsed) ? elapsed : nil
+        guard elapsed >= 0 else { return nil }
+        return keepsCelebrating || elapsed < Self.levelUpDuration ? elapsed : nil
     }
 
     /// 平常一直顯示；升級後的 1.2 秒內熄、亮、熄、亮。
@@ -104,15 +107,21 @@ struct LCDScreenView: View {
         return Int(elapsed / (Self.levelFlashDuration / 4)) % 2 == 1
     }
 
-    /// 三波煙火，每波 8 顆從寵物身邊往外飛：先是十字星，飛遠了縮成一點。
-    /// 相鄰兩波錯開 22.5°，看起來才像一閃一閃。
-    private static func sparkles(around center: PixelPoint, elapsed: TimeInterval) -> [([String], PixelPoint)] {
+    /// 每 0.55 秒一波煙火，每波 8 顆從寵物身邊往外飛：先是十字星，飛遠了縮成一點。
+    /// 相鄰兩波錯開 22.5°，看起來才像一閃一閃。`waves` 是 nil 就一直放下去。
+    private static func sparkles(around center: PixelPoint, elapsed: TimeInterval, waves: Int?) -> [([String], PixelPoint)] {
         let star = [".#.", "###", ".#."]
         let dot = ["#"]
+        let waveGap: TimeInterval = 0.55
         let waveLength: TimeInterval = 0.9
+        // 這一刻還在飛的那幾波。
+        let first = max(0, Int(((elapsed - waveLength) / waveGap).rounded(.down)) + 1)
+        var last = Int((elapsed / waveGap).rounded(.down))
+        if let waves { last = min(last, waves - 1) }
+        guard first <= last else { return [] }
         var result: [([String], PixelPoint)] = []
-        for wave in 0..<3 {
-            let t = (elapsed - Double(wave) * 0.55) / waveLength
+        for wave in first...last {
+            let t = (elapsed - Double(wave) * waveGap) / waveLength
             guard (0..<1).contains(t) else { continue }
             let radius = 11 + t * 12
             let sprite = t < 0.6 ? star : dot
