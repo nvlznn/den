@@ -15,9 +15,11 @@ struct FocusActivityAttributes: ActivityAttributes {
         var pausedText: String?
         var appearance: String? = nil
         var displayCharacterID: String? = nil
+        /// 專注中換標籤後的名字；沒有就用 `FocusActivityAttributes.tagName`。
+        var tagName: String? = nil
     }
 
-    /// 開始時選的標籤。
+    /// 開始時選的標籤（中途換標籤看 `ContentState.tagName`）。
     var tagName: String?
     /// 陪著專注的角色，動態島上畫的就是牠。
     var characterID: String?

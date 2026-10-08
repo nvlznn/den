@@ -13,7 +13,7 @@ enum LiveActivityController {
     }
 
     /// 暫停或繼續之後，把新的時間資料送給 Live Activity。
-    static func update(for session: ActiveSession, displayCharacterID: String? = nil) {
+    static func update(for session: ActiveSession, displayCharacterID: String? = nil, tagName: String? = nil) {
         let content = content(for: session)
         let ids = Set(Activity<FocusActivityAttributes>.activities.map(\.id))
         guard !ids.isEmpty else { return }
@@ -21,6 +21,7 @@ enum LiveActivityController {
             for activity in Activity<FocusActivityAttributes>.activities where ids.contains(activity.id) {
                 var state = content.state
                 state.displayCharacterID = displayCharacterID ?? activity.content.state.displayCharacterID
+                state.tagName = tagName ?? activity.content.state.tagName
                 await activity.update(ActivityContent(state: state, staleDate: content.staleDate))
             }
         }

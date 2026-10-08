@@ -227,6 +227,20 @@ struct FocusTimerTests {
         #expect(finished.shortened(to: 60).characterID == "orb")
     }
 
+    @Test func changingTagMidSessionKeepsTheLastTagInRecord() throws {
+        let first = UUID(), second = UUID()
+        let timer = FocusTimer(defaults: defaults)
+        timer.start(.stopwatch, tagID: first, characterID: "orb", at: start)
+        timer.setTag(second)
+
+        let relaunched = FocusTimer(defaults: defaults)
+        #expect(relaunched.active?.tagID == second)
+        #expect(relaunched.active?.startedAt == start)
+        let finished = try #require(relaunched.end(at: start.addingTimeInterval(600)))
+        #expect(finished.tagID == second)
+        #expect(finished.characterID == "orb")
+    }
+
     /// 舊版存下、沒有 tagID 的計時也要讀得回來。
     @Test func decodesSessionSavedBeforeTags() throws {
         let json = #"{"startedAt": 800000000, "mode": {"stopwatch": {}}}"#

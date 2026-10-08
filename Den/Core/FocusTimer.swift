@@ -6,7 +6,7 @@ import Observation
 struct ActiveSession: Codable, Hashable, Sendable {
     let startedAt: Date
     let mode: TimerMode
-    /// 開始時選的標籤。
+    /// 目前選的標籤；專注中可以換，紀錄歸在結束時的標籤。
     var tagID: UUID?
     /// 開始時陪著的角色。
     var characterID: String?
@@ -132,6 +132,13 @@ final class FocusTimer {
 
     func start(_ mode: TimerMode, tagID: UUID? = nil, characterID: String? = nil, at now: Date = .now) {
         save(ActiveSession(startedAt: now, mode: mode, tagID: tagID, characterID: characterID))
+    }
+
+    /// 換標籤。紀錄歸在結束時的標籤，所以中途換了就以最後一個為準。
+    func setTag(_ tagID: UUID?) {
+        guard var active, active.tagID != tagID else { return }
+        active.tagID = tagID
+        save(active)
     }
 
     /// 暫停。已經在暫停就不動。

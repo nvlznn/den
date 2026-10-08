@@ -43,6 +43,15 @@ final class FocusController {
         }
     }
 
+    /// 專注中換標籤，紀錄會歸在最後選的標籤。
+    func changeTag(to tag: FocusTag?) {
+        guard timer.active != nil else { return }
+        timer.setTag(tag?.id)
+        if let active = timer.active {
+            LiveActivityController.update(for: active, tagName: tag?.name)
+        }
+    }
+
     /// 暫停或繼續。暫停時取消倒數的通知（時間凍結了），繼續時依剩餘時間重新排。
     func togglePause() {
         guard let active = timer.active else { return }

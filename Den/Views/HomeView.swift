@@ -83,7 +83,9 @@ struct HomeView: View {
 
             if let active = timer.active {
                 Section {
-                    RunningTime(session: active, tagName: tagName(for: active))
+                    RunningTime(session: active, tagName: tagName(for: active)) {
+                        isChoosingTag = true
+                    }
                         .frame(maxWidth: .infinity)
                         .listRowBackground(Color.clear)
                 }
@@ -115,7 +117,7 @@ struct HomeView: View {
             CharacterSheet(characterID: $characterID)
         }
         .sheet(isPresented: $isChoosingTag) {
-            TagSheet(selectedTagID: $selectedTagID)
+            TagSheet(selectedTagID: tagSelection)
         }
         .sheet(isPresented: $isChoosingDuration) {
             DurationSheet(minutes: $focusMinutes)
@@ -182,6 +184,18 @@ struct HomeView: View {
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.capsule)
             .controlSize(.extraLarge)
+        }
+    }
+
+    /// 專注中選標籤是換進行中計時的標籤，同時記成下次的預設；沒在專注就只是改預設。
+    private var tagSelection: Binding<String> {
+        Binding {
+            timer.active?.tagID?.uuidString ?? selectedTagID
+        } set: { newID in
+            selectedTagID = newID
+            if timer.isRunning {
+                controller.changeTag(to: tags.first { $0.id.uuidString == newID })
+            }
         }
     }
 
@@ -253,6 +267,8 @@ private struct SettingRow: View {
 private struct RunningTime: View {
     let session: ActiveSession
     let tagName: String?
+    /// 點標籤名字：專注中換標籤，紀錄歸在結束時的標籤。
+    let onTagTap: () -> Void
 
     @ScaledMetric(relativeTo: .largeTitle) private var fontSize: CGFloat = 76
 
@@ -271,13 +287,17 @@ private struct RunningTime: View {
                     .foregroundStyle(session.isPaused ? Color.secondary : Color.primary)
                     .accessibilityLabel(accessibilityText(seconds, overtime: overtime))
             }
-            if let tagName {
-                Text(tagName)
+            Button(action: onTagTap) {
+                Text(tagName ?? "–")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Tag, \(tagName ?? "none")")
+            .accessibilityHint("Change tag")
         }
         .padding(.top, 32)
     }

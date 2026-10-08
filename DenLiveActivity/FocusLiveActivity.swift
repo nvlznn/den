@@ -21,7 +21,7 @@ struct FocusLiveActivity: Widget {
                         .padding(.trailing, 4)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text(context.state.pausedAt != nil ? "Paused" : (context.attributes.tagName ?? (context.state.endsAt == nil ? "Stopwatch" : "Countdown")))
+                    Text(context.state.pausedAt != nil ? "Paused" : (context.state.tagName ?? context.attributes.tagName ?? (context.state.endsAt == nil ? "Stopwatch" : "Countdown")))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -68,7 +68,7 @@ private struct LockScreenView: View {
                 .background(LCDPalette.background, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
             // 只留標籤名字，靠左、放大；沒有標籤時寫 Focus；暫停時改寫 Paused。
-            Text(state.pausedAt != nil ? "Paused" : (attributes.tagName ?? "Focus"))
+            Text(state.pausedAt != nil ? "Paused" : (state.tagName ?? attributes.tagName ?? "Focus"))
                 .font(.title2.weight(.semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
