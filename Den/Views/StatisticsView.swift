@@ -488,7 +488,7 @@ enum StatsFormat {
 
     /// 依日曆的一週起始日排好的星期縮寫。
     static func weekdayInitials() -> [EnumeratedSequence<[String]>.Element] {
-        var calendar = Calendar.current
+        let calendar = Calendar.current
         let symbols = calendar.veryShortStandaloneWeekdaySymbols
         let first = calendar.firstWeekday - 1
         return Array((symbols[first...] + symbols[..<first]).enumerated())

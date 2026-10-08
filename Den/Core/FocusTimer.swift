@@ -92,6 +92,25 @@ struct FinishedSession: Hashable, Sendable {
 
     var isWorthKeeping: Bool { duration >= Self.minimumDuration }
 
+    /// 扣掉已經存在的紀錄佔掉的時間，只留下空著的時段（可能不只一段）。
+    /// 兩台裝置同時計時時，先結束的紀錄是完整的，後結束的只填剩下的空檔。
+    /// 不到最短時長的零碎空檔直接丟掉。
+    func fillingGaps(around taken: [DateInterval]) -> [FinishedSession] {
+        var gaps: [(start: Date, end: Date)] = []
+        var cursor = startedAt
+        for interval in taken.sorted(by: { $0.start < $1.start }) {
+            guard interval.end > cursor else { continue }
+            if interval.start >= endedAt { break }
+            if interval.start > cursor { gaps.append((cursor, interval.start)) }
+            cursor = interval.end
+            if cursor >= endedAt { break }
+        }
+        if cursor < endedAt { gaps.append((cursor, endedAt)) }
+        return gaps
+            .map { FinishedSession(startedAt: $0.start, endedAt: $0.end, tagID: tagID, characterID: characterID) }
+            .filter(\.isWorthKeeping)
+    }
+
     /// 把時長往下修正（忘記按結束、睡著了）。不能往上調。
     func shortened(to newDuration: TimeInterval) -> FinishedSession {
         let clamped = min(max(0, newDuration), duration)

@@ -118,6 +118,13 @@ final class FocusController {
         // 每個角色的等級各自計算，升級也只看這一隻。
         let characterID = finished.characterID ?? PetSprites.defaultCharacterID
         let sessions = (try? context.fetch(FetchDescriptor<FocusSession>())) ?? []
+
+        // 兩台裝置同時計時時，已經同步進來的紀錄是完整的，這一筆只填剩下的空檔。
+        let taken = sessions.filter { !$0.isManual && $0.endedAt > $0.startedAt }
+            .map { DateInterval(start: $0.startedAt, end: $0.endedAt) }
+        let pieces = finished.fillingGaps(around: taken)
+        guard !pieces.isEmpty else { return }
+        let duration = pieces.reduce(0) { $0 + $1.duration }
         let before = Level(totalSeconds: Level.totalSeconds(
             of: characterID,
             defaultID: PetSprites.defaultCharacterID,
@@ -127,18 +134,21 @@ final class FocusController {
             duration: \.duration
         ))
 
-        let record = FocusSession(
-            startedAt: finished.startedAt,
-            endedAt: finished.endedAt,
-            // 標籤被刪掉了或找不到時，補第一個，每筆紀錄一定要有標籤。
-            tag: tag(withID: finished.tagID, context: context) ?? TagMaintenance.fallbackTag(context: context),
-            characterID: characterID
-        )
-        context.insert(record)
-        FocusContribution.capture(record, context: context)
+        // 標籤被刪掉了或找不到時，補第一個，每筆紀錄一定要有標籤。
+        let sessionTag = tag(withID: finished.tagID, context: context) ?? TagMaintenance.fallbackTag(context: context)
+        for piece in pieces {
+            let record = FocusSession(
+                startedAt: piece.startedAt,
+                endedAt: piece.endedAt,
+                tag: sessionTag,
+                characterID: characterID
+            )
+            context.insert(record)
+            FocusContribution.capture(record, context: context)
+        }
         try? context.save()
 
-        let after = Level(totalSeconds: before.totalSeconds + finished.duration)
+        let after = Level(totalSeconds: before.totalSeconds + duration)
         var didHatch = false
         var displayID = "egg"
         var name = PetSprites.character(id: displayID).name
@@ -153,7 +163,7 @@ final class FocusController {
         }
         celebration = Celebration(
             characterID: displayID,
-            duration: finished.duration,
+            duration: duration,
             levelBefore: before.number,
             levelAfter: after.number,
             characterName: name,

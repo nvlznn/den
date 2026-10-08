@@ -260,3 +260,76 @@ struct FocusTimerTests {
         #expect(timer.active?.startedAt == start)
     }
 }
+
+@MainActor
+struct FillingGapsTests {
+    let start = Date(timeIntervalSinceReferenceDate: 800_000_000)
+
+    private func interval(_ from: TimeInterval, _ to: TimeInterval) -> DateInterval {
+        DateInterval(start: start.addingTimeInterval(from), end: start.addingTimeInterval(to))
+    }
+
+    private func finished(_ from: TimeInterval, _ to: TimeInterval) -> FinishedSession {
+        FinishedSession(startedAt: start.addingTimeInterval(from), endedAt: start.addingTimeInterval(to))
+    }
+
+    private func spans(_ pieces: [FinishedSession]) -> [[TimeInterval]] {
+        pieces.map { [$0.startedAt.timeIntervalSince(start), $0.endedAt.timeIntervalSince(start)] }
+    }
+
+    @Test func nothingTakenKeepsEverything() {
+        #expect(spans(finished(0, 3600).fillingGaps(around: [])) == [[0, 3600]])
+    }
+
+    @Test func containedRecordSplitsIntoTwoPieces() {
+        // A 10:00–11:00 裡面有先結束的 B 10:10–10:30。
+        let pieces = finished(0, 3600).fillingGaps(around: [interval(600, 1800)])
+        #expect(spans(pieces) == [[0, 600], [1800, 3600]])
+    }
+
+    @Test func overlapAtTheStartKeepsTheTail() {
+        #expect(spans(finished(1200, 3000).fillingGaps(around: [interval(0, 1800)])) == [[1800, 3000]])
+    }
+
+    @Test func overlapAtTheEndKeepsTheHead() {
+        #expect(spans(finished(0, 1800).fillingGaps(around: [interval(1200, 3000)])) == [[0, 1200]])
+    }
+
+    @Test func fullyCoveredLeavesNothing() {
+        #expect(finished(100, 500).fillingGaps(around: [interval(0, 600)]).isEmpty)
+        #expect(finished(0, 600).fillingGaps(around: [interval(0, 600)]).isEmpty)
+    }
+
+    @Test func severalTakenRecordsLeaveSeveralGaps() {
+        let taken = [interval(300, 600), interval(1200, 1500)]
+        #expect(spans(finished(0, 2000).fillingGaps(around: taken)) == [[0, 300], [600, 1200], [1500, 2000]])
+    }
+
+    @Test func overlappingTakenRecordsAreMerged() {
+        let taken = [interval(300, 900), interval(600, 1200)]
+        #expect(spans(finished(0, 2000).fillingGaps(around: taken)) == [[0, 300], [1200, 2000]])
+    }
+
+    @Test func recordsOutsideTheRangeAreIgnored() {
+        let taken = [interval(5000, 6000), interval(-1000, -10)]
+        #expect(spans(finished(0, 600).fillingGaps(around: taken)) == [[0, 600]])
+    }
+
+    @Test func touchingRecordsLeaveTheWholeThing() {
+        #expect(spans(finished(600, 1200).fillingGaps(around: [interval(0, 600)])) == [[600, 1200]])
+    }
+
+    @Test func gapsUnderFifteenSecondsAreDropped() {
+        // 3600 秒的紀錄中間留了一個 10 秒的空檔。
+        let taken = [interval(0, 1000), interval(1010, 3600)]
+        #expect(finished(0, 3600).fillingGaps(around: taken).isEmpty)
+    }
+
+    @Test func tagAndCharacterSurviveSplitting() {
+        let tagID = UUID()
+        let session = FinishedSession(startedAt: start, endedAt: start.addingTimeInterval(3600), tagID: tagID, characterID: "orb")
+        let pieces = session.fillingGaps(around: [interval(600, 1800)])
+        #expect(pieces.count == 2)
+        #expect(pieces.allSatisfy { $0.tagID == tagID && $0.characterID == "orb" })
+    }
+}
