@@ -208,6 +208,26 @@
         }
       }
     },
+    "Abort": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "放棄"
+          }
+        }
+      }
+    },
+    "Abort Session?": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "放棄這次專注？"
+          }
+        }
+      }
+    },
     "Add": {
       "localizations": {
         "zh-Hant": {
@@ -1204,6 +1224,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "標籤"
+          }
+        }
+      }
+    },
+    "The time so far won’t be saved as a record.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前這段時間不會留下紀錄。"
           }
         }
       }

@@ -15,6 +15,7 @@ struct HomeView: View {
 
     @State private var isChoosingCharacter = false
     @State private var isChoosingTag = false
+    @State private var isConfirmingAbort = false
     @State private var isChoosingDuration = false
 
     private var timer: FocusTimer { controller.timer }
@@ -83,8 +84,10 @@ struct HomeView: View {
 
             if let active = timer.active {
                 Section {
-                    RunningTime(session: active, tagName: tagName(for: active)) {
-                        isChoosingTag = true
+                    RunningTime(session: active, tags: tags) { tag in
+                        // 同時記成下次的預設。
+                        selectedTagID = tag.id.uuidString
+                        controller.changeTag(to: tag)
                     }
                         .frame(maxWidth: .infinity)
                         .listRowBackground(Color.clear)
@@ -113,11 +116,17 @@ struct HomeView: View {
                 .padding(.bottom, 8)
         }
         .animation(.default, value: timer.isRunning)
+        .alert("Abort Session?", isPresented: $isConfirmingAbort) {
+            Button("Abort", role: .destructive) { controller.abort() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("The time so far won’t be saved as a record.")
+        }
         .sheet(isPresented: $isChoosingCharacter) {
             CharacterSheet(characterID: $characterID)
         }
         .sheet(isPresented: $isChoosingTag) {
-            TagSheet(selectedTagID: tagSelection)
+            TagSheet(selectedTagID: $selectedTagID)
         }
         .sheet(isPresented: $isChoosingDuration) {
             DurationSheet(minutes: $focusMinutes)
@@ -171,6 +180,20 @@ struct HomeView: View {
                 .buttonBorderShape(.capsule)
                 .controlSize(.extraLarge)
                 .background(Color(.systemBackground), in: Capsule())
+
+                // 放棄這次專注（不留紀錄），按下去先跳出確認。
+                Button {
+                    isConfirmingAbort = true
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.title3.weight(.semibold))
+                        .frame(width: 24, height: 24)
+                }
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.circle)
+                .controlSize(.extraLarge)
+                .background(Color(.systemBackground), in: Circle())
+                .accessibilityLabel("Abort")
             }
         } else {
             Button {
@@ -185,23 +208,6 @@ struct HomeView: View {
             .buttonBorderShape(.capsule)
             .controlSize(.extraLarge)
         }
-    }
-
-    /// 專注中選標籤是換進行中計時的標籤，同時記成下次的預設；沒在專注就只是改預設。
-    private var tagSelection: Binding<String> {
-        Binding {
-            timer.active?.tagID?.uuidString ?? selectedTagID
-        } set: { newID in
-            selectedTagID = newID
-            if timer.isRunning {
-                controller.changeTag(to: tags.first { $0.id.uuidString == newID })
-            }
-        }
-    }
-
-    private func tagName(for session: ActiveSession) -> String? {
-        guard let id = session.tagID else { return nil }
-        return tags.first { $0.id == id }?.name
     }
 }
 
@@ -266,9 +272,14 @@ private struct SettingRow: View {
 /// 專注中的大數字。正計時顯示經過時間，倒數顯示剩餘時間。
 private struct RunningTime: View {
     let session: ActiveSession
-    let tagName: String?
-    /// 點標籤名字：專注中換標籤，紀錄歸在結束時的標籤。
-    let onTagTap: () -> Void
+    let tags: [FocusTag]
+    /// 專注中換標籤，紀錄歸在結束時的標籤。
+    let onSelectTag: (FocusTag) -> Void
+
+    private var currentTagID: UUID? { session.tagID }
+    private var tagName: String? { tags.first { $0.id == currentTagID }?.name }
+
+    @State private var isPickingTag = false
 
     @ScaledMetric(relativeTo: .largeTitle) private var fontSize: CGFloat = 76
 
@@ -287,15 +298,30 @@ private struct RunningTime: View {
                     .foregroundStyle(session.isPaused ? Color.secondary : Color.primary)
                     .accessibilityLabel(accessibilityText(seconds, overtime: overtime))
             }
-            Button(action: onTagTap) {
+            // 就地展開的標籤選單，只能選現有的標籤，不能新增。
+            // 系統的 Menu 放在會捲動的列表裡，捲動時標籤會慢半拍、甚至消失。
+            // 所以標籤用一般的 SwiftUI 文字（和大數字一起捲動），選單用 popover 就地展開。
+            Button {
+                isPickingTag = true
+            } label: {
                 Text(tagName ?? "–")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    // 具體的顏色；`.secondary` 在按鈕裡會被換成 tint 色。
+                    .foregroundStyle(Color(.secondaryLabel))
                     .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity)
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, minHeight: 28)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .disabled(tags.isEmpty)
+            .popover(isPresented: $isPickingTag) {
+                TagPopoverList(tags: tags, selectedID: currentTagID) { tag in
+                    isPickingTag = false
+                    onSelectTag(tag)
+                }
+                .presentationCompactAdaptation(.popover)
+            }
             .accessibilityLabel(String(localized: "Tag, \(tagName ?? String(localized: "none"))"))
             .accessibilityHint("Change tag")
         }
@@ -308,6 +334,55 @@ private struct RunningTime: View {
         if session.plannedEnd == nil { return String(localized: "Focused for \(text)") }
         if overtime > 0 { return String(localized: "Time is up, \(DurationText.hoursAndMinutes(TimeInterval(overtime))) over") }
         return String(localized: "\(text) left")
+    }
+}
+
+/// 專注中換標籤的選單內容：只能選現有的標籤，不能新增。
+private struct TagPopoverList: View {
+    static let rowHeight: CGFloat = 50
+    static let verticalInset: CGFloat = 8
+    static let width: CGFloat = 260
+
+    let tags: [FocusTag]
+    let selectedID: UUID?
+    let onSelect: (FocusTag) -> Void
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                ForEach(tags) { tag in
+                    Button {
+                        onSelect(tag)
+                    } label: {
+                        HStack {
+                            Text(tag.name)
+                                .foregroundStyle(Color.primary)
+                                .lineLimit(1)
+                            Spacer(minLength: 12)
+                            if tag.id == selectedID {
+                                Image(systemName: "checkmark")
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(Color.accentColor)
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .frame(height: Self.rowHeight)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(tag.id == selectedID ? .isSelected : [])
+
+                    if tag.id != tags.last?.id {
+                        Divider().padding(.horizontal, 20)
+                    }
+                }
+            }
+            .padding(.vertical, Self.verticalInset)
+        }
+        .frame(
+            width: Self.width,
+            height: min(CGFloat(tags.count), 6.5) * Self.rowHeight + Self.verticalInset * 2
+        )
     }
 }
 

@@ -87,6 +87,15 @@ final class FocusController {
         }
     }
 
+    /// 放棄這次專注：不留下任何紀錄，也不顯示慶祝畫面。
+    func abort() {
+        guard timer.active != nil else { return }
+        stops += 1
+        CountdownNotifier.shared.cancel()
+        LiveActivityController.end()
+        timer.clear()
+    }
+
     /// App 啟動或回到前景。倒數時間到了不會自動結束，只有使用者按 End 才結束。
     func sceneBecameActive() {
         timer.restore()
