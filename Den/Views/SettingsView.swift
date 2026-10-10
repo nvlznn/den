@@ -5,6 +5,8 @@ struct SettingsView: View {
     @Environment(EggStore.self) private var store
     @Environment(FocusController.self) private var controller
     @AppStorage("liveActivityAppearance") private var appearance = "glass"
+    @AppStorage(DayBoundary.key, store: DayBoundary.store) private var dayStartHour = DayBoundary.defaultHour
+    @AppStorage(CountdownNotifier.ignoreFocusKey) private var ignoreFocus = false
     @Environment(\.openURL) private var openURL
     @State private var displayedSeconds: Double?
 
@@ -41,12 +43,18 @@ struct SettingsView: View {
                         Text("Classic").tag("classic")
                         Text("Liquid Glass").tag("glass")
                     }
+                    Picker("Day Ends", selection: $dayStartHour) {
+                        ForEach(DayBoundary.hours, id: \.self) { hour in
+                            Text(verbatim: "\(hour):00").tag(hour)
+                        }
+                    }
                     // 每個 app 的語言由系統設定管理，這裡直接帶使用者過去。
                     Button {
                         if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
                     } label: {
                         row("Language", value: Text(languageName))
                     }
+                    Toggle("Ignore Do Not Disturb", isOn: $ignoreFocus)
                 }
                 Section {
                     LabeledContent("All Users’ Focus Time") {
@@ -57,8 +65,6 @@ struct SettingsView: View {
                             Text("—")
                         }
                     }
-                }
-                Section {
                     LabeledContent("Version", value: appVersion)
                 }
                 #if DEBUG
@@ -69,6 +75,7 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .onAppear { displayedSeconds = community.totalSeconds }
+            .onChange(of: dayStartHour) { _, hour in DayBoundarySync.push(hour) }
             .onChange(of: appearance) { _, _ in
                 if let session = controller.timer.active { LiveActivityController.update(for: session) }
             }

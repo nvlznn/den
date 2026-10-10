@@ -24,7 +24,7 @@ struct TodayEntry: TimelineEntry {
 }
 
 /// 內容由 app 寫入的摘要決定；app 改了資料就會叫 Widget 重新整理。
-/// 另外在午夜排一筆，讓「今天」自動歸零，不必先打開 app。
+/// 另外在換日時間排一筆，讓「今天」自動歸零，不必先打開 app。
 struct TodayProvider: TimelineProvider {
     func placeholder(in context: Context) -> TodayEntry {
         TodayEntry(date: .now, snapshot: .empty())
@@ -38,11 +38,7 @@ struct TodayProvider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<TodayEntry>) -> Void) {
         let now = Date.now
         let stored = WidgetSnapshot.load() ?? .empty()
-        let midnight = Calendar.current.nextDate(
-            after: now,
-            matching: DateComponents(hour: 0, minute: 0, second: 5),
-            matchingPolicy: .nextTime
-        ) ?? now.addingTimeInterval(24 * 3600)
+        let midnight = DayBoundary.current.nextStart(after: now)
         let entries = [
             TodayEntry(date: now, snapshot: stored.asOf(now)),
             TodayEntry(date: midnight, snapshot: stored.asOf(midnight)),

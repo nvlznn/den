@@ -6,12 +6,14 @@ struct RecordsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \FocusSession.startedAt, order: .reverse) private var sessions: [FocusSession]
 
-    @State private var range = StatsRange(period: .week, containing: .now)
+    @AppStorage(DayBoundary.key, store: DayBoundary.store) private var dayStartHour = DayBoundary.defaultHour
+    @State private var range = StatsRange(period: .week, containing: DayBoundary.current.shift(.now))
     @State private var isAdding = false
     @State private var editing: FocusSession?
 
     private var days: [DayGroup<FocusSession>] {
-        RecordGrouping.days(sessions, in: range.interval, startedAt: \.startedAt, duration: \.duration)
+        let boundary = DayBoundary(hour: dayStartHour)
+        return RecordGrouping.days(sessions, in: range.interval, startedAt: { boundary.shift($0.startedAt) }, duration: \.duration)
     }
 
     var body: some View {
@@ -103,7 +105,7 @@ struct RecordsView: View {
                     .foregroundStyle(Color.primary)
             }
             .accessibilityLabel("Next Period")
-            .disabled(range.interval.end > .now)
+            .disabled(range.interval.end > DayBoundary(hour: dayStartHour).shift(.now))
         }
         .buttonStyle(.bordered)
         .buttonBorderShape(.circle)

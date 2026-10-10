@@ -17,7 +17,7 @@ struct OnboardingGuideView: View {
     private let titles = [String(localized: "Focus together"), String(localized: "Surprise inside!"), String(localized: "Start collecting your friends!")]
     private let captions = [
         String(localized: "Study with your little friend."),
-        String(localized: "Focus for 10 hours to hatch a new friend."),
+        String(localized: "Focus for 5 hours to hatch a new friend."),
         String(localized: "Every egg brings a new friend."),
     ]
 

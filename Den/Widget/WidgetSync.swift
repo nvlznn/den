@@ -6,6 +6,7 @@ import WidgetKit
 struct WidgetSync: ViewModifier {
     @Query(sort: [SortDescriptor(\CharacterLibrary.createdAt), SortDescriptor(\CharacterLibrary.id)]) private var libraries: [CharacterLibrary]
     @Query private var sessions: [FocusSession]
+    @AppStorage(DayBoundary.key, store: DayBoundary.store) private var dayStartHour = DayBoundary.defaultHour
     @AppStorage("characterID") private var characterID = PetSprites.defaultCharacterID
 
     func body(content: Content) -> some View {
@@ -18,8 +19,8 @@ struct WidgetSync: ViewModifier {
 
     /// 和 Focus 頁的「Today」一樣：今天開始的紀錄都算（包含手動補的）；等級只算這隻角色、不含手動補的。
     private var snapshot: WidgetSnapshot {
-        let calendar = Calendar.current
-        let today = sessions.filter { calendar.isDateInToday($0.startedAt) }
+        let boundary = DayBoundary(hour: dayStartHour)
+        let today = sessions.filter { boundary.isSameDay($0.startedAt, .now) }
         let character = PetSprites.character(id: characterID)
         let level = Level(totalSeconds: Level.totalSeconds(
             of: character.id,
@@ -30,7 +31,7 @@ struct WidgetSync: ViewModifier {
             duration: \.duration
         ))
         return WidgetSnapshot(
-            day: calendar.startOfDay(for: .now),
+            day: boundary.startOfDay(.now),
             todaySeconds: today.reduce(0) { $0 + $1.duration },
             todaySessions: today.count,
             characterID: libraries.first?.collection.displayID(for: character.id) ?? "egg",

@@ -458,6 +458,16 @@
         }
       }
     },
+    "Day Ends": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "換日時間"
+          }
+        }
+      }
+    },
     "Delete": {
       "localizations": {
         "zh-Hant": {
@@ -608,12 +618,12 @@
         }
       }
     },
-    "Focus for 10 hours to hatch a new friend.": {
+    "Focus for 5 hours to hatch a new friend.": {
       "localizations": {
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "專注10小時，孵出一位新夥伴。"
+            "value": "專注5小時，孵出一位新夥伴。"
           }
         }
       }
@@ -664,6 +674,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "小時"
+          }
+        }
+      }
+    },
+    "Ignore Do Not Disturb": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "忽略勿擾模式"
           }
         }
       }
@@ -1054,6 +1074,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "繼續"
+          }
+        }
+      }
+    },
+    "Running on %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 正在計時"
+          }
+        }
+      }
+    },
+    "Running on another %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "另一台 %@ 正在計時"
           }
         }
       }

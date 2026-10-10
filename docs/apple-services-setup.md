@@ -40,7 +40,7 @@ Product ID 要完全一致。顏色是在 App 內選，不需要兩個顏色商�
 6. **Review Information**：上傳 New Egg 購買視窗截圖。
 7. Review Notes 可貼：
 
-   `The first two eggs are free. Each later purchase grants one permanent egg. Users choose white or black before buying the same consumable product. Each egg reserves a unique character of that color and reveals it at level 1 after 10 hours of actual focus. Unhatched eggs count toward collection capacity. Purchases are disabled once the chosen color or the entire collection is full. Test with an account that has used both free eggs.`
+   `The first two eggs are free. Each later purchase grants one permanent egg. Users choose white or black before buying the same consumable product. Each egg reserves a unique character of that color and reveals it at level 1 after 5 hours of actual focus. Unhatched eggs count toward collection capacity. Purchases are disabled once the chosen color or the entire collection is full. Test with an account that has used both free eggs.`
 
 8. 若顯示 Missing Metadata，完成商品頁剩餘必填欄位。商品資料變更最多可能需要一小時才反映在 Sandbox。
 9. Xcode 改回一般 **Den** scheme（StoreKit Configuration 為 None），使用 Sandbox 測試帳號或 TestFlight 測商品載入、價格、連買、取消。

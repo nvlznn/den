@@ -25,9 +25,10 @@ struct CharacterSheet: View {
                     let collection = library.collection
                     let totals = totals
                     Section {
-                        ForEach(CharacterRanking.sorted(collection.ownedIDs, totals: totals), id: \.self) { id in
+                        ForEach(collection.displayIDs, id: \.self) { id in
                             row(id: id, collection: collection, seconds: totals[id, default: 0])
                         }
+                        .onMove { move(from: $0, to: $1, in: collection) }
                     }
                     if !collection.isFull {
                         Section {
@@ -41,6 +42,7 @@ struct CharacterSheet: View {
                 }
             }
             .navigationTitle("Characters")
+            .onAppear(perform: seedOrder)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { SheetCloseButton { dismiss() } }
@@ -98,6 +100,26 @@ struct CharacterSheet: View {
                 .tint(.orange)
             }
         }
+    }
+
+    /// 第一次打開時，用目前的專注時間排名當起始順序，之後就由使用者決定。
+    private func seedOrder() {
+        guard let library else { return }
+        var collection = library.collection
+        guard collection.displayOrder.isEmpty, !collection.ownedIDs.isEmpty else { return }
+        collection.setDisplayOrder(CharacterRanking.sorted(collection.ownedIDs, totals: totals))
+        library.collection = collection
+        try? modelContext.save()
+    }
+
+    private func move(from source: IndexSet, to destination: Int, in collection: CharacterCollection) {
+        guard let library else { return }
+        var ids = collection.displayIDs
+        ids.move(fromOffsets: source, toOffset: destination)
+        var updated = collection
+        updated.setDisplayOrder(ids)
+        library.collection = updated
+        try? modelContext.save()
     }
 
     private func saveName() {

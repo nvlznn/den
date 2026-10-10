@@ -15,6 +15,7 @@ struct DenApp: App {
 
     init() {
         CountdownNotifier.shared.becomeDelegate()
+        DayBoundarySync.start()
         let (container, usesCloud) = Self.makeModelContainer()
         modelContainer = container
         _cloudSync = State(initialValue: CloudSyncMonitor(usesCloud: usesCloud, containerID: Self.cloudContainerID))

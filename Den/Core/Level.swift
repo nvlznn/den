@@ -1,8 +1,8 @@
 import Foundation
 
-/// 總專注時間換算成等級。每累積 10 小時升 1 級，從 Lv 0 開始。
+/// 總專注時間換算成等級。每累積 5 小時升 1 級，從 Lv 0 開始。
 struct Level: Equatable, Sendable {
-    static let secondsPerLevel: TimeInterval = 10 * 3600
+    static let secondsPerLevel: TimeInterval = 5 * 3600
 
     let totalSeconds: TimeInterval
 
@@ -10,7 +10,7 @@ struct Level: Equatable, Sendable {
         self.totalSeconds = max(0, totalSeconds)
     }
 
-    /// 等級 = 總專注秒數 / 36000，無條件捨去。
+    /// 等級 = 總專注秒數 / 18000，無條件捨去。
     var number: Int {
         Int(totalSeconds / Self.secondsPerLevel)
     }

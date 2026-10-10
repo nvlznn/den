@@ -144,6 +144,22 @@ struct CharacterCollectionTests {
         #expect(!collection.canClaimFreeEgg)
     }
 
+    @Test func displayOrderIsSeparateFromTheEggDeckAndSurvivesCoding() throws {
+        var collection = CharacterCollection(legacyIDs: ["mochi", "drop"], shuffledIDs: ids)
+        #expect(collection.displayIDs == ["mochi", "drop"])
+        collection.setDisplayOrder(["drop", "orb", "mochi", "drop"])
+        #expect(collection.displayIDs == ["drop", "mochi"])
+        #expect(collection.order == ids)
+        let decoded = try JSONDecoder().decode(CharacterCollection.self, from: JSONEncoder().encode(collection))
+        #expect(decoded.displayIDs == ["drop", "mochi"])
+    }
+
+    @Test func savesWithoutDisplayOrderDecodeWithDeckOrder() throws {
+        let json = #"{"order":["fangfang","mochi","orb","drop","cloud","doudou"],"freeIDs":["mochi"],"legacyIDs":[],"paidEggs":[],"purchasedIDs":[],"revealed":[]}"#
+        let collection = try JSONDecoder().decode(CharacterCollection.self, from: Data(json.utf8))
+        #expect(collection.displayIDs == ["mochi"])
+    }
+
     @Test func oldSingleColorDevelopmentSaveMigratesWithoutLosingSpecies() throws {
         let json = #"{"order":["fangfang","mochi","orb","drop","cloud","doudou"],"freeCount":2,"legacyCount":0,"paidSlots":[2],"revealed":["fangfang"]}"#
         let collection = try JSONDecoder().decode(CharacterCollection.self, from: Data(json.utf8))

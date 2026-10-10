@@ -10,26 +10,26 @@ struct LevelTests {
     }
 
     @Test func roundsDown() {
-        #expect(Level(totalSeconds: 10 * 3600 - 1).number == 0)
-        #expect(Level(totalSeconds: 10 * 3600).number == 1)
-        #expect(Level(totalSeconds: 20 * 3600 - 1).number == 1)
+        #expect(Level(totalSeconds: 5 * 3600 - 1).number == 0)
+        #expect(Level(totalSeconds: 5 * 3600).number == 1)
+        #expect(Level(totalSeconds: 10 * 3600 - 1).number == 1)
     }
 
-    @Test func oneLevelPerTenHours() {
-        #expect(Level(totalSeconds: 37 * 3600).number == 3)
-        #expect(Level(totalSeconds: 370 * 3600).number == 37)
+    @Test func oneLevelPerFiveHours() {
+        #expect(Level(totalSeconds: 17 * 3600).number == 3)
+        #expect(Level(totalSeconds: 185 * 3600).number == 37)
     }
 
     @Test func progressToNextLevel() {
-        #expect(Level(totalSeconds: 125 * 3600).progressToNext == 0.5)
-        #expect(Level(totalSeconds: 9000).progressToNext == 0.25)
-        #expect(Level(totalSeconds: 10 * 3600).progressToNext == 0)
+        #expect(Level(totalSeconds: 62 * 3600 + 1800).progressToNext == 0.5)
+        #expect(Level(totalSeconds: 4500).progressToNext == 0.25)
+        #expect(Level(totalSeconds: 5 * 3600).progressToNext == 0)
     }
 
     @Test func timeLeftToEvolve() {
-        #expect(Level(totalSeconds: 0).secondsToNext == 10 * 3600)
+        #expect(Level(totalSeconds: 0).secondsToNext == 5 * 3600)
         #expect(Level(totalSeconds: 6 * 3600 + 40 * 60).secondsToNext == 3 * 3600 + 20 * 60)
-        #expect(Level(totalSeconds: 10 * 3600).secondsToNext == 10 * 3600)
+        #expect(Level(totalSeconds: 5 * 3600).secondsToNext == 5 * 3600)
     }
 
     /// 每個角色的等級各自計算；沒記角色的舊紀錄算給預設角色；手動補的紀錄不算。

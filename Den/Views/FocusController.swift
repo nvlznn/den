@@ -9,6 +9,8 @@ import SwiftData
 @Observable
 final class FocusController {
     let timer: FocusTimer
+    /// 其他裝置的計時狀態；這台的狀態一變就寫上去。
+    let otherDevices: OtherDeviceTimers
 
     var happySince: Date?
     /// 專注結束後要顯示的慶祝畫面。
@@ -21,8 +23,9 @@ final class FocusController {
     private(set) var stops = 0
     private(set) var pauseToggles = 0
 
-    init(timer: FocusTimer) {
+    init(timer: FocusTimer, otherDevices: OtherDeviceTimers = OtherDeviceTimers()) {
         self.timer = timer
+        self.otherDevices = otherDevices
     }
 
     // MARK: 開始與結束
@@ -31,6 +34,7 @@ final class FocusController {
         let mode = TimerMode(focusMinutes: focusMinutes)
         timer.start(mode, tagID: tag?.id, characterID: character.id)
         starts += 1
+        otherDevices.publish(timer.active)
 
         guard let active = timer.active else { return }
         LiveActivityController.start(for: active, tagName: tag?.name, displayCharacterID: displayCharacterID)
@@ -80,7 +84,9 @@ final class FocusController {
         // 不管提早結束、剛好到、還是超時，已經過的時間都照樣存。
         CountdownNotifier.shared.cancel()
         LiveActivityController.end()
-        if let finished = timer.end(at: .now) {
+        let finished = timer.end(at: .now)
+        otherDevices.publish(nil)
+        if let finished {
             record(finished, context: context)
         }
     }
@@ -92,11 +98,15 @@ final class FocusController {
         CountdownNotifier.shared.cancel()
         LiveActivityController.end()
         timer.clear()
+        otherDevices.publish(nil)
     }
 
     /// App 啟動或回到前景。倒數時間到了不會自動結束，只有使用者按 End 才結束。
     func sceneBecameActive() {
         timer.restore()
+        // 修正上次沒寫到的狀態（例如計時中 app 被砍掉），順便拉一次別台的。
+        otherDevices.publish(timer.active)
+        otherDevices.reload()
         if !timer.isRunning {
             LiveActivityController.end()
         }
@@ -154,7 +164,7 @@ final class FocusController {
         var name = PetSprites.character(id: displayID).name
         if let library = CharacterLibrary.current(in: context) {
             var collection = library.collection
-            // 專注中滿 10 小時也不會先孵，按 End 才孵。
+            // 專注中滿 5 小時也不會先孵，按 End 才孵。
             didHatch = collection.hatch(characterID, totalSeconds: after.totalSeconds)
             library.collection = collection
             try? context.save()

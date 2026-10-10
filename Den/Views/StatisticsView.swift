@@ -6,17 +6,21 @@ import SwiftUI
 struct StatisticsView: View {
     @Query private var sessions: [FocusSession]
 
-    @State private var range = StatsRange(period: .day, containing: .now)
+    @AppStorage(DayBoundary.key, store: DayBoundary.store) private var dayStartHour = DayBoundary.defaultHour
+    @State private var range = StatsRange(period: .day, containing: DayBoundary.current.shift(.now))
+
+    private var boundary: DayBoundary { DayBoundary(hour: dayStartHour) }
 
     private var stats: FocusStats {
+        let boundary = boundary
         let items = sessions.map {
             FocusStats.Item(
-                startedAt: $0.startedAt,
+                startedAt: boundary.shift($0.startedAt),
                 duration: $0.duration,
                 tagName: $0.displayTagName
             )
         }
-        return FocusStats(items: items, range: range)
+        return FocusStats(items: items, range: range, now: boundary.shift(.now))
     }
 
     var body: some View {
@@ -79,7 +83,8 @@ struct StatisticsView: View {
         Binding {
             range.period
         } set: { newPeriod in
-            let anchor = range.contains(.now) ? Date.now : range.interval.start
+            let now = boundary.shift(.now)
+            let anchor = range.contains(now) ? now : range.interval.start
             range = StatsRange(period: newPeriod, containing: anchor)
         }
     }
@@ -107,7 +112,7 @@ struct StatisticsView: View {
                 Image(systemName: "chevron.right")
             }
             .accessibilityLabel("Next")
-            .disabled(range.interval.end > .now)
+            .disabled(range.interval.end > boundary.shift(.now))
         }
         .buttonStyle(.bordered)
         .buttonBorderShape(.circle)
@@ -151,6 +156,7 @@ private struct FocusDaysView: View {
 
 /// 圓圈下面的時長，今天再加一個小點。固定高度，沒專注的日子也佔位，格子才不會跳動。
 private struct DayCaption: View {
+    @AppStorage(DayBoundary.key, store: DayBoundary.store) private var dayStartHour = DayBoundary.defaultHour
     let day: FocusStats.Bucket
 
     var body: some View {
@@ -160,7 +166,7 @@ private struct DayCaption: View {
                 .monospacedDigit()
                 .foregroundStyle(.secondary)
             Circle()
-                .fill(Calendar.current.isDateInToday(day.start) ? Color.accentColor : Color.clear)
+                .fill(Calendar.current.isDate(day.start, inSameDayAs: DayBoundary(hour: dayStartHour).shift(.now)) ? Color.accentColor : Color.clear)
                 .frame(width: 5, height: 5)
         }
     }
@@ -272,6 +278,7 @@ private struct StatCell: View {
 
 /// 單一系列的長條圖，用主色、不放圖例。點長條看數值。
 private struct DistributionChart: View {
+    @AppStorage(DayBoundary.key, store: DayBoundary.store) private var dayStartHour = DayBoundary.defaultHour
     let stats: FocusStats
 
     @State private var selectedDate: Date?
@@ -309,7 +316,7 @@ private struct DistributionChart: View {
                     .foregroundStyle(Color.clear)
                     .annotation(position: .top, overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
                         VStack(spacing: 2) {
-                            Text(StatsFormat.bucketTitle(selectedBucket.start, period: stats.range.period))
+                            Text(StatsFormat.bucketTitle(selectedBucket.start, period: stats.range.period, boundary: DayBoundary(hour: dayStartHour)))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                             Text(DurationText.hoursAndMinutes(selectedBucket.duration))
@@ -338,9 +345,12 @@ private struct DistributionChart: View {
     private var xAxis: some AxisContent {
         switch stats.range.period {
         case .day:
-            AxisMarks(values: .stride(by: .hour, count: 6)) { _ in
+            AxisMarks(values: .stride(by: .hour, count: 6)) { value in
                 AxisGridLine()
-                AxisValueLabel(format: .dateTime.hour(.defaultDigits(amPM: .omitted)))
+                // 橫軸的時間是挪過的，標籤要還原成真正的幾點。
+                if let date = value.as(Date.self) {
+                    AxisValueLabel(StatsFormat.hourLabel(DayBoundary(hour: dayStartHour).unshift(date)))
+                }
             }
         case .week:
             AxisMarks(values: .stride(by: .day)) { _ in
@@ -472,12 +482,17 @@ enum StatsFormat {
     }
 
     /// 長條圖上被點到的那一根的名稱。
-    static func bucketTitle(_ date: Date, period: StatsPeriod) -> String {
+    static func bucketTitle(_ date: Date, period: StatsPeriod, boundary: DayBoundary) -> String {
         switch period {
-        case .day: hourFormatter.string(from: date)
+        case .day: hourFormatter.string(from: boundary.unshift(date))
         case .week, .month: RecordFormat.day(date)
         case .year: monthYear.string(from: date)
         }
+    }
+
+    /// 橫軸的整點標籤，例如「4」。
+    static func hourLabel(_ date: Date) -> String {
+        String(Calendar.current.component(.hour, from: date))
     }
 
     /// 「S」「M」「T」…

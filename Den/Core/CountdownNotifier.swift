@@ -9,6 +9,9 @@ import UserNotifications
 final class CountdownNotifier: NSObject, UNUserNotificationCenterDelegate {
     static let shared = CountdownNotifier()
 
+    /// 打開後倒數結束的通知用 Time Sensitive，專注模式 / 勿擾下也會響。
+    static let ignoreFocusKey = "ignoreFocus"
+
     private static let requestID = "countdown-finished"
 
     private var center: UNUserNotificationCenter { .current() }
@@ -28,6 +31,9 @@ final class CountdownNotifier: NSObject, UNUserNotificationCenterDelegate {
         content.title = String(localized: "Time's up")
         content.body = String(localized: "\(DurationText.hoursAndMinutes(planned)). Nice work.")
         content.sound = .default
+        if UserDefaults.standard.bool(forKey: Self.ignoreFocusKey) {
+            content.interruptionLevel = .timeSensitive
+        }
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
         let request = UNNotificationRequest(identifier: Self.requestID, content: content, trigger: trigger)

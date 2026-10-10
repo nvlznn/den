@@ -8,6 +8,7 @@ struct HomeView: View {
     @Query(sort: [SortDescriptor(\CharacterLibrary.createdAt), SortDescriptor(\CharacterLibrary.id)]) private var libraries: [CharacterLibrary]
     @Query private var sessions: [FocusSession]
     @Query(sort: \FocusTag.order) private var tags: [FocusTag]
+    @AppStorage(DayBoundary.key, store: DayBoundary.store) private var dayStartHour = DayBoundary.defaultHour
 
     @AppStorage("focusMinutes") private var focusMinutes = 25
     @AppStorage("selectedTagID") private var selectedTagID = ""
@@ -53,8 +54,8 @@ struct HomeView: View {
     }
 
     private var today: (count: Int, duration: TimeInterval) {
-        let calendar = Calendar.current
-        let todays = sessions.filter { calendar.isDateInToday($0.startedAt) }
+        let boundary = DayBoundary(hour: dayStartHour)
+        let todays = sessions.filter { boundary.isSameDay($0.startedAt, .now) }
         return (todays.count, todays.reduce(0) { $0 + $1.duration })
     }
 
@@ -111,8 +112,15 @@ struct HomeView: View {
             }
         }
         .safeAreaInset(edge: .bottom) {
-            primaryButton
-                .padding(.bottom, 8)
+            VStack(spacing: 8) {
+                if let notice = controller.otherDevices.notice() {
+                    Text(notice)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                primaryButton
+            }
+            .padding(.bottom, 8)
         }
         .animation(.default, value: timer.isRunning)
         .alert("Abort Session?", isPresented: $isConfirmingAbort) {
