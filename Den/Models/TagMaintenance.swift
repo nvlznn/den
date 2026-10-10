@@ -80,8 +80,12 @@ enum TagMaintenance {
     /// 回傳被合併掉的標籤 id → 留下來的標籤 id。
     @discardableResult
     static func mergeDuplicates(context: ModelContext) -> [UUID: UUID] {
-        let descriptor = FetchDescriptor<FocusTag>(sortBy: [SortDescriptor(\.order), SortDescriptor(\.name)])
-        guard let tags = try? context.fetch(descriptor) else { return [:] }
+        guard let fetched = try? context.fetch(FetchDescriptor<FocusTag>()) else { return [:] }
+        // 每台裝置都要留下同一個（最後再比 id），不然兩台各留一個、各刪另一個，
+        // 同步後兩個都沒了，跨裝置選的標籤也對不上。
+        let tags = fetched.sorted {
+            ($0.order, $0.name, $0.id.uuidString) < ($1.order, $1.name, $1.id.uuidString)
+        }
 
         var keepers: [String: FocusTag] = [:]
         var replaced: [UUID: UUID] = [:]

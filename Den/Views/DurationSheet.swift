@@ -37,6 +37,7 @@ struct DurationSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     SheetConfirmButton {
                         minutes = draft
+                        SettingsSync.push(.focusMinutes, draft)
                         dismiss()
                     }
                 }
@@ -46,7 +47,11 @@ struct DurationSheet: View {
     }
 
     static func wheelLabel(_ minutes: Int) -> String {
-        minutes == TimerMode.unlimitedMinutes ? String(localized: "Stopwatch") : String(localized: "\(minutes) minutes")
+        switch minutes {
+        case TimerMode.unlimitedMinutes: String(localized: "Stopwatch")
+        case TimerMode.debugThirtySeconds: "30 sec"
+        default: String(localized: "\(minutes) minutes")
+        }
     }
 
     /// 設定列上顯示的文字。

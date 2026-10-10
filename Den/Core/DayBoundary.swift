@@ -9,7 +9,7 @@ struct DayBoundary: Equatable, Sendable {
     static let defaultHour = 4
     static let hours = 0...5
 
-    /// 存在 App Group，Widget 讀得到。跨裝置的同步見 `DayBoundarySync`。
+    /// 存在 App Group，Widget 讀得到。跨裝置的同步見 `SettingsSync`。
     static var store: UserDefaults { UserDefaults(suiteName: WidgetSnapshot.appGroup) ?? .standard }
 
     static var current: DayBoundary {

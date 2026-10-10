@@ -85,6 +85,7 @@ struct AddEggSheet: View {
             do {
                 try modelContext.save()
                 selectedCharacterID = id
+                SettingsSync.push(.characterID, id)
                 dismiss()
             } catch {
                 library.collection = previous
@@ -93,6 +94,7 @@ struct AddEggSheet: View {
         } else {
             if let id = await store.purchase(color: color, library: library, context: modelContext) {
                 selectedCharacterID = id
+                SettingsSync.push(.characterID, id)
                 dismiss()
             }
         }

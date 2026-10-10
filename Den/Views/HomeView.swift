@@ -87,6 +87,7 @@ struct HomeView: View {
                     RunningTime(session: active, tags: tags) { tag in
                         // 同時記成下次的預設。
                         selectedTagID = tag.id.uuidString
+                        SettingsSync.push(.selectedTagID, tag.id.uuidString)
                         controller.changeTag(to: tag)
                     }
                         .frame(maxWidth: .infinity)

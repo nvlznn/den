@@ -14,6 +14,8 @@ enum TimerMode: Codable, Hashable, Sendable {
     init(focusMinutes: Int) {
         if focusMinutes == Self.unlimitedMinutes {
             self = .stopwatch
+        } else if focusMinutes == Self.debugThirtySeconds {
+            self = .countdown(planned: 30)
         } else {
             self = .countdown(planned: TimeInterval(focusMinutes * 60))
         }
@@ -22,6 +24,13 @@ enum TimerMode: Codable, Hashable, Sendable {
     /// 專注時長設定中代表 Stopwatch（正計時）的值。
     static let unlimitedMinutes = 0
 
-    /// 時長滾輪的選項：Stopwatch，然後 5 分鐘到 3 小時，每 5 分鐘一格。
+    /// 開發版才有的 30 秒倒數，測試用，不必等 5 分鐘。
+    static let debugThirtySeconds = -1
+
+    /// 時長滾輪的選項：Stopwatch，然後 5 分鐘到 3 小時，每 5 分鐘一格。開發版多一個 30 秒。
+    #if DEBUG
+    static let focusMinuteChoices = [unlimitedMinutes, debugThirtySeconds] + Array(stride(from: 5, through: 180, by: 5))
+    #else
     static let focusMinuteChoices = [unlimitedMinutes] + Array(stride(from: 5, through: 180, by: 5))
+    #endif
 }

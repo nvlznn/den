@@ -71,6 +71,7 @@ struct CharacterSheet: View {
         let isSelected = id == characterID
         return Button {
             characterID = id
+            SettingsSync.push(.characterID, id)
             dismiss()
         } label: {
             HStack(spacing: 14) {

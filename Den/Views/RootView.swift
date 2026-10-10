@@ -60,7 +60,12 @@ struct RootView: View {
                 library.collection = collection
                 try library.reconcile(purchases: purchases, context: modelContext)
                 try library.reconcile(sessions: sessions, context: modelContext)
-                if !collection.ownedIDs.contains(characterID), let first = collection.ownedIDs.first {
+                // 別台選的角色可能比角色資料先同步過來：資料到了就換成雲端選的那隻；
+                // 還沒到就先暫時用第一隻（不上傳，才不會蓋掉別台的選擇）。
+                if let synced = SettingsSync.cloudString(.characterID), synced != characterID,
+                   collection.ownedIDs.contains(synced) {
+                    characterID = synced
+                } else if !collection.ownedIDs.contains(characterID), let first = collection.ownedIDs.first {
                     characterID = first
                 }
                 for session in sessions { FocusContribution.capture(session, context: modelContext) }

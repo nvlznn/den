@@ -75,7 +75,7 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .onAppear { displayedSeconds = community.totalSeconds }
-            .onChange(of: dayStartHour) { _, hour in DayBoundarySync.push(hour) }
+            .onChange(of: dayStartHour) { _, hour in SettingsSync.push(.dayStartHour, hour) }
             .onChange(of: appearance) { _, _ in
                 if let session = controller.timer.active { LiveActivityController.update(for: session) }
             }

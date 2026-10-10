@@ -66,6 +66,7 @@ struct TagSheet: View {
     private func row(for tag: FocusTag) -> some View {
         Button {
             selectedTagID = tag.id.uuidString
+            SettingsSync.push(.selectedTagID, tag.id.uuidString)
             dismiss()
         } label: {
             HStack {
@@ -147,6 +148,7 @@ struct TagSheet: View {
         guard let target = TagMaintenance.delete(tag, context: modelContext) else { return }
         if wasSelected || selectedTagID == tag.id.uuidString {
             selectedTagID = target.id.uuidString
+            SettingsSync.push(.selectedTagID, target.id.uuidString)
         }
     }
 }

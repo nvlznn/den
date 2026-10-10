@@ -58,6 +58,7 @@ struct FirstEggView: View {
         do {
             try modelContext.save()
             selectedCharacterID = id
+            SettingsSync.push(.characterID, id)
             guidePending = true
         } catch {
             library.collection = previous
