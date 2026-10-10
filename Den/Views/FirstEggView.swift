@@ -4,6 +4,8 @@ import SwiftUI
 struct FirstEggView: View {
     let library: CharacterLibrary
     @Binding var selectedCharacterID: String
+    /// 預覽用的假資料不能同步到其他裝置。
+    var syncsChoice = true
     @Environment(\.modelContext) private var modelContext
     @AppStorage("onboardingGuidePending") private var guidePending = false
     @State private var color: EggColor = .white
@@ -58,7 +60,7 @@ struct FirstEggView: View {
         do {
             try modelContext.save()
             selectedCharacterID = id
-            SettingsSync.push(.characterID, id)
+            if syncsChoice { SettingsSync.push(.characterID, id) }
             guidePending = true
         } catch {
             library.collection = previous

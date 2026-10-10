@@ -1,4 +1,5 @@
 import CoreData
+import StoreKit
 import SwiftData
 import SwiftUI
 
@@ -6,6 +7,7 @@ import SwiftUI
 struct RootView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.requestReview) private var requestReview
     @Environment(FocusController.self) private var controller
     @Environment(CloudSyncMonitor.self) private var cloudSync
 
@@ -47,6 +49,7 @@ struct RootView: View {
         .fullScreenCover(isPresented: $guidePending) {
             OnboardingGuideView(eggColor: EggColor.of(characterID: characterID) ?? .white) {
                 guidePending = false
+                controller.askForReview(after: .welcome)
             }
         }
         .syncsWidgets()
@@ -81,6 +84,14 @@ struct RootView: View {
             // Debounce edits/sync bursts; no request every timer tick.
             do { try await Task.sleep(for: .seconds(2)) } catch { return }
             await community.refresh(context: modelContext)
+        }
+        // 等慶祝畫面收完再問，太早會被正在關的畫面擋掉。
+        .task(id: controller.pendingReview) {
+            guard let moment = controller.pendingReview else { return }
+            do { try await Task.sleep(for: .seconds(0.8)) } catch { return }
+            requestReview()
+            moment.markAsked()
+            controller.pendingReview = nil
         }
         .alert("Unable to Save", isPresented: Binding(get: { libraryError != nil }, set: { if !$0 { libraryError = nil } })) {
             Button("OK") { libraryError = nil }

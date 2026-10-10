@@ -17,6 +17,7 @@ struct PreviewMenu: View {
     }
 
     @State private var scenario: Scenario?
+    @Environment(FocusController.self) private var controller
 
     var body: some View {
         List(Scenario.allCases) { scenario in
@@ -35,9 +36,16 @@ struct PreviewMenu: View {
         case .firstLaunch:
             FirstLaunchPreview(onClose: close)
         case .hatch:
-            CelebrationView(celebration: Celebration(characterID: "mochi", duration: 1800, levelBefore: 0, levelAfter: 1, characterName: "Mochi", didHatch: true)) { _ in close() }
+            // 跟真的孵化一樣，關掉之後會跳評分視窗（開發版不看「只問一次」）。
+            CelebrationView(celebration: Celebration(characterID: "mochi", duration: 1800, levelBefore: 0, levelAfter: 1, characterName: "Mochi", didHatch: true)) { _ in
+                close()
+                controller.pendingReview = .hatch
+            }
         case .levelUp:
-            CelebrationView(celebration: Celebration(characterID: "fangfang", duration: 2700, levelBefore: 2, levelAfter: 3, characterName: "Boxy")) { _ in close() }
+            CelebrationView(celebration: Celebration(characterID: "fangfang", duration: 2700, levelBefore: 2, levelAfter: 3, characterName: "Boxy")) { _ in
+                close()
+                controller.pendingReview = .levelUp
+            }
         case .sessionDone:
             CelebrationView(celebration: Celebration(characterID: "fangfang", duration: 1500, levelBefore: 3, levelAfter: 3, characterName: "Boxy")) { _ in close() }
         case .focusLevelUp:
@@ -93,16 +101,19 @@ private struct FirstLaunchPreview: View {
 private struct FirstLaunchFlow: View {
     let library: CharacterLibrary
     let onClose: () -> Void
+    @Environment(FocusController.self) private var reviewController
     @AppStorage("onboardingGuidePending") private var guidePending = false
     @AppStorage("characterID") private var characterID = PetSprites.defaultCharacterID
 
     var body: some View {
-        FirstEggView(library: library, selectedCharacterID: $characterID)
+        FirstEggView(library: library, selectedCharacterID: $characterID, syncsChoice: false)
             .overlay(alignment: .topTrailing) { CloseButton(action: onClose) }
             .fullScreenCover(isPresented: $guidePending) {
+                // 直接關掉整個預覽，不先收起導覽，不然會先露出底下的選蛋畫面。
+                // 跟真的一樣接著跳評分視窗（開發版不看「只問一次」）。
                 OnboardingGuideView(eggColor: EggColor.of(characterID: characterID) ?? .white) {
-                    guidePending = false
                     onClose()
+                    reviewController.pendingReview = .welcome
                 }
             }
     }

@@ -15,6 +15,26 @@ final class FocusController {
     var happySince: Date?
     /// 專注結束後要顯示的慶祝畫面。
     var celebration: Celebration?
+    /// 要請 App Store 跳評分視窗的時機。每個時機各問一次。
+    enum ReviewMoment: String {
+        /// 新手導覽最後的 Welcome to Den 之後。
+        case welcome = "reviewRequestedAfterWelcome"
+        /// 第一次孵化、取完名字之後。
+        case hatch = "reviewRequested"
+        /// 孵化以外的第一次升級（例如 Lv 1 → Lv 2）之後。
+        case levelUp = "reviewRequestedAfterLevelUp"
+
+        var wasAsked: Bool { UserDefaults.standard.bool(forKey: rawValue) }
+        func markAsked() { UserDefaults.standard.set(true, forKey: rawValue) }
+    }
+
+    /// 等著問評分的時機；RootView 等畫面收完才真的問。
+    var pendingReview: ReviewMoment?
+
+    func askForReview(after moment: ReviewMoment) {
+        guard !moment.wasAsked else { return }
+        pendingReview = moment
+    }
 
     // Haptic 觸發器
     private(set) var petTaps = 0
@@ -185,6 +205,13 @@ final class FocusController {
     /// 關掉慶祝畫面。剛孵化的話順便存使用者取的名字（nil 就是沒取，維持原名）。
     func finishCelebration(naming name: String?, context: ModelContext) {
         defer { celebration = nil }
+        if let celebration {
+            if celebration.didHatch {
+                askForReview(after: .hatch)
+            } else if celebration.didLevelUp {
+                askForReview(after: .levelUp)
+            }
+        }
         guard let celebration, celebration.didHatch, let name,
               let library = CharacterLibrary.current(in: context) else { return }
         var collection = library.collection
