@@ -145,7 +145,7 @@ final class FocusController {
     private func record(_ finished: FinishedSession, context: ModelContext) {
         guard finished.isWorthKeeping else { return }
 
-        // 每個角色的等級各自計算，升級也只看這一隻。
+        // 等級是玩家的，所有角色共用；時間還是記在陪著專注的這一隻身上。
         let characterID = finished.characterID ?? PetSprites.defaultCharacterID
         let sessions = (try? context.fetch(FetchDescriptor<FocusSession>())) ?? []
 
@@ -155,14 +155,7 @@ final class FocusController {
         let pieces = finished.fillingGaps(around: taken)
         guard !pieces.isEmpty else { return }
         let duration = pieces.reduce(0) { $0 + $1.duration }
-        let before = Level(totalSeconds: Level.totalSeconds(
-            of: characterID,
-            defaultID: PetSprites.defaultCharacterID,
-            in: sessions,
-            characterOf: \.characterID,
-            isManual: \.isManual,
-            duration: \.duration
-        ))
+        let before = Level(totalSeconds: Level.totalSeconds(in: sessions, isManual: \.isManual, duration: \.duration))
 
         // 標籤被刪掉了或找不到時，補第一個，每筆紀錄一定要有標籤。
         let sessionTag = tag(withID: finished.tagID, context: context) ?? TagMaintenance.fallbackTag(context: context)
@@ -184,8 +177,8 @@ final class FocusController {
         var name = PetSprites.character(id: displayID).name
         if let library = CharacterLibrary.current(in: context) {
             var collection = library.collection
-            // 專注中滿 5 小時也不會先孵，按 End 才孵。
-            didHatch = collection.hatch(characterID, totalSeconds: after.totalSeconds)
+            // 蛋升級就是孵化：只有陪著這次專注的蛋會孵。專注中跨過一級也不會先孵，按 End 才孵。
+            didHatch = after.number > before.number && collection.hatch(characterID)
             library.collection = collection
             try? context.save()
             displayID = collection.displayID(for: characterID)

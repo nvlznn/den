@@ -728,6 +728,16 @@
         }
       }
     },
+    "Levels Are Now Shared": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有角色現在共用等級"
+          }
+        }
+      }
+    },
     "Liquid Glass": {
       "localizations": {
         "zh-Hant": {
@@ -754,16 +764,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "載入中…"
-          }
-        }
-      }
-    },
-    "Lv %lld · %@": {
-      "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lv %1$lld · %2$@"
           }
         }
       }
@@ -1338,6 +1338,16 @@
         }
       }
     },
+    "Total Focus Time": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "總專注時間"
+          }
+        }
+      }
+    },
     "Unable to Save": {
       "localizations": {
         "zh-Hant": {
@@ -1364,6 +1374,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "版本"
+          }
+        }
+      }
+    },
+    "Warming up your egg…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在幫蛋保溫…"
           }
         }
       }

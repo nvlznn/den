@@ -18,6 +18,14 @@ struct RootView: View {
     @Query(sort: [SortDescriptor(\CharacterLibrary.createdAt), SortDescriptor(\CharacterLibrary.id)]) private var libraries: [CharacterLibrary]
     @AppStorage("characterID") private var characterID = PetSprites.defaultCharacterID
     @State private var libraryError: String?
+    @State private var showsSharedLevelNotice = false
+    // 第一次打開、等 iCloud 的等待畫面（見 `showsEggWaiting`）。
+    @State private var eggWaitShown = false
+    @State private var eggWaitMinimumPassed = false
+    @State private var eggWaitGaveUp = false
+    @State private var eggPhase = EggWaitingView.Phase.waiting
+    @State private var eggTarget: CGRect?
+    @State private var eggWaitEnded = false
     @State private var selectedTab = 0
     @AppStorage("onboardingGuidePending") private var guidePending = false
 
@@ -26,26 +34,54 @@ struct RootView: View {
     var body: some View {
         @Bindable var controller = controller
 
-        Group {
-            if let library = libraries.first, library.collection.needsFirstEgg {
-                FirstEggView(library: library, selectedCharacterID: $characterID)
-            } else if controller.timer.isRunning {
-                // 專注中只留 LCD、進度條、數字、標籤和 End，不顯示 tab bar。
-                HomeView()
-            } else {
-                TabView(selection: $selectedTab) {
+        // 等待畫面疊在最上面；下面先排好選蛋頁，蛋才知道要飛去哪裡。
+        ZStack {
+            Group {
+                if libraries.isEmpty {
+                    Color.clear
+                } else if let library = libraries.first, library.collection.needsFirstEgg {
+                    FirstEggView(library: library, selectedCharacterID: $characterID,
+                                 introducesEgg: eggWaitShown, eggLanded: eggWaitEnded)
+                } else if controller.timer.isRunning {
+                    // 專注中只留 LCD、進度條、數字、標籤和 End，不顯示 tab bar。
                     HomeView()
-                        .tabItem { Label("Focus", systemImage: "hourglass") }.tag(0)
-                    RecordsView()
-                        .tabItem { Label("Records", systemImage: "book.closed") }.tag(1)
-                    StatisticsView()
-                        .tabItem { Label("Statistics", systemImage: "chart.pie") }.tag(2)
-                    SettingsView()
-                        .tabItem { Label("Settings", systemImage: "gearshape") }.tag(3)
+                } else {
+                    TabView(selection: $selectedTab) {
+                        HomeView()
+                            .tabItem { Label("Focus", systemImage: "hourglass") }.tag(0)
+                        RecordsView()
+                            .tabItem { Label("Records", systemImage: "book.closed") }.tag(1)
+                        StatisticsView()
+                            .tabItem { Label("Statistics", systemImage: "chart.pie") }.tag(2)
+                        SettingsView()
+                            .tabItem { Label("Settings", systemImage: "gearshape") }.tag(3)
+                    }
                 }
             }
+            .animation(.default, value: controller.timer.isRunning)
+
+            if showsEggWaiting {
+                EggWaitingView(phase: eggPhase, target: eggTarget)
+                    .task {
+                        eggWaitShown = true
+                        do { try await Task.sleep(for: .seconds(Self.eggWaitMinimum)) } catch { return }
+                        eggWaitMinimumPassed = true
+                        do { try await Task.sleep(for: .seconds(Self.eggWaitLimit - Self.eggWaitMinimum)) } catch { return }
+                        eggWaitGaveUp = true
+                    }
+            }
         }
-        .animation(.default, value: controller.timer.isRunning)
+        .onPreferenceChange(FirstEggFrameKey.self) { eggTarget = $0 }
+        // 等待畫面至少放 1 秒；資料好了之後蛋先停下來，再飛進選蛋頁白蛋的位置（老使用者就淡出到主頁）。
+        // 落地的那一刻才換成選蛋頁自己的白蛋，兩個長得一模一樣，看起來是同一顆。
+        .task(id: canLeaveEggWaiting) {
+            guard canLeaveEggWaiting else { return }
+            eggPhase = .settled
+            do { try await Task.sleep(for: .seconds(0.3)) } catch { return }
+            withAnimation(.spring(duration: 0.6, bounce: 0.15)) { eggPhase = .flying }
+            do { try await Task.sleep(for: .seconds(0.45)) } catch { return }
+            eggWaitEnded = true
+        }
         .fullScreenCover(isPresented: $guidePending) {
             OnboardingGuideView(eggColor: EggColor.of(characterID: characterID) ?? .white) {
                 guidePending = false
@@ -55,14 +91,14 @@ struct RootView: View {
         .syncsWidgets()
         .task { await store.load(context: modelContext) }
         .task(id: libraryInput) {
-            guard cloudSync.isReady || !libraries.isEmpty else { return }
+            // 等 iCloud 第一次下載完，重新安裝時才不會多建一份；等太久（例如沒網路）就當成新使用者。
+            guard cloudSync.isReady || !libraries.isEmpty || eggWaitGaveUp else { return }
             do {
                 let library = try CharacterLibrary.prepare(in: modelContext)
                 var collection = library.collection
                 collection.paidEggs.formUnion(store.legacyEggs)
                 library.collection = collection
                 try library.reconcile(purchases: purchases, context: modelContext)
-                try library.reconcile(sessions: sessions, context: modelContext)
                 // 別台選的角色可能比角色資料先同步過來：資料到了就換成雲端選的那隻；
                 // 還沒到就先暫時用第一隻（不上傳，才不會蓋掉別台的選擇）。
                 if let synced = SettingsSync.cloudString(.characterID), synced != characterID,
@@ -96,6 +132,16 @@ struct RootView: View {
         .alert("Unable to Save", isPresented: Binding(get: { libraryError != nil }, set: { if !$0 { libraryError = nil } })) {
             Button("OK") { libraryError = nil }
         } message: { Text(libraryError ?? "") }
+        .alert("Levels Are Now Shared", isPresented: $showsSharedLevelNotice) {
+            Button("OK") {}
+        }
+        // 等導覽、慶祝畫面都關掉才判斷，只判斷一次。
+        .onChange(of: canCheckSharedLevelNotice, initial: true) { _, canCheck in
+            guard canCheck else { return }
+            SharedLevelNotice.markDone()
+            showsSharedLevelNotice = SharedLevelNotice.levelChanged(totals: CharacterRanking.totals(
+                in: sessions, characterOf: \.characterID, isManual: \.isManual, duration: \.duration))
+        }
         .fullScreenCover(item: $controller.celebration) { celebration in
             CelebrationView(celebration: celebration) { name in
                 controller.finishCelebration(naming: name, context: modelContext)
@@ -126,10 +172,27 @@ struct RootView: View {
         .sensoryFeedback(.impact(weight: .medium), trigger: controller.pauseToggles)
     }
 
+    private static let eggWaitMinimum: TimeInterval = 1
+    private static let eggWaitLimit: TimeInterval = 10
+
+    /// 還沒有角色資料（第一次打開，在等 iCloud）；或等待畫面已經出現、還沒播完離開的動畫。
+    /// 已經在用的人打開時資料就在了，不會看到。
+    private var showsEggWaiting: Bool {
+        libraries.isEmpty || (eggWaitShown && !eggWaitEnded)
+    }
+
+    private var canLeaveEggWaiting: Bool {
+        eggWaitMinimumPassed && !libraries.isEmpty
+    }
+
     private var libraryInput: [String] {
-        [String(cloudSync.isReady), store.legacyEggs.map(\.id).sorted().description] + purchaseInput
+        [String(cloudSync.isReady), String(eggWaitGaveUp), store.legacyEggs.map(\.id).sorted().description] + purchaseInput
             + libraries.map { $0.payload.base64EncodedString() }
             + sessions.map { "\($0.characterID ?? ""):\($0.duration):\($0.isManual)" }
+    }
+
+    private var canCheckSharedLevelNotice: Bool {
+        SharedLevelNotice.isPending() && !libraries.isEmpty && !guidePending && controller.celebration == nil
     }
 
     private var purchaseInput: [String] {

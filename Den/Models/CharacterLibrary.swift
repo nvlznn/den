@@ -48,7 +48,6 @@ final class CharacterLibrary {
             shuffledIDs: PetSprites.characters.map(\.id).shuffled()
         ))
         context.insert(library)
-        try library.reconcile(sessions: sessions, context: context)
         try context.save()
         return library
     }
@@ -62,20 +61,6 @@ final class CharacterLibrary {
         // explicit revocations, and keep grants backed by another valid receipt.
         for purchase in purchases where purchase.revoked && !delivered.contains(purchase.characterID) {
             updated.purchasedIDs.remove(purchase.characterID)
-        }
-        if updated != collection {
-            collection = updated
-            try context.save()
-        }
-    }
-
-    @MainActor
-    func reconcile(sessions: [FocusSession], context: ModelContext) throws {
-        var updated = collection
-        for id in updated.ownedIDs {
-            let seconds = Level.totalSeconds(of: id, defaultID: PetSprites.defaultCharacterID,
-                in: sessions, characterOf: \.characterID, isManual: \.isManual, duration: \.duration)
-            _ = updated.hatch(id, totalSeconds: seconds)
         }
         if updated != collection {
             collection = updated

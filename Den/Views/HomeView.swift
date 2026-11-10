@@ -31,16 +31,10 @@ struct HomeView: View {
         return PetSprites.character(id: id)
     }
 
-    /// 每個角色的等級各自計算。這是已經存下來的部分，LCD 上的 Lv 看這個：專注中不會升級，按 End 才升。
+    /// 玩家等級，所有角色共用。這是已經存下來的部分，LCD 上的 Lv 看這個：專注中不會升級，按 End 才升。
+    /// 選的是蛋時，下一次升級就是孵化。
     private var savedLevel: Level {
-        Level(totalSeconds: Level.totalSeconds(
-            of: character.id,
-            defaultID: PetSprites.defaultCharacterID,
-            in: sessions,
-            characterOf: \.characterID,
-            isManual: \.isManual,
-            duration: \.duration
-        ))
+        Level(totalSeconds: Level.totalSeconds(in: sessions, isManual: \.isManual, duration: \.duration))
     }
 
     /// 專注中也把正在進行的這一段算進去，進度條才會每秒跟著變。

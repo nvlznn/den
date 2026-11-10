@@ -23,7 +23,7 @@ struct EggSlot: Hashable, Codable, Sendable, Identifiable {
     }
 }
 
-/// The random order is saved once. An egg's species stays hidden until Lv 1;
+/// The random order is saved once. An egg's species stays hidden until it hatches;
 /// reserving it at acquisition prevents two unhatched eggs drawing duplicates.
 struct CharacterCollection: Codable, Equatable, Sendable {
     var order: [String]
@@ -99,8 +99,9 @@ struct CharacterCollection: Codable, Equatable, Sendable {
         return id
     }
 
-    mutating func hatch(_ characterID: String, totalSeconds: TimeInterval) -> Bool {
-        guard ownedIDs.contains(characterID), totalSeconds >= Level.secondsPerLevel else { return false }
+    /// Only records the hatch; callers decide when an egg is due.
+    mutating func hatch(_ characterID: String) -> Bool {
+        guard ownedIDs.contains(characterID) else { return false }
         return revealed.insert(characterID).inserted
     }
 

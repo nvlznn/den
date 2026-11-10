@@ -17,19 +17,12 @@ struct WidgetSync: ViewModifier {
         }
     }
 
-    /// 和 Focus 頁的「Today」一樣：今天開始的紀錄都算（包含手動補的）；等級只算這隻角色、不含手動補的。
+    /// 和 Focus 頁的「Today」一樣：今天開始的紀錄都算（包含手動補的）；等級是玩家的、不含手動補的。
     private var snapshot: WidgetSnapshot {
         let boundary = DayBoundary(hour: dayStartHour)
         let today = sessions.filter { boundary.isSameDay($0.startedAt, .now) }
         let character = PetSprites.character(id: characterID)
-        let level = Level(totalSeconds: Level.totalSeconds(
-            of: character.id,
-            defaultID: PetSprites.defaultCharacterID,
-            in: sessions,
-            characterOf: \.characterID,
-            isManual: \.isManual,
-            duration: \.duration
-        ))
+        let level = Level(totalSeconds: Level.totalSeconds(in: sessions, isManual: \.isManual, duration: \.duration))
         return WidgetSnapshot(
             day: boundary.startOfDay(.now),
             todaySeconds: today.reduce(0) { $0 + $1.duration },

@@ -24,9 +24,9 @@ struct OnboardingGuideView: View {
     /// 孵化那頁：蛋先看書，然後孵出來跳舞、煙火放個不停，再從蛋重來。
     private static let hatchDelay: TimeInterval = 1.5
     private static let hatchLoop: TimeInterval = 3.8
-    /// 收集那頁：每隻角色出場的時間，和各自的等級（每隻各自升級）。
+    /// 收集那頁：每隻角色出場的時間，和大家共用的玩家等級。
     private static let paradeInterval: TimeInterval = 1
-    private static let paradeLevels = [3, 5, 1, 4, 2, 6]
+    private static let paradeLevel = 6
 
     var body: some View {
         ZStack {
@@ -143,7 +143,7 @@ struct OnboardingGuideView: View {
         default:
             let index = Int(elapsed / Self.paradeInterval) % PetSprites.characters.count
             character = PetSprites.characters[index]
-            level = Self.paradeLevels[index % Self.paradeLevels.count]
+            level = Self.paradeLevel
             activity = .dancing
         }
 

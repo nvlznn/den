@@ -14,8 +14,11 @@ struct DenApp: App {
     private let modelContainer: ModelContainer
 
     init() {
+        // 要在其他設定被寫入之前判斷這台裝置是不是從舊版更新上來的。
+        SharedLevelNotice.prepare()
         CountdownNotifier.shared.becomeDelegate()
         SettingsSync.start()
+        Self.resetLiveActivityToGlassOnce()
         let (container, usesCloud) = Self.makeModelContainer()
         modelContainer = container
         _cloudSync = State(initialValue: CloudSyncMonitor(usesCloud: usesCloud, containerID: Self.cloudContainerID))
@@ -30,6 +33,15 @@ struct DenApp: App {
                 .environment(community)
         }
         .modelContainer(modelContainer)
+    }
+
+    /// Live Activity 預設是 Liquid Glass。以前選過 Classic 的人也換成 Glass 一次，之後想改回去還是可以。
+    private static func resetLiveActivityToGlassOnce() {
+        let defaults = UserDefaults.standard
+        let doneKey = "liveActivityGlassReset"
+        guard !defaults.bool(forKey: doneKey) else { return }
+        defaults.set("glass", forKey: "liveActivityAppearance")
+        defaults.set(true, forKey: doneKey)
     }
 
     /// 紀錄存在 iCloud 的私人資料庫：刪掉 app 再裝回來、換一台裝置，紀錄都還在。

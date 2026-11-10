@@ -37,6 +37,11 @@ struct CharacterSheet: View {
                             }
                         }
                     }
+                    // 和 Statistics 一樣包含手動補的紀錄，所以會比上面每隻加起來多。
+                    Section {
+                        LabeledContent("Total Focus Time", value: DurationText.hoursAndMinutes(
+                            sessions.reduce(0) { $0 + max(0, $1.duration) }))
+                    }
                 } else {
                     ProgressView()
                 }
@@ -67,7 +72,6 @@ struct CharacterSheet: View {
 
     private func row(id: String, collection: CharacterCollection, seconds: TimeInterval) -> some View {
         let character = PetSprites.character(id: collection.displayID(for: id))
-        let level = Level(totalSeconds: seconds)
         let isSelected = id == characterID
         return Button {
             characterID = id
@@ -78,7 +82,8 @@ struct CharacterSheet: View {
                 CharacterThumbnail(character: character).frame(width: 52, height: 52)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(collection.name(for: id)).foregroundStyle(Color.primary)
-                    Text("Lv \(level.number) · \(DurationText.hoursAndMinutes(level.totalSeconds))")
+                    // 等級是玩家共用的，這裡只顯示這隻陪了多久。
+                    Text(DurationText.hoursAndMinutes(seconds))
                         .font(.subheadline).foregroundStyle(Color.secondary)
                 }
                 Spacer()

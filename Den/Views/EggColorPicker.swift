@@ -6,6 +6,10 @@ struct EggColorPicker: View {
     @Binding var selection: EggColor
     var reservedIDs: Set<String> = []
     var thumbnailSize: CGFloat = 88
+    /// 第一次選蛋時，白蛋回報自己的位置給等待畫面的蛋飛過來，落地前先藏起來；其他部分用 `restOpacity` 淡入。
+    var reportsWhiteEggFrame = false
+    var whiteEggOpacity: Double = 1
+    var restOpacity: Double = 1
 
     var body: some View {
         HStack(spacing: 16) {
@@ -17,19 +21,28 @@ struct EggColorPicker: View {
                     VStack(spacing: 10) {
                         CharacterThumbnail(character: PetSprites.character(id: color.spriteID))
                             .frame(width: thumbnailSize, height: thumbnailSize)
-                        Text(color.name).font(.headline)
-                        if remaining == 0 {
-                            Text("Sold Out")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        } else {
-                            Image(systemName: selection == color ? "checkmark.circle.fill" : "circle")
-                                .foregroundStyle(selection == color ? Color.accentColor : Color.secondary)
+                            .opacity(color == .white ? whiteEggOpacity : restOpacity)
+                            .background {
+                                if reportsWhiteEggFrame && color == .white {
+                                    GeometryReader { Color.clear.preference(key: FirstEggFrameKey.self, value: $0.frame(in: .global)) }
+                                }
+                            }
+                        Group {
+                            Text(color.name).font(.headline)
+                            if remaining == 0 {
+                                Text("Sold Out")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Image(systemName: selection == color ? "checkmark.circle.fill" : "circle")
+                                    .foregroundStyle(selection == color ? Color.accentColor : Color.secondary)
+                            }
                         }
+                        .opacity(restOpacity)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(selection == color ? Color.accentColor.opacity(0.08) : Color.clear,
+                    .background(selection == color ? Color.accentColor.opacity(0.08 * restOpacity) : Color.clear,
                                 in: RoundedRectangle(cornerRadius: 18))
                     .contentShape(Rectangle())
                 }

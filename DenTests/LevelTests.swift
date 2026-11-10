@@ -32,27 +32,20 @@ struct LevelTests {
         #expect(Level(totalSeconds: 5 * 3600).secondsToNext == 5 * 3600)
     }
 
-    /// 每個角色的等級各自計算；沒記角色的舊紀錄算給預設角色；手動補的紀錄不算。
-    @Test func levelsArePerCharacter() {
+    /// 等級是玩家的：所有角色的時間加起來；手動補的紀錄不算。
+    @Test func levelIsSharedByAllCharacters() {
         let items: [(characterID: String?, isManual: Bool, duration: TimeInterval)] = [
-            (nil, false, 1800),           // 舊紀錄 → 方方
+            (nil, false, 1800),           // 舊紀錄也算
             ("fangfang", false, 3600),
             ("mochi", false, 7200),
             ("mochi", false, 600),
             ("mochi", true, 99_999),      // 手動補的不算
             (nil, true, 99_999),          // 手動補的不算
         ]
-        func total(_ id: String) -> TimeInterval {
-            Level.totalSeconds(
-                of: id, defaultID: "fangfang", in: items,
-                characterOf: \.characterID, isManual: \.isManual, duration: \.duration
-            )
-        }
-        #expect(total("fangfang") == 5400)
-        #expect(Level(totalSeconds: total("fangfang") * 10).number == 1)
-        #expect(total("mochi") == 7800)
-        #expect(Level(totalSeconds: total("mochi") * 10).number == 2)
-        #expect(total("cloud") == 0)
+        let total = Level.totalSeconds(in: items, isManual: \.isManual, duration: \.duration)
+        #expect(total == 13_200)
+        #expect(Level(totalSeconds: total * 10).number == 7)
+        #expect(Level.totalSeconds(in: [(isManual: false, duration: -60.0)], isManual: \.isManual, duration: \.duration) == 0)
     }
 
     @Test func neverNegative() {

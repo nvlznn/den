@@ -1,6 +1,6 @@
 import Foundation
 
-/// 總專注時間換算成等級。每累積 5 小時升 1 級，從 Lv 0 開始。
+/// 玩家的總專注時間換算成等級，所有角色共用。每累積 5 小時升 1 級，從 Lv 0 開始。
 struct Level: Equatable, Sendable {
     static let secondsPerLevel: TimeInterval = 5 * 3600
 
@@ -27,18 +27,14 @@ struct Level: Equatable, Sendable {
 }
 
 extension Level {
-    /// 某個角色的累積秒數。每個角色的等級各自計算；沒有記角色的舊紀錄算給 `defaultID`。
-    /// 手動補的紀錄不算進等級。
+    /// 玩家的累積秒數：所有角色加起來。手動補的紀錄不算進等級。
     static func totalSeconds<Item>(
-        of characterID: String,
-        defaultID: String,
         in items: [Item],
-        characterOf: (Item) -> String?,
         isManual: (Item) -> Bool,
         duration: (Item) -> TimeInterval
     ) -> TimeInterval {
         items
-            .filter { !isManual($0) && (characterOf($0) ?? defaultID) == characterID }
-            .reduce(0) { $0 + duration($1) }
+            .filter { !isManual($0) }
+            .reduce(0) { $0 + max(0, duration($1)) }
     }
 }

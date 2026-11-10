@@ -47,20 +47,17 @@ struct CharacterCollectionTests {
         #expect(!collection.isFull)
     }
 
-    @Test func hatchesAtExactlyLevelOneAndNeverRepeats() {
+    @Test func hatchesOnlyOwnedEggsAndNeverRepeats() {
         var collection = CharacterCollection(shuffledIDs: ids)
         _ = collection.claimFreeEgg(color: .black)
-        let early = collection.hatch("fangfang", totalSeconds: 35_999)
-        let unowned = collection.hatch("mochi", totalSeconds: 36_000)
-        let hatched = collection.hatch("fangfang", totalSeconds: 36_000)
-        #expect(!early)
+        #expect(collection.displayID(for: "fangfang") == "egg.black")
+        let unowned = collection.hatch("mochi")
+        let hatched = collection.hatch("fangfang")
         #expect(!unowned)
         #expect(hatched)
         #expect(collection.displayID(for: "fangfang") == "fangfang")
-        let repeated = collection.hatch("fangfang", totalSeconds: 36_000)
-        let reduced = collection.hatch("fangfang", totalSeconds: 0)
+        let repeated = collection.hatch("fangfang")
         #expect(!repeated)
-        #expect(!reduced)
         #expect(collection.displayID(for: "fangfang") == "fangfang")
     }
 
@@ -72,7 +69,7 @@ struct CharacterCollectionTests {
         collection.rename(id, to: "Pebble")
         #expect(collection.name(for: id) == PetSprites.character(id: "egg.white").name)
 
-        _ = collection.hatch(id, totalSeconds: Level.secondsPerLevel)
+        _ = collection.hatch(id)
         #expect(collection.name(for: id) == species)
         collection.rename(id, to: "  Pebble  ")
         #expect(collection.name(for: id) == "Pebble")
@@ -130,7 +127,7 @@ struct CharacterCollectionTests {
         #expect(!collection.needsFirstEgg)
         #expect(collection.displayID(for: "mochi") == "egg.white")
         #expect(collection.displayID(for: "orb") == "egg.black")
-        let hatched = collection.hatch("orb", totalSeconds: 72_000)
+        let hatched = collection.hatch("orb")
         #expect(hatched)
         #expect(collection.displayID(for: "orb") == "orb")
         #expect(collection.remainingCount(of: .white) == 2)
@@ -169,7 +166,8 @@ struct CharacterCollectionTests {
         #expect(collection.displayID(for: "orb") == "egg.black")
     }
 
-    @Test @MainActor func migrationPreservesRecordsAndHatchesOnlyEligibleCharacters() throws {
+    /// Eggs hatch only on a level-up while focusing with them, never from saved time alone.
+    @Test @MainActor func migrationPreservesRecordsAndKeepsEggsUnhatched() throws {
         let schema = Schema([FocusSession.self, FocusTag.self, CharacterLibrary.self, FocusContribution.self])
         let container = try ModelContainer(for: schema, configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none))
         let context = container.mainContext
@@ -179,7 +177,7 @@ struct CharacterCollectionTests {
         let library = try CharacterLibrary.prepare(in: context)
         #expect(Set(library.collection.ownedIDs) == ["mochi", "orb"])
         #expect(library.collection.displayID(for: "mochi") == "egg.white")
-        #expect(library.collection.displayID(for: "orb") == "orb")
+        #expect(library.collection.displayID(for: "orb") == "egg.black")
         #expect(try context.fetchCount(FetchDescriptor<FocusSession>()) == 3)
         #expect(try CharacterLibrary.prepare(in: context).id == library.id)
     }

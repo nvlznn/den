@@ -154,7 +154,7 @@ struct EggStoreTests {
         await store.load(context: context)
         let id = try #require(await store.purchase(color: .white, library: library, context: context))
         var collection = library.collection
-        _ = collection.hatch(id, totalSeconds: 36_000)
+        _ = collection.hatch(id)
         library.collection = collection
         try context.save()
         let receipt = try #require(context.fetch(FetchDescriptor<EggPurchase>()).first)
